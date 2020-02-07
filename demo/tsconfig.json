@@ -1,0 +1,31 @@
+{
+    "compilerOptions": {
+        "plugins": [
+            {
+                "transform": "../src/node.ts",
+                "globalObject": "window",
+                "dynamicImportPathRewrite": {
+                    "type": "custom",
+                    "function": "x => Promise.reject('Ahhh')"
+                },
+                "bareModuleRewrite": {
+                    "lodash": "pikacdn",
+                    "@material-ui/core": "snowpack",
+                    "lodash-es": "unpkg",
+                    "jquery": "umd",
+                    "/^(.+).json$/": {
+                        "type": "umd",
+                        "target": "getJSONSync('$1.json')",
+                        "globalObject": "app.config"
+                    },
+                    "/.+/g": "umd"
+                }
+            }
+        ],
+        "target": "ESNext",
+        "module": "ESNext",
+        "esModuleInterop": true,
+        "sourceMap": true
+    },
+    "files": ["test.ts"]
+}

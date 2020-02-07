@@ -1,0 +1,30 @@
+{
+    "name": "ttypescript-browser-like-import-transformer",
+    "version": "1.0.0",
+    "description": "A custom transformer that can be used with ttypescript to transform ts imports to browser style imports",
+    "main": "index.js",
+    "repository": "https://github.com/Jack-Works/ttypescript-browser-like-import-transformer",
+    "author": "Jack Works <jackworks@protonmail.com>",
+    "license": "MIT",
+    "scripts": {
+        "release": "standard-version"
+    },
+    "standard-version": {
+        "skip": {
+            "tag": true
+        }
+    },
+    "dependencies": {},
+    "devDependencies": {
+        "standard-version": "^7.1.0",
+        "ts-node": "^8.6.2",
+        "ttypescript": "^1.5.10",
+        "typescript-322": "npm:typescript@3.2.2",
+        "typescript": "next"
+    },
+    "peerDependencies": {
+        "ts-node": "^8.0.2",
+        "ttypescript": "^1.5.0",
+        "typescript": "^3.2.2"
+    }
+}
