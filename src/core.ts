@@ -22,6 +22,7 @@ import {
     CallExpression,
     ArrowFunction,
     FunctionExpression,
+    StringLiteral,
 } from 'typescript'
 
 /**
@@ -68,9 +69,9 @@ export default function createTransformer(ts: ts) {
                 sf = ts.updateSourceFileNode(
                     sf,
                     [
-                        ...hoistedHelper,
                         ...hoistedUMDImport,
                         ...sf.statements.filter(x => !hoistedUMDImport.includes(x)),
+                        ...hoistedHelper,
                     ],
                     sf.isDeclarationFile,
                     sf.referencedFiles,
@@ -182,7 +183,17 @@ function updateImportExportDeclaration(
             const nextPath = rewriteStrategy.target
             const globalObject = rewriteStrategy.globalObject
             const clause = ts.isImportDeclaration(node) ? node.importClause : node.exportClause
-            if (!clause) return [node]
+            if (!clause)
+                return [
+                    ts.createExpressionStatement(
+                        ts.createLiteral(
+                            `// import "${
+                                (node.moduleSpecifier as StringLiteral).text
+                            }" is eliminated in UMD mode (Expected target: ${globalObject ??
+                                'globalThis'}.${nextPath})`,
+                        ),
+                    ),
+                ]
             const { statements } = importOrExportClauseToUMD(nextPath, ctx_(ctx, clause), globalObject)
             statements.forEach(x =>
                 writeSourceFileMeta(sourceFile, hoistUMDImportDeclaration, new Set<Statement>(), _ => _.add(x)),

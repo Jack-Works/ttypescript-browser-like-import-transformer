@@ -4,7 +4,7 @@ import { Worker, isMainThread, parentPort, workerData } from 'worker_threads'
 import { spawnSync, execSync } from 'child_process'
 
 const dir = join(__dirname, './tests/')
-const inlineConfigReg = /\/\/\/ (.+)\n/
+const inlineConfigReg = /\/\/\/(.+)\n/
 const snapshotDir = join(dir, '../__snapshot__/')
 
 if (isMainThread) {
