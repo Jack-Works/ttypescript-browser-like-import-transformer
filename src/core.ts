@@ -126,7 +126,6 @@ function isLocalModuleSpecifier(path: string) {
  * Is the node a `import(...)` call?
  */
 function isDynamicImport(ts: typeof import('typescript'), node: Node): NodeArray<Expression> | null {
-    console.log(ts.SyntaxKind[node.kind])
     if (!ts.isCallExpression(node)) return null
     if (node.expression.kind === ts.SyntaxKind.ImportKeyword) {
         return node.arguments

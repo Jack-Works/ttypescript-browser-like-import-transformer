@@ -1,0 +1,2 @@
+/// { bareModuleRewrite: 'pikacdn' }
+//@ default.ts

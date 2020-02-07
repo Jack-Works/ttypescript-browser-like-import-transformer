@@ -5,6 +5,7 @@ import { spawnSync, execSync } from 'child_process'
 
 const dir = join(__dirname, './tests/')
 const inlineConfigReg = /\/\/\/(.+)\n/
+const refFileReg = /\/\/@ (.+)/
 const snapshotDir = join(dir, '../__snapshot__/')
 
 if (isMainThread) {
@@ -32,7 +33,12 @@ async function worker() {
     if (statSync(script.path).isFile()) {
         const file = readFileSync(script.path, 'utf-8')
         const inlineConfig = file.match(inlineConfigReg)
-        const result = ts.transpileModule(file.replace(inlineConfigReg, ''), {
+        console.log(inlineConfig)
+        const refFile = file.match(refFileReg)
+        const source = refFile
+            ? readFileSync(script.path.replace(script.filename, refFile[1]), 'utf-8').replace(inlineConfigReg, '')
+            : file.replace(inlineConfigReg, '')
+        const result = ts.transpileModule(source, {
             compilerOptions: { ...sharedCompilerOptions.compilerOptions },
             transformers: {
                 after: [
@@ -40,7 +46,7 @@ async function worker() {
                         {},
                         {
                             after: true,
-                            ...eval(inlineConfig[1]),
+                            ...eval('(' + inlineConfig[1] + ')'),
                         },
                     ),
                 ],
