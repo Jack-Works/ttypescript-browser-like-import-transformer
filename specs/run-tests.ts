@@ -33,7 +33,6 @@ async function worker() {
     if (statSync(script.path).isFile()) {
         const file = readFileSync(script.path, 'utf-8')
         const inlineConfig = file.match(inlineConfigReg)
-        console.log(inlineConfig)
         const refFile = file.match(refFileReg)
         const source = refFile
             ? readFileSync(script.path.replace(script.filename, refFile[1]), 'utf-8').replace(inlineConfigReg, '')
