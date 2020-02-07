@@ -44,7 +44,7 @@ import {
  * * appendExtensionName
  * * appendExtensionNameForRemote
  * * bareModuleRewrite
- * TODO: dynamicImportPathRewrite
+ * * dynamicImportPathRewrite
  * * globalObject
  * * webModulePath
  */
@@ -59,7 +59,7 @@ type Ctx<T extends Node> = {
 }
 const ctx_ = <T extends Node>(ctx: Ctx<any>, node: T) => ({ ...ctx, node } as Ctx<T>)
 export default function createTransformer(ts: ts) {
-    return function(program: Program, config: PluginConfig) {
+    return function(_program: unknown, config: PluginConfig) {
         return (context: TransformationContext) => {
             return (sourceFile: SourceFile) => {
                 let sf = ts.visitEachChild(sourceFile, visitor, context)

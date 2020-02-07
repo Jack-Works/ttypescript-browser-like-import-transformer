@@ -7,7 +7,9 @@
     "author": "Jack Works <jackworks@protonmail.com>",
     "license": "MIT",
     "scripts": {
-        "release": "standard-version"
+        "release": "standard-version",
+        "pretest": "node ./node_modules/typescript/lib/tsc.js ./specs/run-tests.ts --target es2017 --moduleResolution node --skipLibCheck --module commonjs",
+        "test": "./specs/run-tests.js"
     },
     "standard-version": {
         "skip": {
@@ -20,7 +22,8 @@
         "ts-node": "^8.6.2",
         "ttypescript": "^1.5.10",
         "typescript-322": "npm:typescript@3.2.2",
-        "typescript": "next"
+        "typescript": "next",
+        "@types/node": "latest"
     },
     "peerDependencies": {
         "ts-node": "^8.0.2",

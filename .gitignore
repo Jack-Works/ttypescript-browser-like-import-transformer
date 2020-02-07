@@ -1,3 +1,6 @@
+src/*.js
+specs/run-tests.js
+
 # Logs
 logs
 *.log
