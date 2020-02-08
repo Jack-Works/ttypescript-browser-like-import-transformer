@@ -26,15 +26,14 @@ function __dynamicImportHelper(path) {
             case "umd":
                 if (config.globalObject //example.com/'
                     // Static dynamic import
-                    === false)
-                    return // Static dynamic import
-                     Promise.reject("When using runtime transform, globalObject must be \"globalThis\" or \"window\"");
-                if (
-                // invalid dynamic import (invalid currently)
-                config.globalObject === "globalThis" || config
-                    .globalObject === undefined)
+                    === "globalThis" // Static dynamic import
+                    || config.globalObject === undefined)
                     return Promise.resolve(globalThis[result.target]);
-                if (config.globalObject === "window")
+                if (config
+                    // invalid dynamic import (invalid currently)
+                    .
+                        // invalid dynamic import (invalid currently)
+                        globalObject === "window")
                     return Promise.resolve(window[result.target]);
                 return Promise.reject("Unreachable transform case");
             default: return Promise.reject("Unreachable transform case");

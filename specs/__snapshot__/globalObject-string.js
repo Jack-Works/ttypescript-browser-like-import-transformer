@@ -3,34 +3,36 @@ function __dynamicImportHelper(path) {
         // Node style import
         "umd": "umd", "unpkg": "unpkg", "pikacdn": "pikacdn" };
     const parsedRegExpCache = new Map();
-    const config = { "after": true, "appendExtensionNameForRemote": true };
-    function _(path) {
-        return import(path);
-    }
-    const __ = __runtimeTransform(path, _);
+    const config = { "after": true, "globalObject": "global" };
+    function _(path) { return import(path); }
+    const __ = __runtimeTransform(path
+    // browser style import
+    , // browser style import
+    _);
     if (__ === null)
         return _(path);
     return __;
-    function parseJS(...a) {
-        return null;
-    }
-    function __runtimeTransform(path, dyn) {
-        const result = moduleSpecifierTransform({ config, path });
+    function parseJS(...a) { return null; }
+    function __runtimeTransform(path //example.com/'
+    , dyn) {
+        const result = moduleSpecifierTransform({ config, path }
+        // Node style export
+        ) // Node style export
+        ;
         switch (result.type) {
             case "error":
                 return null;
-            case "noop":
-                return null;
-            case "rewrite" // browser style import
-            :
+            case "noop": return null;
+            case "rewrite":
                 return dyn(result.nextPath);
             case "umd":
                 if (config.globalObject === "globalThis" || config.globalObject === undefined)
-                    return Promise.resolve(globalThis[result.target]);
-                if (
-                // invalid dynamic import (invalid currently)
-                config.globalObject === "window")
-                    return Promise.resolve(window[result.target]);
+                    return Promise. //example.com')
+                        // dynamic dynamic import
+                        resolve(globalThis[result.target]);
+                if (config.globalObject === "window")
+                    return Promise.resolve(window[result.
+                        target]);
                 return Promise.reject("Unreachable transform case");
             default: return Promise.reject("Unreachable transform case");
         }
@@ -137,38 +139,38 @@ function __dynamicImportTransformFailedHelper(reason, ...args) {
     // Node style import
     return import(args[0], args[1]);
 }
-const a = globalThis.a.default;
-const b = globalThis.b.default;
-const { c, d } = globalThis.b;
-const e = globalThis.c;
-const { c_1, d_1 } = globalThis.b;
+const a = global.a.default;
+const b = global.b.default;
+const { c, d } = global.b;
+const e = global.c;
+const { c_1, d_1 } = global.b;
 export { c_1 as c, d_1 as d };
-const e_1 = globalThis.c;
+const e_1 = global.c;
 export { e_1 as e };
 console.log('Should run after all imports', a, b, c, d, e, a1, b1, c1, d1, e1, a2, b2, c2, d2, e2);
-"// import \"d\" is eliminated in UMD mode (Expected target: globalThis.d)";
+"// import \"d\" is eliminated in UMD mode (Expected target: global.d)";
 // relative import without ext name
 import a1 from "./a.js";
 import b1, { c1, d1 } from "./b.js";
 import * as e1 from "/c.js";
 import "./d.js";
 // browser style import
-import a2 from "http://example.com/.js";
-import b2, { c2, d2 } from "https://example.com.js";
-import * as e2 from "http://example.com/.js";
-import "http://example.com/.js";
+import a2 from 'http://example.com/';
+import b2, { c2, d2 } from 'https://example.com';
+import * as e2 from 'http://example.com/';
+import 'http://example.com/';
 const x = 1;
 export { x };
 // relative import without ext name
 export { c1, d1 } from "./b.js";
 export * as e1 from "./c.js";
 // browser style import
-export { c2, d2 } from "http://example.com/.js";
-export * as e2 from "http://example.com/.js";
+export { c2, d2 } from 'http://example.com/';
+export * as e2 from 'http://example.com/';
 // Static dynamic import
-Promise.resolve(globalThis.a);
+Promise.resolve(global.a);
 import("./a.js");
-import("https://example.com.js");
+import('https://example.com');
 // dynamic dynamic import
 const y = '';
 __dynamicImportHelper(y);

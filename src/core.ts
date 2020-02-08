@@ -553,7 +553,7 @@ export interface PluginConfig {
      */
     dynamicImportPathRewrite?: false | 'auto' | DynamicImportPathRewriteCustom
     /** Used in UMD. For what object will store the UMD variables? Default to "globalThis" */
-    globalObject?: string | false
+    globalObject?: string
     /** Used in snowpack. web_modules module path, default "/web_modules/" */
     webModulePath?: string
 }
@@ -572,7 +572,7 @@ export enum BareModuleRewriteSimple {
 export interface BareModuleRewriteUMD {
     type: 'umd'
     target: string
-    globalObject?: string | false
+    globalObject?: string
 }
 //#endregion
 //#region ts helper
@@ -651,8 +651,6 @@ const dynamicImportHelper = (config: PluginConfig) => `function __dynamicImportH
             case 'rewrite':
                 return dyn(result.nextPath)
             case 'umd':
-                if (config.globalObject === false)
-                    return Promise.reject('When using runtime transform, globalObject must be "globalThis" or "window"')
                 if (config.globalObject === 'globalThis' || config.globalObject === undefined)
                     return Promise.resolve((globalThis as any)[result.target])
                 if (config.globalObject === 'window') return Promise.resolve((window as any)[result.target])

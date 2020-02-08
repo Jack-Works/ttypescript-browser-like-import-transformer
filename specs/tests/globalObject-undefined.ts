@@ -1,0 +1,2 @@
+/// {globalObject: undefined}
+//@ default.ts

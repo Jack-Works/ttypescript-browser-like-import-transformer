@@ -1,0 +1,2 @@
+/// {globalObject: "window"}
+//@ default.ts

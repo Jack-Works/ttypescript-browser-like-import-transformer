@@ -30,14 +30,7 @@ function __dynamicImportHelper(path) {
                 return dyn(result.nextPath);
             case "umd":
                 if (config. //example.com/'
-                    globalObject === false)
-                    return Promise.reject("When using runtime transform, globalObject must be \"globalThis\" or \"window\""
-                    // dynamic dynamic import
-                    ) // dynamic dynamic import
-                    ;
-                if (config
-                    .globalObject
-                    === "globalThis" || config.globalObject === undefined)
+                    globalObject === "globalThis" || config.globalObject === undefined)
                     return Promise.resolve(globalThis[result.target]);
                 if (config.globalObject === "window")
                     return Promise.resolve(window[result.target]);

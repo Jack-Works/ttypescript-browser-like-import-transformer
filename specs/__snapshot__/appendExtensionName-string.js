@@ -26,10 +26,9 @@ function __dynamicImportHelper(path) {
             case "rewrite":
                 return dyn(result.nextPath);
             case "umd":
-                if (config.globalObject === false)
-                    return Promise
-                        .reject("When using runtime transform, globalObject must be \"globalThis\" or \"window\"");
-                if (config.globalObject === "globalThis" || config.globalObject === undefined)
+                if (config.globalObject === "globalThis"
+                    // Static dynamic import
+                    || config.globalObject === undefined)
                     return Promise.resolve(globalThis[result.target]);
                 if (config.globalObject === "window")
                     return Promise.resolve(window[result.target]);
