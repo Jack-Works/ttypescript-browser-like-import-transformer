@@ -1,5 +1,4 @@
 import {
-    Program,
     TransformationContext,
     SourceFile,
     Node,
@@ -20,10 +19,11 @@ import {
     SyntaxList,
     NamespaceExport,
     CallExpression,
-    ArrowFunction,
-    FunctionExpression,
     StringLiteral,
 } from 'typescript'
+
+export class TransformError extends Error {}
+export class ConfigError extends Error {}
 
 /**
  * * 1. local module specifier rewrite (add .js)
@@ -59,9 +59,83 @@ type Ctx<T extends Node> = {
     node: T
 }
 const ctx_ = <T extends Node>(ctx: Ctx<any>, node: T) => ({ ...ctx, node } as Ctx<T>)
+function checkConfig(config: PluginConfig) {
+    const {
+        appendExtensionName,
+        appendExtensionNameForRemote,
+        bareModuleRewrite,
+        dynamicImportPathRewrite,
+        globalObject,
+        webModulePath,
+    } = config
+    const a =
+        typeof appendExtensionName === 'string' ||
+        appendExtensionName === undefined ||
+        typeof appendExtensionName === 'boolean'
+    if (!a) throw new ConfigError(`appendExtensionName must have type (string | undefined | boolean)`)
+
+    const b = appendExtensionNameForRemote === undefined || typeof appendExtensionNameForRemote === 'boolean'
+    if (!b) throw new ConfigError(`appendExtensionNameRemote must have type (undefined | boolean)`)
+
+    const lengthString = ' must be a string and it must not be empty.'
+    const c =
+        bareModuleRewrite === undefined ||
+        bareModuleRewrite === false ||
+        bareModuleRewrite in BareModuleRewriteSimple ||
+        (isNonNullObject(bareModuleRewrite) &&
+            Object.values(bareModuleRewrite).every(
+                x =>
+                    x === false ||
+                    x in BareModuleRewriteSimple ||
+                    (isNonNullObject(x) &&
+                    x.type === 'umd' &&
+                    (typeof x.target === 'string' && x.target.length > 0
+                        ? true
+                        : throws(new ConfigError('bareModuleRewrite[key].target ' + lengthString))) &&
+                    checkGlobalObject(x.globalObject)
+                        ? true
+                        : throws(new ConfigError('bareModuleRewrite[key].globalObject ' + lengthString))),
+            ))
+    const enums = Object.values(BareModuleRewriteSimple).map(x => `'${x}'`)
+    if (!c)
+        throw new ConfigError(
+            `bareModuleRewrite must have type (${enums.join(' | ')} | false | undefined | Record<string, ${enums.join(
+                ' | ',
+            )} | false | { type: 'umd', target: string, globalObject?: string }>)`,
+        )
+    const d =
+        dynamicImportPathRewrite === false ||
+        dynamicImportPathRewrite === 'auto' ||
+        dynamicImportPathRewrite === undefined ||
+        (typeof dynamicImportPathRewrite === 'object' &&
+            dynamicImportPathRewrite !== null &&
+            dynamicImportPathRewrite.type === 'custom' &&
+            typeof dynamicImportPathRewrite.function === 'string')
+    if (!d)
+        throw new ConfigError(
+            `dynamicImportPathRewrite must have type (false | 'auto' | undefined | { type: 'custom', function: string })`,
+        )
+    const e = checkGlobalObject(globalObject)
+    if (!e) throw new ConfigError(`globalObject must have type undefined or it` + lengthString)
+    const f = typeof webModulePath === 'string' || webModulePath === undefined
+    if (!f) throw new ConfigError(`webModulePath must have type (string | undefined)`)
+    function checkGlobalObject(x: any) {
+        if (x === undefined) return true
+        if (typeof x === 'string' && x.length > 0) return true
+        return false
+    }
+    function isNonNullObject<T>(x: T): x is NonNullable<T> {
+        if (typeof x === 'object' && x !== null) return true
+        return false
+    }
+    function throws(e: ConfigError): never {
+        throw e
+    }
+}
 export default function createTransformer(ts: ts) {
     return function(_program: unknown, config: PluginConfig) {
         return (context: TransformationContext) => {
+            checkConfig(config)
             return (sourceFile: SourceFile) => {
                 let sf = ts.visitEachChild(sourceFile, visitor, context)
                 const hoistedHelper = Array.from(topLevelScopedHelperMap.get(sourceFile)?.values() || []).map(x => x[1])
@@ -124,7 +198,7 @@ function isLocalModuleSpecifier(path: string) {
 /**
  * Is the node a `import(...)` call?
  */
-function isDynamicImport(ts: typeof import('typescript'), node: Node): NodeArray<Expression> | null {
+function isDynamicImport(ts: ts, node: Node): NodeArray<Expression> | null {
     if (!ts.isCallExpression(node)) return null
     if (node.expression.kind === ts.SyntaxKind.ImportKeyword) {
         return node.arguments
@@ -244,7 +318,7 @@ function moduleSpecifierTransform(
             return { type: 'umd', target: nextPath, globalObject: config.globalObject }
         }
         default: {
-            const rules: Record<string, BareModuleRewriteSimple | BareModuleRewriteUMD> = opt
+            const rules: ObjectTypeRewrite = opt
             for (const rule in rules) {
                 const ruleValue = rules[rule]
                 if (ts) {
@@ -261,6 +335,7 @@ function moduleSpecifierTransform(
                 }
                 const regexp = parsedRegExpCache.get(rule)
                 if (regexp && path.match(regexp)) {
+                    if (ruleValue === false) return { type: 'noop' }
                     if (typeof ruleValue === 'string') return moduleSpecifierTransform(ctx, ruleValue)
                     const nextPath = path.replace(regexp, ruleValue.target)
                     if (!nextPath)
@@ -274,6 +349,7 @@ function moduleSpecifierTransform(
                         globalObject: ruleValue.globalObject ?? config.globalObject,
                     }
                 } else if (rule === path) {
+                    if (ruleValue === false) return { type: 'noop' }
                     if (typeof ruleValue === 'string') return moduleSpecifierTransform(ctx, ruleValue)
                     return {
                         type: 'umd',
@@ -351,7 +427,8 @@ function importOrExportClauseToUMD(
         statements.push(...updatedGhost)
         statements.push(exportDeclaration)
         return { statements, variableNames: ids }
-    } else if (ts.isNamespaceExport(node)) {
+        // New function since ts 3.8
+    } else if (ts.isNamespaceExport?.(node)) {
         const ghostBinding = ts.createUniqueName(node.name.text)
         const ghostImportDeclaration = ts.createImportDeclaration(
             undefined,
@@ -477,7 +554,7 @@ function transformDynamicImport(ctx: Omit<Ctx<CallExpression>, 'path'>, args: Ex
         const builtinHelper = createTopLevelScopedHelper(ts, sourceFile, dynamicImportHelper(config))
         if (opt === 'auto' || opt === undefined) return [ts.createCall(builtinHelper, void 0, args)]
         const f = parseJS(ts, opt.function, ts.isArrowFunction)
-        if (!f) throw new Error('Unable to parse the function. It must be an ArrowFunction')
+        if (!f) throw new ConfigError('Unable to parse the function. It must be an ArrowFunction. Get: ' + opt.function)
         const customFunction =
             topLevelScopedHelperMap.get(sourceFile)?.get('__customImportHelper')?.[0] ||
             ts.createUniqueName('__customImportHelper')
@@ -496,6 +573,8 @@ function transformDynamicImport(ctx: Omit<Ctx<CallExpression>, 'path'>, args: Ex
         return [ts.createCall(customFunction, undefined, [first, builtinHelper])]
     }
 }
+type ObjectTypeRewrite = Record<string, false | BareModuleRewriteSimple | BareModuleRewriteUMD>
+
 //#endregion
 //#region Types
 export interface PluginConfig {
@@ -536,7 +615,7 @@ export interface PluginConfig {
      *
      * @default 'umd'
      */
-    bareModuleRewrite?: false | BareModuleRewriteSimple | Record<string, BareModuleRewriteSimple | BareModuleRewriteUMD>
+    bareModuleRewrite?: false | BareModuleRewriteSimple | ObjectTypeRewrite
     /**
      * Rewrite dynamic import
      *

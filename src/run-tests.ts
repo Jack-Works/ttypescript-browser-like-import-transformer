@@ -1,26 +1,30 @@
-import { statSync, readdirSync, stat, readFileSync, writeFileSync } from 'fs'
-import { join, dirname } from 'path'
-import { Worker, isMainThread, parentPort, workerData } from 'worker_threads'
-import { spawnSync, execSync } from 'child_process'
+import { statSync, readdirSync, readFileSync, writeFileSync } from 'fs'
+import { join } from 'path'
+import { isMainThread, workerData, Worker } from 'worker_threads'
+import { execSync } from 'child_process'
+import { ConfigError, TransformError } from './core.js'
 
-const dir = join(__dirname, './tests/')
+const dir = join(__dirname, '../specs/tests/')
 // "/// {}"
 const pluginConfigRegExp = /\/\/\/(.+)\n/
 // "//@ filename.ts"
 const referenceFileRegExp = /\/\/@ (.+)/
 // "//! {}"
 const compilerOptionsRegExp = /\/\/! (.+)/
-const snapshotDir = join(dir, '../__snapshot__/')
+const snapshotDir = join(__dirname, '../specs/__snapshot__/')
 
 if (isMainThread) {
     for (const testFile of readdirSync(dir)) {
-        // statSync(test).isDirectory() ? runFolder(test) : runSingleFile(test)
-        // worker({ path: join(dir, testFile), filename: testFile })
+        // worker({ path: join(dir, testFile), filename: testFile }).catch(x => {
+        //     console.error(x)
+        //     process.exit(1)
+        // })
         const worker = new Worker(__filename, {
             workerData: { path: join(dir, testFile), filename: testFile } as WorkerParam,
         })
         worker.on('error', e => {
-            throw e
+            console.error(e)
+            process.exit(1)
         })
         worker.on('exit', code => {
             if (code !== 0) throw new Error(`Worker stopped with exit code ${code}`)
@@ -28,12 +32,14 @@ if (isMainThread) {
         // // worker.on('message', resolve)
     }
 } else {
-    worker()
+    worker().catch(e => {
+        throw e
+    })
 }
 async function worker(script: WorkerParam = workerData) {
     const ts = await import('typescript')
-    const transformer = await import('../src/node')
-    const sharedCompilerOptions = require('./tsconfig.json')
+    const transformer = await import('./node.js')
+    const sharedCompilerOptions = require('../specs/tsconfig.json')
     if (statSync(script.path).isFile()) {
         let outputText = ''
         try {
@@ -58,7 +64,7 @@ async function worker(script: WorkerParam = workerData) {
                             {},
                             {
                                 after: true,
-                                ...eval('(' + inlineConfig[1] + ')'),
+                                ...eval('(' + inlineConfig![1] + ')'),
                             },
                         ),
                     ],
@@ -66,7 +72,8 @@ async function worker(script: WorkerParam = workerData) {
             })
             outputText = result.outputText
         } catch (e) {
-            outputText = '// ' + e.message
+            if (e instanceof ConfigError || e instanceof TransformError) outputText = '// ' + e.message
+            else throw e
         }
         writeFileSync(join(snapshotDir, script.filename.replace(/tsx$/g, 'jsx').replace(/ts$/, 'js')), outputText)
     } else {

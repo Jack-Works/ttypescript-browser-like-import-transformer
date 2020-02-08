@@ -1,5 +1,5 @@
 src/*.js
-specs/run-tests.js
+cjs/
 
 # Logs
 logs

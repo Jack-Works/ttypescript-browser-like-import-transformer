@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "module": "CommonJS",
+        "target": "ES2016",
+        "outDir": "../cjs/",
+        "sourceMap": true,
+        "strict": true,
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true,
+        "moduleResolution": "node"
+    },
+    "files": ["./core.ts", "./node.ts", "./run-tests.ts"]
+}

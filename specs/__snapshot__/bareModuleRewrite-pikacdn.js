@@ -97,6 +97,8 @@ function __dynamicImportHelper(path) {
                     }
                     const regexp = parsedRegExpCache.get(rule);
                     if (regexp && path.match(regexp)) {
+                        if (ruleValue === false)
+                            return { type: "noop" };
                         if (typeof ruleValue === "string")
                             return moduleSpecifierTransform(ctx, ruleValue);
                         const nextPath = path.replace(regexp, ruleValue.target);
@@ -109,6 +111,8 @@ function __dynamicImportHelper(path) {
                         };
                     }
                     else if (rule === path) {
+                        if (ruleValue === false)
+                            return { type: "noop" };
                         if (typeof ruleValue === "string")
                             return moduleSpecifierTransform(ctx, ruleValue);
                         return {
