@@ -131,7 +131,7 @@ function moduleSpecifierTransform(
         case BareModuleRewriteSimple.unpkg: {
             const table = {
                 [BareModuleRewriteSimple.pikacdn]: 'https://cdn.pika.dev/%1',
-                [BareModuleRewriteSimple.unpkg]: 'https://unpkg.com/%1?module',
+                [BareModuleRewriteSimple.unpkg]: 'https://unpkg.com/%1@latest/?module',
                 [BareModuleRewriteSimple.snowpack]: `${config.webModulePath ?? '/web_modules/'}%1.js`,
             }
             return { nextPath: table[opt].replace('%1', path), type: 'rewrite' }
@@ -153,10 +153,18 @@ function moduleSpecifierTransform(
                 if (ts) {
                     if (!parsedRegExpCache.has(rule)) {
                         const literal = parseJS(ts, rule, ts.isRegularExpressionLiteral)
+                        if (rule.startsWith('/') && literal === null) {
+                            console.error('Might be an invalid regexp:', rule)
+                        }
                         if (literal) {
-                            // it's safe
-                            const next = eval(literal.text)
-                            parsedRegExpCache.set(rule, next)
+                            try {
+                                // it's safe
+                                const next = eval(literal.text)
+                                parsedRegExpCache.set(rule, next)
+                            } catch (e) {
+                                console.error('Might be invalid regexp:', literal.text)
+                                console.error(e)
+                            }
                         }
                     }
                 } else if (rule.startsWith('/')) {
@@ -565,7 +573,7 @@ export enum BareModuleRewriteSimple {
     unpkg = 'unpkg',
     pikacdn = 'pikacdn',
 }
-export interface BareModuleRewriteUMD {
+export type BareModuleRewriteUMD = {
     type: 'umd'
     target: string
     globalObject?: string

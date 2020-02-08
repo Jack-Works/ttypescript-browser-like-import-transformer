@@ -54,7 +54,7 @@ function __dynamicImportHelper(path) {
             case BareModuleRewriteSimple.pikacdn:
             case BareModuleRewriteSimple.unpkg: {
                 const table = {
-                    [BareModuleRewriteSimple.pikacdn]: "https://cdn.pika.dev/%1", [BareModuleRewriteSimple.unpkg]: "https://unpkg.com/%1?module", [BareModuleRewriteSimple.snowpack]: `${(_b = config.webModulePath) !== null && _b !== void 0 ? _b : "/web_modules/"}%1.js`,
+                    [BareModuleRewriteSimple.pikacdn]: "https://cdn.pika.dev/%1", [BareModuleRewriteSimple.unpkg]: "https://unpkg.com/%1@latest/?module", [BareModuleRewriteSimple.snowpack]: `${(_b = config.webModulePath) !== null && _b !== void 0 ? _b : "/web_modules/"}%1.js`,
                 };
                 return { nextPath: table[opt].replace("%1", path), type: "rewrite" };
             }
@@ -74,9 +74,18 @@ function __dynamicImportHelper(path) {
                     if (ts) {
                         if (!parsedRegExpCache.has(rule)) {
                             const literal = parseJS(ts, rule, ts.isRegularExpressionLiteral);
+                            if (rule.startsWith("/") && literal === null) {
+                                console.error("Might be an invalid regexp:", rule);
+                            }
                             if (literal) {
-                                const next = eval(literal.text);
-                                parsedRegExpCache.set(rule, next);
+                                try {
+                                    const next = eval(literal.text);
+                                    parsedRegExpCache.set(rule, next);
+                                }
+                                catch (e) {
+                                    console.error("Might be invalid regexp:", literal.text);
+                                    console.error(e);
+                                }
                             }
                         }
                     }
@@ -144,10 +153,10 @@ function __dynamicImportTransformFailedHelper2(reason, ...args) {
 }
 console.log('Should run after all imports', a, b, c, d, e, a1, b1, c1, d1, e1, a2, b2, c2, d2, e2);
 // Node style import
-import a from "https://unpkg.com/a?module";
-import b, { c, d } from "https://unpkg.com/b?module";
-import * as e from "https://unpkg.com/c?module";
-import "https://unpkg.com/d?module";
+import a from "https://unpkg.com/a@latest/?module";
+import b, { c, d } from "https://unpkg.com/b@latest/?module";
+import * as e from "https://unpkg.com/c@latest/?module";
+import "https://unpkg.com/d@latest/?module";
 // relative import without ext name
 import a1 from "./a.js";
 import b1, { c1, d1 } from "./b.js";
@@ -161,8 +170,8 @@ import 'http://example.com/';
 const x = 1;
 export { x };
 // Node style export
-export { c, d } from "https://unpkg.com/b?module";
-export * as e from "https://unpkg.com/c?module";
+export { c, d } from "https://unpkg.com/b@latest/?module";
+export * as e from "https://unpkg.com/c@latest/?module";
 // relative import without ext name
 export { c1, d1 } from "./b.js";
 export * as e1 from "./c.js";
@@ -170,7 +179,7 @@ export * as e1 from "./c.js";
 export { c2, d2 } from 'http://example.com/';
 export * as e2 from 'http://example.com/';
 // Static dynamic import
-import("https://unpkg.com/a?module");
+import("https://unpkg.com/a@latest/?module");
 import("./a.js");
 import('https://example.com');
 // dynamic dynamic import

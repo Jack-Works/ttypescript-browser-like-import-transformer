@@ -1,5 +1,5 @@
 {
-    "name": "ttypescript-browser-like-import-transformer",
+    "name": "@magic-works/ttypescript-browser-like-import-transformer",
     "version": "1.0.0",
     "description": "A custom transformer that can be used with ttypescript to transform ts imports to browser style imports",
     "main": "index.js",

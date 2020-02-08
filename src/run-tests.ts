@@ -44,7 +44,14 @@ async function worker(script: WorkerParam = workerData) {
         let outputText = ''
         try {
             const file = readFileSync(script.path, 'utf-8')
-            const inlineConfig = file.match(pluginConfigRegExp) || ['', {}]
+            const inlineConfig = file.match(pluginConfigRegExp) || ['', '{}']
+            function tryEval(x: string) {
+                try {
+                    return eval(`(${x})`)
+                } catch (e) {
+                    console.error('Syntax error string:', x)
+                }
+            }
             const referencedFile = file.match(referenceFileRegExp)
             const additionalCompilerOptions = file.match(compilerOptionsRegExp) || ['', '{}']
             const source = (referencedFile
@@ -56,7 +63,7 @@ async function worker(script: WorkerParam = workerData) {
             const result = ts.transpileModule(source, {
                 compilerOptions: {
                     ...sharedCompilerOptions.compilerOptions,
-                    ...eval('(' + additionalCompilerOptions[1] + ')'),
+                    ...tryEval(additionalCompilerOptions[1]),
                 },
                 transformers: {
                     after: [
@@ -64,7 +71,7 @@ async function worker(script: WorkerParam = workerData) {
                             {},
                             {
                                 after: true,
-                                ...eval('(' + inlineConfig![1] + ')'),
+                                ...tryEval(inlineConfig[1]),
                             },
                         ),
                     ],

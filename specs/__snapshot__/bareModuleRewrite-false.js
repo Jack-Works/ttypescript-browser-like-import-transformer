@@ -55,7 +55,7 @@ function __dynamicImportHelper(path) {
             case BareModuleRewriteSimple.pikacdn:
             case BareModuleRewriteSimple.unpkg: {
                 const table = {
-                    [BareModuleRewriteSimple.pikacdn]: "https://cdn.pika.dev/%1", [BareModuleRewriteSimple.unpkg]: "https://unpkg.com/%1?module", [BareModuleRewriteSimple.snowpack]: `${(_b = config.webModulePath) !== null && _b !== void 0 ? _b : "/web_modules/"}%1.js`,
+                    [BareModuleRewriteSimple.pikacdn]: "https://cdn.pika.dev/%1", [BareModuleRewriteSimple.unpkg]: "https://unpkg.com/%1@latest/?module", [BareModuleRewriteSimple.snowpack]: `${(_b = config.webModulePath) !== null && _b !== void 0 ? _b : "/web_modules/"}%1.js`,
                 };
                 return { nextPath: table[opt].replace("%1", path), type: "rewrite" };
             }
@@ -75,9 +75,18 @@ function __dynamicImportHelper(path) {
                     if (ts) {
                         if (!parsedRegExpCache.has(rule)) {
                             const literal = parseJS(ts, rule, ts.isRegularExpressionLiteral);
+                            if (rule.startsWith("/") && literal === null) {
+                                console.error("Might be an invalid regexp:", rule);
+                            }
                             if (literal) {
-                                const next = eval(literal.text);
-                                parsedRegExpCache.set(rule, next);
+                                try {
+                                    const next = eval(literal.text);
+                                    parsedRegExpCache.set(rule, next);
+                                }
+                                catch (e) {
+                                    console.error("Might be invalid regexp:", literal.text);
+                                    console.error(e);
+                                }
                             }
                         }
                     }

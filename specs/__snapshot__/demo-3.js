@@ -1,21 +1,13 @@
 function __dynamicImportHelper(path) {
-    const BareModuleRewriteSimple = { "snowpack": "snowpack",
-        // Node style import
-        "umd": "umd", "unpkg": "unpkg", "pikacdn": "pikacdn" };
+    const BareModuleRewriteSimple = { "snowpack": "snowpack", "umd": "umd", "unpkg": "unpkg", "pikacdn": "pikacdn" };
     const parsedRegExpCache = new Map();
-    const config = { "after": true, "appendExtensionName": false };
-    function dynamicImport(path) {
-        return import(path);
-    }
+    const config = { "after": true, "dynamicImportPathRewrite": { "type": "custom", "function": "(path, defaultImpl) => defaultImpl(path).then(mod => new Proxy(mod, {}))" } };
+    function dynamicImport(path) { return import(path); }
     const result = runtimeTransform(config, path, dynamicImport);
-    if ( //example.com/'
-    result === null)
-        return dynamicImport(path); //example.com'
+    if (result === null)
+        return dynamicImport(path);
     return result;
-    function parseJS(//example.com/'
-    ...a) {
-        return null;
-    }
+    function parseJS(...a) { return null; }
     function runtimeTransform(config, path, dynamicImport) {
         const result = moduleSpecifierTransform({ config, path });
         const header = `ttypescript-browser-like-import-transformer: Runtime transform error:`;
@@ -23,8 +15,7 @@ function __dynamicImportHelper(path) {
             case "error":
                 console.error(header, result.reason, `raw specifier:`, path);
                 return null;
-            case "rewrite":
-                return dynamicImport(result.nextPath);
+            case "rewrite": return dynamicImport(result.nextPath);
             case "umd":
                 if (config.globalObject === "globalThis" || config.globalObject === undefined)
                     return Promise.resolve(globalThis[result.target]);
@@ -145,46 +136,5 @@ function __dynamicImportHelper(path) {
         }
     }
 }
-function __dynamicImportTransformFailedHelper2(reason, ...args) {
-    console.warn(reason, ...args
-    // Node style import
-    ); // Node style import
-    return import(args[0], args[1]);
-}
-const a = globalThis.a.default;
-const b = globalThis.b.default;
-const { c, d } = globalThis.b;
-const e = globalThis.c;
-const { c_1, d_1 } = globalThis.b;
-export { c_1 as c, d_1 as d };
-const e_1 = globalThis.c;
-export { e_1 as e };
-console.log('Should run after all imports', a, b, c, d, e, a1, b1, c1, d1, e1, a2, b2, c2, d2, e2);
-"import \"d\" is eliminated because it expected to have no side effects.";
-// relative import without ext name
-import a1 from './a';
-import b1, { c1, d1 } from './b';
-import * as e1 from '/c';
-import './d';
-// browser style import
-import a2 from 'http://example.com/';
-import b2, { c2, d2 } from 'https://example.com';
-import * as e2 from 'http://example.com/';
-import 'http://example.com/';
-const x = 1;
-export { x };
-// relative import without ext name
-export { c1, d1 } from './b';
-export * as e1 from './c';
-// browser style import
-export { c2, d2 } from 'http://example.com/';
-export * as e2 from 'http://example.com/';
-// Static dynamic import
-Promise.resolve(globalThis.a);
-import('./a');
-import('https://example.com');
-// dynamic dynamic import
-const y = '';
-__dynamicImportHelper(y);
-// invalid dynamic import (invalid currently)
-__dynamicImportTransformFailedHelper2("This dynamic import has more than 1 arguments and don't know how to transform", y, 'second argument');
+const __customImportHelper_1 = (path, defaultImpl) => defaultImpl(path).then(mod => new Proxy(mod, {}));
+__customImportHelper_1('react' + x, __dynamicImportHelper);
