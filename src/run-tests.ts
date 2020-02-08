@@ -83,9 +83,7 @@ async function worker(script: WorkerParam = workerData) {
         )}`
         try {
             execSync(cmd)
-        } catch (e) {
-            console.warn(e)
-        }
+        } catch (e) {}
     }
 }
 interface WorkerParam {

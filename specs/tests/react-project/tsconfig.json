@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "esModuleInterop": true,
+        "jsx": "react",
+        "module": "ESNext",
+        "target": "ESNext",
+        "plugins": [
+            {
+                "transform": "../../../cjs/node.js",
+                "bareModuleRewrite": "umd"
+            }
+        ]
+    },
+    "files": ["./app.tsx", "./comp.tsx", "./index.tsx"]
+}
