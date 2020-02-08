@@ -1,0 +1,2 @@
+/// {appendExtensionName: ".ts"}
+//@ default.ts

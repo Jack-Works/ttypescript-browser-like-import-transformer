@@ -1,0 +1,2 @@
+/// {appendExtensionName: true}
+//@ default.ts

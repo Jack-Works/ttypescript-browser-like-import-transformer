@@ -1,0 +1,2 @@
+/// {appendExtensionNameForRemote: undefined}
+//@ default.ts
