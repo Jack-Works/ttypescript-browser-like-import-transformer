@@ -44,7 +44,7 @@ async function worker(script: WorkerParam = workerData) {
         let outputText = ''
         try {
             const file = readFileSync(script.path, 'utf-8')
-            const inlineConfig = file.match(pluginConfigRegExp)
+            const inlineConfig = file.match(pluginConfigRegExp) || ['', {}]
             const referencedFile = file.match(referenceFileRegExp)
             const additionalCompilerOptions = file.match(compilerOptionsRegExp) || ['', '{}']
             const source = (referencedFile

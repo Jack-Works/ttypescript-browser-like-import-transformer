@@ -135,9 +135,10 @@ function __dynamicImportHelper(path) {
         }
     }
 }
-function __dynamicImportTransformFailedHelper(reason, ...args) {
-    console.warn(reason, ...args);
+function __dynamicImportTransformFailedHelper2(reason, ...args) {
+    console.warn(reason, ...args
     // Node style import
+    ); // Node style import
     return import(args[0], args[1]);
 }
 console.log('Should run after all imports', a, b, c, d, e, a1, b1, c1, d1, e1, a2, b2, c2, d2, e2);
@@ -175,4 +176,4 @@ import('https://example.com');
 const y = '';
 __dynamicImportHelper(y);
 // invalid dynamic import (invalid currently)
-__dynamicImportTransformFailedHelper("This dynamic import has more than 1 arguments and don't know how to transform", y, 'second argument');
+__dynamicImportTransformFailedHelper2("This dynamic import has more than 1 arguments and don't know how to transform", y, 'second argument');

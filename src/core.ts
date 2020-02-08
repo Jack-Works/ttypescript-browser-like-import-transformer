@@ -621,9 +621,9 @@ function writeSourceFileMeta<T, E extends T, Q>(
 const importDefaultHelper = `function __ttsc_importDefault(mod) {
      return (mod && mod.__esModule) ? mod : { "default": mod };
 };`
-const dynamicImportFailedHelper = (
-    args: Expression[],
-) => `function __dynamicImportTransformFailedHelper(reason, ...args) {
+const dynamicImportFailedHelper = (args: Expression[]) => `function __dynamicImportTransformFailedHelper${
+    args.length
+}(reason, ...args) {
     console.warn(reason, ...args)
     return import(${args.map((_, i) => `args[${i}]`).join(', ')});
 };`
