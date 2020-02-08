@@ -2,6 +2,24 @@
 
 A custom transformer that can be used with ttypescript to transform ts imports to browser style imports
 
+Treat your import like:
+
+Before
+
+```ts
+import React from 'react'
+import * as AsyncCall from 'async-call-rpc'
+import isarray from 'isarray'
+```
+
+After
+
+```ts
+const React = __bindCheck(__esModuleCheck(globalThis.React), ['default'], 'react', 'globalThis.React').default
+import * as AsyncCall from 'https://unpkg.com/async-call-rpc@latest/?module'
+import isarray from '/web_modules/isarray.js'
+```
+
 ## Abstract
 
 This is a [ttypescript](https://github.com/cevek/ttypescript) transformer to transform your `import` and `export` declarations into the form that browser can run directly. Including rewrite to another path or redirect to a global UMD variable.
@@ -187,12 +205,12 @@ export * as React from 'react'
 export { useState } from 'react'
 // ---------------------------------------
 // after
-const x = globalThis.react.default;
-const { useState } = globalThis.react;
-const React = globalThis.react;
-const React_1 = globalThis.react;
+const x = __bindCheck(globalThis.React, ["default"], "react", "globalThis.React").default;
+const { useState } = __bindCheck(globalThis.React, ["useState"], "react", "globalThis.React");
+const React = __bindCheck(globalThis.React, [], "react", "globalThis.React");
+const React_1 = __bindCheck(globalThis.React, [], "react", "globalThis.React");
 export { React_1 as React };
-const { useState_1 } = globalThis.react;
+const { useState_1 } = __bindCheck(globalThis.React, ["useState"], "react", "globalThis.React");
 export { useState_1 as useState };
 ```
 
@@ -229,14 +247,11 @@ import * as MUILab from '@material-ui/labs'
 import 'other-polyfill'
 // ------------------------------
 // after
-function __ttsc_importDefault(mod) {
-    return mod && mod.__esModule ? mod : { default: mod }
-}
-const React = __ttsc_importDefault(globalThis.react).default
-const MUI = __ttsc_importDefault(window.MaterialUI.core)
-const MUILab = __ttsc_importDefault(window.MaterialUI.labs)
+const React = __bindCheck(__esModuleCheck(globalThis.React), ['default'], 'react', 'globalThis.React').default
+const MUI = __bindCheck(window.MaterialUI.core, [], '@material-ui/core', 'window.MaterialUI.core')
+const MUILab = __bindCheck(window.MaterialUI.labs, [], '@material-ui/labs', 'window.MaterialUI.labs')
 import lodash from 'https://cdn.pika.dev/lodash-es'
-import * as AsyncCall from 'https://unpkg.com/async-call-rpc?module'
+import * as AsyncCall from 'https://unpkg.com/async-call-rpc@latest/?module'
 import fs from 'std:fs'
 import isarray from '/web_modules/isarray.js'
 import '/web_modules/other-polyfill.js'
@@ -280,8 +295,8 @@ import('react')
 import('react' + x)
 
 // after
-Promise.resolve(globalThis.react)
 // Or import("/web_modules/react.js") etc, based on your config.
+Promise.resolve(globalThis.react)
 __dynamicImportHelper('react' + x)
 ```
 
