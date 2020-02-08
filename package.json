@@ -8,7 +8,7 @@
     "license": "MIT",
     "scripts": {
         "release": "standard-version",
-        "test": "./cjs/run-tests.js"
+        "test": "node ./cjs/run-tests.js"
     },
     "standard-version": {
         "skip": {

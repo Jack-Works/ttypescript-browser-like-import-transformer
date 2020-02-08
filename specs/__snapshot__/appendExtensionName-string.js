@@ -39,7 +39,7 @@ function __dynamicImportHelper(path) {
     function isBrowserCompatibleModuleSpecifier(path) {
         return isHTTPModuleSpecifier(path) || isLocalModuleSpecifier(path);
     }
-    function appendExtname(path, expectedExt) {
+    function appendExtensionName(path, expectedExt) {
         if (path.endsWith(expectedExt))
             return path;
         return path + expectedExt;
@@ -54,7 +54,7 @@ function __dynamicImportHelper(path) {
                 return { type: "noop" };
             if (config.appendExtensionNameForRemote !== true && isHTTPModuleSpecifier(path))
                 return { type: "noop" };
-            const nextPath = appendExtname(path, config.appendExtensionName === true ? ".js" : (_a = config.appendExtensionName) !== null && _a !== void 0 ? _a : ".js");
+            const nextPath = appendExtensionName(path, config.appendExtensionName === true ? ".js" : (_a = config.appendExtensionName) !== null && _a !== void 0 ? _a : ".js");
             return { type: "rewrite", nextPath: nextPath };
         }
         switch (opt) {
@@ -68,11 +68,10 @@ function __dynamicImportHelper(path) {
             }
             case BareModuleRewriteSimple.umd:
             case undefined: {
-                const nextPath = __umdNameTransform(path);
+                const nextPath = importPathToUMDName(path);
                 if (!nextPath) {
-                    return {
-                        type: "error", reason: "Transformer error: Can not transform this module to UMD, please specify it in the config. Module name: " + path,
-                    };
+                    const err = `The transformer doesn't know how to transform this module specifier. Please specify the transform rule in the config.`;
+                    return { type: "error", reason: err };
                 }
                 return { type: "umd", target: nextPath, globalObject: config.globalObject };
             }
@@ -101,7 +100,7 @@ function __dynamicImportHelper(path) {
                         const nextPath = path.replace(regexp, ruleValue.target);
                         if (!nextPath)
                             return {
-                                type: "error", reason: "Cannot transform this.",
+                                type: "error", reason: "The transform result is an empty string. Skipped.",
                             };
                         return {
                             type: "umd", target: nextPath, globalObject: (_c = ruleValue.globalObject) !== null && _c !== void 0 ? _c : config.globalObject,
@@ -127,7 +126,7 @@ function __dynamicImportHelper(path) {
     function isLocalModuleSpecifier(path) {
         return path.startsWith(".") || path.startsWith("/");
     }
-    function __umdNameTransform(path) {
+    function importPathToUMDName(path) {
         const reg = path.match(/[a-zA-Z0-9_]+/g);
         if (!reg)
             return null;
@@ -151,7 +150,7 @@ export { c_1 as c, d_1 as d };
 const e_1 = globalThis.c;
 export { e_1 as e };
 console.log('Should run after all imports', a, b, c, d, e, a1, b1, c1, d1, e1, a2, b2, c2, d2, e2);
-"// import \"d\" is eliminated in UMD mode (Expected target: globalThis.d)";
+"import \"d\" is eliminated because it expected to have no side effects.";
 // relative import without ext name
 import a1 from "./a.ts";
 import b1, { c1, d1 } from "./b.ts";

@@ -37,26 +37,34 @@ type Ctx<T extends Node> = {
 const ctx_ = <T extends Node>(ctx: Ctx<any>, node: T) => ({ ...ctx, node } as Ctx<T>)
 export default function createTransformer(ts: ts) {
     return function(_program: unknown, config: PluginConfig) {
-        simpleValidation(config)
+        validateConfig(config)
         return (context: TransformationContext) => {
             return (sourceFile: SourceFile) => {
-                let sf = ts.visitEachChild(sourceFile, visitor, context)
+                let visitedSourceFile = ts.visitEachChild(sourceFile, visitor, context)
+                // ? hoistedHelper and hoistedUMDImport will be added ^ in the visitor
                 const hoistedHelper = Array.from(topLevelScopedHelperMap.get(sourceFile)?.values() || []).map(x => x[1])
                 const hoistedUMDImport = Array.from(hoistUMDImportDeclaration.get(sourceFile)?.values() || [])
-                sf = ts.updateSourceFileNode(
-                    sf,
-                    [
-                        ...hoistedHelper,
-                        ...hoistedUMDImport,
-                        ...sf.statements.filter(x => !hoistedUMDImport.includes(x)),
-                    ],
-                    sf.isDeclarationFile,
-                    sf.referencedFiles,
-                    sf.typeReferenceDirectives,
-                    sf.hasNoDefaultLib,
-                    sf.libReferenceDirectives,
+                visitedSourceFile = ts.updateSourceFileNode(
+                    visitedSourceFile,
+                    Array.from(
+                        new Set([
+                            // ? Hoisted helper must comes first, because in case of custom dynamic import handler
+                            // ? there will be a const f = () => ... declaration, it must appear at the top
+                            ...hoistedHelper,
+                            // ? Then UMD import should be introduces before any other statements.
+                            // ? UMD import declarations might use helper defined in the hoistedHelper
+                            ...hoistedUMDImport,
+                            // ? original statements
+                            ...visitedSourceFile.statements,
+                        ]),
+                    ),
+                    visitedSourceFile.isDeclarationFile,
+                    visitedSourceFile.referencedFiles,
+                    visitedSourceFile.typeReferenceDirectives,
+                    visitedSourceFile.hasNoDefaultLib,
+                    visitedSourceFile.libReferenceDirectives,
                 )
-                return sf
+                return visitedSourceFile
 
                 function visitor(node: Node): VisitResult<Node> {
                     const dynamicImportArgs = isDynamicImport(ts, node)
@@ -81,13 +89,6 @@ export default function createTransformer(ts: ts) {
     }
 }
 //#region Pure Helpers
-/**
- * Local module specifier:
- * ./file
- * ../foo/bar
- * /static/file
- * https://my-cdn.com/files/x
- */
 function isBrowserCompatibleModuleSpecifier(path: string) {
     return isHTTPModuleSpecifier(path) || isLocalModuleSpecifier(path)
 }
@@ -97,10 +98,6 @@ function isHTTPModuleSpecifier(path: string) {
 function isLocalModuleSpecifier(path: string) {
     return path.startsWith('.') || path.startsWith('/')
 }
-
-/**
- * Is the node a `import(...)` call?
- */
 function isDynamicImport(ts: ts, node: Node): NodeArray<Expression> | null {
     if (!ts.isCallExpression(node)) return null
     if (node.expression.kind === ts.SyntaxKind.ImportKeyword) {
@@ -108,11 +105,11 @@ function isDynamicImport(ts: ts, node: Node): NodeArray<Expression> | null {
     }
     return null
 }
-function appendExtname(path: string, expectedExt: string) {
+function appendExtensionName(path: string, expectedExt: string) {
     if (path.endsWith(expectedExt)) return path
     return path + expectedExt
 }
-function __umdNameTransform(path: string) {
+function importPathToUMDName(path: string) {
     const reg = path.match(/[a-zA-Z0-9_]+/g)
     if (!reg) return null
     const x = [...reg].join(' ')
@@ -124,63 +121,14 @@ function __umdNameTransform(path: string) {
             .replace(/\s+/g, '')
     return null
 }
-//#endregion
-//#region Transformers
-const hoistUMDImportDeclaration = new WeakMap<SourceFile, Set<Statement>>()
-function updateImportExportDeclaration(
-    ctx: Ctx<ImportDeclaration | ExportDeclaration>,
-    opt = ctx.config.bareModuleRewrite,
-): Statement[] {
-    const { node, sourceFile, ts } = ctx
-    const rewriteStrategy = moduleSpecifierTransform(ctx, opt)
-    switch (rewriteStrategy.type) {
-        case 'error':
-            return [ts.createExpressionStatement(ts.createStringLiteral(rewriteStrategy.reason)), node]
-        case 'noop':
-            return [node]
-        case 'rewrite': {
-            const nextPath = ts.createStringLiteral(rewriteStrategy.nextPath)
-            if (ts.isImportDeclaration(node))
-                return [ts.updateImportDeclaration(node, node.decorators, node.modifiers, node.importClause, nextPath)]
-            else
-                return [
-                    ts.updateExportDeclaration(
-                        node,
-                        node.decorators,
-                        node.modifiers,
-                        node.exportClause,
-                        nextPath,
-                        node.isTypeOnly,
-                    ),
-                ]
-        }
-        case 'umd': {
-            const nextPath = rewriteStrategy.target
-            const globalObject = rewriteStrategy.globalObject
-            const clause = ts.isImportDeclaration(node) ? node.importClause : node.exportClause
-            if (!clause)
-                return [
-                    ts.createExpressionStatement(
-                        ts.createLiteral(
-                            `// import "${
-                                (node.moduleSpecifier as StringLiteral).text
-                            }" is eliminated in UMD mode (Expected target: ${globalObject ??
-                                'globalThis'}.${nextPath})`,
-                        ),
-                    ),
-                ]
-            const { statements } = importOrExportClauseToUMD(nextPath, ctx_(ctx, clause), globalObject)
-            statements.forEach(x =>
-                writeSourceFileMeta(sourceFile, hoistUMDImportDeclaration, new Set<Statement>(), _ => _.add(x)),
-            )
-            return statements
-        }
-        default: {
-            throw new Error('Unreachable case')
-        }
-    }
+function unreachable(_x: never): never {
+    throw new Error('Unreachable case' + _x)
 }
 const parsedRegExpCache = new Map<string, RegExp | null>()
+/**
+ * This function will also be included in the runtime for dynamic transform.
+ * So the typescript runtime is optional.
+ */
 function moduleSpecifierTransform(
     ctx: Pick<Ctx<any>, 'config' | 'path'> & { ts?: ts },
     opt = ctx.config.bareModuleRewrite,
@@ -190,7 +138,7 @@ function moduleSpecifierTransform(
     if (isBrowserCompatibleModuleSpecifier(path)) {
         if (config.appendExtensionName === false) return { type: 'noop' }
         if (config.appendExtensionNameForRemote !== true && isHTTPModuleSpecifier(path)) return { type: 'noop' }
-        const nextPath = appendExtname(
+        const nextPath = appendExtensionName(
             path,
             config.appendExtensionName === true ? '.js' : config.appendExtensionName ?? '.js',
         )
@@ -208,15 +156,12 @@ function moduleSpecifierTransform(
             return { nextPath: table[opt].replace('%1', path), type: 'rewrite' }
         }
         case BareModuleRewriteSimple.umd:
+        // ? the default
         case undefined: {
-            const nextPath = __umdNameTransform(path)
+            const nextPath = importPathToUMDName(path)
             if (!nextPath) {
-                return {
-                    type: 'error',
-                    reason:
-                        'Transformer error: Can not transform this module to UMD, please specify it in the config. Module name: ' +
-                        path,
-                }
+                const err = `The transformer doesn't know how to transform this module specifier. Please specify the transform rule in the config.`
+                return { type: 'error', reason: err }
             }
             return { type: 'umd', target: nextPath, globalObject: config.globalObject }
         }
@@ -244,7 +189,7 @@ function moduleSpecifierTransform(
                     if (!nextPath)
                         return {
                             type: 'error',
-                            reason: 'Cannot transform this.',
+                            reason: 'The transform result is an empty string. Skipped.',
                         }
                     return {
                         type: 'umd',
@@ -264,6 +209,67 @@ function moduleSpecifierTransform(
         }
     }
     return { type: 'noop' }
+}
+//#endregion
+//#region Transformers
+/**
+ * A set of UMD ImportDeclaration
+ * e.g.:
+ * Before:
+ *      import a from 'a'
+ * After:
+ *      const a = globalThis.a
+ *
+ * ES Import is hoisted to the top of the file so these declarations should do also.
+ */
+const hoistUMDImportDeclaration = new WeakMap<SourceFile, Set<Statement>>()
+function updateImportExportDeclaration(
+    ctx: Ctx<ImportDeclaration | ExportDeclaration>,
+    opt = ctx.config.bareModuleRewrite,
+): Statement[] {
+    const { node, sourceFile, ts } = ctx
+    const rewriteStrategy = moduleSpecifierTransform(ctx, opt)
+    switch (rewriteStrategy.type) {
+        case 'error':
+            return [ts.createExpressionStatement(ts.createLiteral(rewriteStrategy.reason)), node]
+        case 'noop':
+            return [node]
+        case 'rewrite': {
+            const nextPath = ts.createLiteral(rewriteStrategy.nextPath)
+            if (ts.isImportDeclaration(node))
+                return [ts.updateImportDeclaration(node, node.decorators, node.modifiers, node.importClause, nextPath)]
+            else
+                return [
+                    ts.updateExportDeclaration(
+                        node,
+                        node.decorators,
+                        node.modifiers,
+                        node.exportClause,
+                        nextPath,
+                        node.isTypeOnly,
+                    ),
+                ]
+        }
+        case 'umd': {
+            const nextPath = rewriteStrategy.target
+            const globalObject = rewriteStrategy.globalObject
+            const clause = ts.isImportDeclaration(node) ? node.importClause : node.exportClause
+            // ? if it have no clause, it must be an ImportDeclaration
+            if (!clause) {
+                const text = `import "${
+                    (node.moduleSpecifier as StringLiteral).text
+                }" is eliminated because it expected to have no side effects.`
+                return [ts.createExpressionStatement(ts.createLiteral(text))]
+            }
+            const { statements } = importOrExportClauseToUMD(nextPath, ctx_(ctx, clause), globalObject)
+            writeSourceFileMeta(sourceFile, hoistUMDImportDeclaration, new Set<Statement>(), _ => {
+                statements.forEach(x => _.add(x))
+            })
+            return statements
+        }
+        default:
+            return unreachable(rewriteStrategy)
+    }
 }
 /**
  * import a from 'b' => const a = globalThis.b.default
@@ -315,7 +321,7 @@ function importOrExportClauseToUMD(
                     }),
                 ),
             ),
-            ts.createStringLiteral(path),
+            ts.createLiteral(path),
         )
         const updatedGhost = updateImportExportDeclaration(ctx_(ctx, ghostImportDeclaration))
         const exportDeclaration = ts.createExportDeclaration(
@@ -337,7 +343,7 @@ function importOrExportClauseToUMD(
             undefined,
             undefined,
             ts.createImportClause(undefined, ts.createNamespaceImport(ghostBinding)),
-            ts.createStringLiteral(path),
+            ts.createLiteral(path),
         )
         const updatedGhost = updateImportExportDeclaration(ctx_(ctx, ghostImportDeclaration))
         const exportDeclaration = ts.createExportDeclaration(
@@ -404,7 +410,7 @@ function getUMDAccess(
     )
     return umdAccess
 }
-function createDynImport(ts: ts, args: Expression[]) {
+function createDynamicImport(ts: ts, args: Expression[]) {
     return ts.createCall(ts.createToken(ts.SyntaxKind.ImportKeyword) as any, void 0, args)
 }
 function transformDynamicImport(ctx: Omit<Ctx<CallExpression>, 'path'>, args: Expression[]): Expression[] {
@@ -415,18 +421,18 @@ function transformDynamicImport(ctx: Omit<Ctx<CallExpression>, 'path'>, args: Ex
         switch (rewriteStrategy.type) {
             case 'error':
                 const id = createTopLevelScopedHelper(ts, sourceFile, dynamicImportFailedHelper(args))
-                return [ts.createCall(id, void 0, [ts.createStringLiteral(rewriteStrategy.reason), ...args])]
+                return [ts.createCall(id, void 0, [ts.createLiteral(rewriteStrategy.reason), ...args])]
             case 'noop':
                 return [node]
             case 'rewrite': {
-                return [createDynImport(ts, [ts.createStringLiteral(rewriteStrategy.nextPath), ...rest])]
+                return [createDynamicImport(ts, [ts.createLiteral(rewriteStrategy.nextPath), ...rest])]
             }
             case 'umd': {
                 if (rest.length !== 0) {
                     const id = createTopLevelScopedHelper(ts, sourceFile, dynamicImportFailedHelper(args))
                     return [
                         ts.createCall(id, void 0, [
-                            ts.createStringLiteral(
+                            ts.createLiteral(
                                 "Transform rule found, but this dynamic import has more than 1 argument, don't know how to transform that.",
                             ),
                             ...args,
@@ -445,9 +451,7 @@ function transformDynamicImport(ctx: Omit<Ctx<CallExpression>, 'path'>, args: Ex
             const id = createTopLevelScopedHelper(ts, sourceFile, dynamicImportFailedHelper(args))
             return [
                 ts.createCall(id, void 0, [
-                    ts.createStringLiteral(
-                        "This dynamic import has more than 1 arguments and don't know how to transform",
-                    ),
+                    ts.createLiteral("This dynamic import has more than 1 arguments and don't know how to transform"),
                     ...args,
                 ]),
             ]
@@ -637,13 +641,13 @@ const dynamicImportHelper = (config: PluginConfig) => `function __dynamicImportH
         }
     }.toString()}
     ${isBrowserCompatibleModuleSpecifier.toString()}
-    ${appendExtname.toString()}
+    ${appendExtensionName.toString()}
     ${moduleSpecifierTransform.toString()}
     ${isHTTPModuleSpecifier.toString()}
     ${isLocalModuleSpecifier.toString()}
-    ${__umdNameTransform.toString()}
+    ${importPathToUMDName.toString()}
 };`
-function simpleValidation(config: PluginConfig) {
+function validateConfig(config: PluginConfig) {
     type('appendExtensionName', ['string', 'boolean'])
     type('appendExtensionNameForRemote', ['boolean'])
     type('bareModuleRewrite', ['boolean', 'string', 'object'])
@@ -684,7 +688,7 @@ function simpleValidation(config: PluginConfig) {
     }
 
     const _x = typeof config
-    function type(name: keyof PluginConfig, _: typeof x[], v: any = config[name], noUndefined = false) {
+    function type(name: keyof PluginConfig, _: typeof _x[], v: any = config[name], noUndefined = false) {
         if (!noUndefined) _ = _.concat('undefined')
         if (!_.includes(typeof v)) throw new ConfigError(`type of ${name} in the tsconfig is not correct`)
         if (_.includes('object') && typeof v === null) throw new ConfigError(`${name} can't be null!`)
