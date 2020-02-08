@@ -1,7 +1,7 @@
 function __dynamicImportHelper(path) {
     const BareModuleRewriteSimple = { "snowpack": "snowpack", "umd": "umd", "unpkg": "unpkg", "pikacdn": "pikacdn" };
     const parsedRegExpCache = new Map();
-    const config = { "globalObject": "window", "dynamicImportPathRewrite": { "type": "custom", "function": "x => Promise.reject('Ahhh')" }, "bareModuleRewrite": { "lodash": "pikacdn", "@material-ui/core": "snowpack", "lodash-es": "unpkg", "jquery": "umd", "/^(.+).json$/": { "type": "umd", "target": "getJSONSync('$1.json')", "globalObject": "app.config" }, "/.+/g": "umd" } };
+    const config = { "globalObject": "window", "dynamicImportPathRewrite": { "type": "customx", "function": "x => Promise.reject('Ahhh')" }, "bareModuleRewrite": { "lodash": "pikacdn", "@material-ui/core": "snowpack", "lodash-es": "unpkg", "jquery": "umd", "/^(.+).json$/": { "type": "umd", "target": "getJSONSync('$1.json')", "globalObject": "app.config" }, "/.+/g": "umd" } };
     function _(path) { return import(path); }
     const __ = __runtimeTransform(path, _);
     if (__ === null)
@@ -15,8 +15,6 @@ function __dynamicImportHelper(path) {
             case "noop": return null;
             case "rewrite": return dyn(result.nextPath);
             case "umd":
-                if (config.globalObject === false)
-                    return Promise.reject("When using runtime transform, globalObject must be \"globalThis\" or \"window\"");
                 if (config.globalObject === "globalThis" || config.globalObject === undefined)
                     return Promise.resolve(globalThis[result.target]);
                 if (config.globalObject === "window")
@@ -83,6 +81,8 @@ function __dynamicImportHelper(path) {
                     }
                     const regexp = parsedRegExpCache.get(rule);
                     if (regexp && path.match(regexp)) {
+                        if (ruleValue === false)
+                            return { type: "noop" };
                         if (typeof ruleValue === "string")
                             return moduleSpecifierTransform(ctx, ruleValue);
                         const nextPath = path.replace(regexp, ruleValue.target);
@@ -95,6 +95,8 @@ function __dynamicImportHelper(path) {
                         };
                     }
                     else if (rule === path) {
+                        if (ruleValue === false)
+                            return { type: "noop" };
                         if (typeof ruleValue === "string")
                             return moduleSpecifierTransform(ctx, ruleValue);
                         return {

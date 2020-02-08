@@ -25,30 +25,6 @@ import {
 export class TransformError extends Error {}
 export class ConfigError extends Error {}
 
-/**
- * * 1. local module specifier rewrite (add .js)
- * * 2. bare module specifier rewrite
- *      * i. match by regexp and replace
- *      * ii. rewrite to umd import / export
- * * 3. default bare module specifier handling
- *      * i. snowpack
- *      * ii. umd
- *      * iii. unpkg / pika cdn
- * * a. default import
- * * b. namespace import
- * * c. namespace export
- * * d. named imports
- * * e. named export
- * * f. dynamic import rewrite
- *
- * Config support:
- * * appendExtensionName
- * * appendExtensionNameForRemote
- * * bareModuleRewrite
- * * dynamicImportPathRewrite
- * * globalObject
- * * webModulePath
- */
 type ts = typeof import('typescript')
 type Ctx<T extends Node> = {
     ts: ts
@@ -59,83 +35,10 @@ type Ctx<T extends Node> = {
     node: T
 }
 const ctx_ = <T extends Node>(ctx: Ctx<any>, node: T) => ({ ...ctx, node } as Ctx<T>)
-function checkConfig(config: PluginConfig) {
-    const {
-        appendExtensionName,
-        appendExtensionNameForRemote,
-        bareModuleRewrite,
-        dynamicImportPathRewrite,
-        globalObject,
-        webModulePath,
-    } = config
-    const a =
-        typeof appendExtensionName === 'string' ||
-        appendExtensionName === undefined ||
-        typeof appendExtensionName === 'boolean'
-    if (!a) throw new ConfigError(`appendExtensionName must have type (string | undefined | boolean)`)
-
-    const b = appendExtensionNameForRemote === undefined || typeof appendExtensionNameForRemote === 'boolean'
-    if (!b) throw new ConfigError(`appendExtensionNameRemote must have type (undefined | boolean)`)
-
-    const lengthString = ' must be a string and it must not be empty.'
-    const c =
-        bareModuleRewrite === undefined ||
-        bareModuleRewrite === false ||
-        bareModuleRewrite in BareModuleRewriteSimple ||
-        (isNonNullObject(bareModuleRewrite) &&
-            Object.values(bareModuleRewrite).every(
-                x =>
-                    x === false ||
-                    x in BareModuleRewriteSimple ||
-                    (isNonNullObject(x) &&
-                    x.type === 'umd' &&
-                    (typeof x.target === 'string' && x.target.length > 0
-                        ? true
-                        : throws(new ConfigError('bareModuleRewrite[key].target ' + lengthString))) &&
-                    checkGlobalObject(x.globalObject)
-                        ? true
-                        : throws(new ConfigError('bareModuleRewrite[key].globalObject ' + lengthString))),
-            ))
-    const enums = Object.values(BareModuleRewriteSimple).map(x => `'${x}'`)
-    if (!c)
-        throw new ConfigError(
-            `bareModuleRewrite must have type (${enums.join(' | ')} | false | undefined | Record<string, ${enums.join(
-                ' | ',
-            )} | false | { type: 'umd', target: string, globalObject?: string }>)`,
-        )
-    const d =
-        dynamicImportPathRewrite === false ||
-        dynamicImportPathRewrite === 'auto' ||
-        dynamicImportPathRewrite === undefined ||
-        (typeof dynamicImportPathRewrite === 'object' &&
-            dynamicImportPathRewrite !== null &&
-            dynamicImportPathRewrite.type === 'custom' &&
-            typeof dynamicImportPathRewrite.function === 'string')
-    if (!d)
-        throw new ConfigError(
-            `dynamicImportPathRewrite must have type (false | 'auto' | undefined | { type: 'custom', function: string })`,
-        )
-    const e = checkGlobalObject(globalObject)
-    if (!e) throw new ConfigError(`globalObject must have type undefined or it` + lengthString)
-    const f = typeof webModulePath === 'string' || webModulePath === undefined
-    if (!f) throw new ConfigError(`webModulePath must have type (string | undefined)`)
-    function checkGlobalObject(x: any) {
-        if (x === undefined) return true
-        if (typeof x === 'string' && x.length > 0) return true
-        return false
-    }
-    function isNonNullObject<T>(x: T): x is NonNullable<T> {
-        if (typeof x === 'object' && x !== null) return true
-        return false
-    }
-    function throws(e: ConfigError): never {
-        throw e
-    }
-}
 export default function createTransformer(ts: ts) {
     return function(_program: unknown, config: PluginConfig) {
+        simpleValidation(config)
         return (context: TransformationContext) => {
-            checkConfig(config)
             return (sourceFile: SourceFile) => {
                 let sf = ts.visitEachChild(sourceFile, visitor, context)
                 const hoistedHelper = Array.from(topLevelScopedHelperMap.get(sourceFile)?.values() || []).map(x => x[1])
@@ -318,7 +221,7 @@ function moduleSpecifierTransform(
             return { type: 'umd', target: nextPath, globalObject: config.globalObject }
         }
         default: {
-            const rules: ObjectTypeRewrite = opt
+            const rules: Record<string, BareModuleRewriteObject> = opt
             for (const rule in rules) {
                 const ruleValue = rules[rule]
                 if (ts) {
@@ -573,38 +476,32 @@ function transformDynamicImport(ctx: Omit<Ctx<CallExpression>, 'path'>, args: Ex
         return [ts.createCall(customFunction, undefined, [first, builtinHelper])]
     }
 }
-type ObjectTypeRewrite = Record<string, false | BareModuleRewriteSimple | BareModuleRewriteUMD>
 
 //#endregion
+// When generating JSON schema, don't forget to add a
+// "$ref": "#/definitions/PluginConfig",
+// at top level
 //#region Types
+/** #TopLevel */
 export interface PluginConfig {
-    /** Path to transformer or transformer module name */
-    transform?: string
-    /** The optional name of the exported transform plugin in the transform module. */
-    import?: string
-    /** Plugin entry point format type, default is program */
-    type?: 'program' | 'config' | 'checker' | 'raw' | 'compilerOptions'
-    /** Should transformer applied after all ones */
-    after?: boolean
-    /** Should transformer applied for d.ts files, supports from TS2.9 */
-    afterDeclarations?: boolean
-    /** Add '.js' extension for local module specifier, default to '.js' */
+    /**
+     * Add '.js' extension for local module specifier
+     * @default .js
+     */
     appendExtensionName?: string | boolean
-    /** Also append extension to http:// or https://?, default to false */
+    /**
+     * Also append extension to http:// or https://
+     * @default false
+     */
     appendExtensionNameForRemote?: boolean
     /**
-     * false: disable the transform
-     *
-     * BareModuleRewriteSimple.snowpack: if you are using snowpack (https://github.com/pikapkg/snowpack)
-     *
-     * BareModuleRewriteSimple.umd: make your `import a from 'b'` to `const a = globalThis.b`
-     *
-     * BareModuleRewriteSimple.unpkg: try to transform imports path to https://unpkg.com/package@latest/index.js?module
-     *
-     * BareModuleRewriteSimple.pikacdn: try to transform import path to https://cdn.pika.dev/package
-     *
-     * Record<string, BareModuleRewriteSimple | BareModuleRewriteUMD>: string can be a string or a RegExp to match import path.
-     *
+     * @description
+     * `false`: disable the transform
+     * `BareModuleRewriteSimple.snowpack`: if you are using snowpack (https://github.com/pikapkg/snowpack)
+     * `BareModuleRewriteSimple.umd`: make your `import a from 'b'` to `const a = globalThis.b`
+     * `BareModuleRewriteSimple.unpkg`: try to transform imports path to https://unpkg.com/package@latest/index.js?module
+     * `BareModuleRewriteSimple.pikacdn`: try to transform import path to https://cdn.pika.dev/package
+     * `Record<string, BareModuleRewriteObject>`: string can be a string or a RegExp to match import path.
      * @example
      * {
      *    "my-pkg": "umd", // to globalThis.myPkg
@@ -612,24 +509,31 @@ export interface PluginConfig {
      *    "my-pkg3": "unpkg", // to https://unpkg.com/my-pkg3
      *    "/my-pkg-(.+)/": { type: 'umd', target: 'getMyPkg("$1")' }, // for "my-pkg-12" to globalThis.getMyPkg("12")
      * }
-     *
-     * @default 'umd'
+     * @default umd
      */
-    bareModuleRewrite?: false | BareModuleRewriteSimple | ObjectTypeRewrite
+    bareModuleRewrite?: false | BareModuleRewriteSimple | { [key: string]: BareModuleRewriteObject }
     /**
      * Rewrite dynamic import
-     *
-     * false: Do not rewrite
-     * 'auto': try to optimise automatically
-     * DynamicImportPathRewrite:
-     * using a custom function to handle the import path (path: string, builtinImpl: (path) => Promise<any>): Promise<any>
+     * @description
+     * `false`: Do not rewrite
+     * `'auto'`: try to optimise automatically
+     * `DynamicImportPathRewrite`: using a custom function to handle the import path (path: string, builtinImpl: (path) => Promise<any>): Promise<any>
+     * @default auto
      */
     dynamicImportPathRewrite?: false | 'auto' | DynamicImportPathRewriteCustom
-    /** Used in UMD. For what object will store the UMD variables? Default to "globalThis" */
+    /**
+     * Used in UMD.
+     * For what object will store the UMD variables
+     * @default globalThis
+     */
     globalObject?: string
-    /** Used in snowpack. web_modules module path, default "/web_modules/" */
+    /**
+     * Used in snowpack. web_modules module path
+     * @default /web_modules/
+     */
     webModulePath?: string
 }
+export type BareModuleRewriteObject = false | BareModuleRewriteSimple | BareModuleRewriteUMD
 export interface DynamicImportPathRewriteCustom {
     type: 'custom'
     /** e.g: "(path => path + '.js')" */
@@ -739,3 +643,60 @@ const dynamicImportHelper = (config: PluginConfig) => `function __dynamicImportH
     ${isLocalModuleSpecifier.toString()}
     ${__umdNameTransform.toString()}
 };`
+function simpleValidation(config: PluginConfig) {
+    type('appendExtensionName', ['string', 'boolean'])
+    type('appendExtensionNameForRemote', ['boolean'])
+    type('bareModuleRewrite', ['boolean', 'string', 'object'])
+    type('dynamicImportPathRewrite', ['boolean', 'string', 'object'])
+    type('globalObject', ['string'])
+    type('webModulePath', ['string'])
+
+    length('globalObject')
+    length('webModulePath')
+
+    enumCheck('dynamicImportPathRewrite', ['auto'])
+    const enums = Object.keys(BareModuleRewriteSimple) as BareModuleRewriteSimple[]
+    enumCheck('bareModuleRewrite', enums)
+
+    falseOnly('bareModuleRewrite')
+    falseOnly('dynamicImportPathRewrite')
+
+    {
+        const b = config.bareModuleRewrite
+        if (typeof b === 'object') Object.entries(b).forEach(validateBareModuleRewrite)
+    }
+
+    function validateBareModuleRewrite([k, v]: [string, BareModuleRewriteObject]) {
+        type(k as any, ['boolean', 'string', 'object'], v)
+        falseOnly(k as any, v)
+        enumCheck(k as any, enums, v)
+        if (typeof v === 'object') {
+            switch (v.type) {
+                case 'umd':
+                    type('globalObject', ['string'], v.globalObject)
+                    length('globalObject', v.globalObject)
+                    type(('target' as keyof typeof v) as any, ['string'], v.target, true)
+                    break
+                default:
+                    throw new ConfigError('Unknown tagged union ' + v.type + ' at ' + k)
+            }
+        }
+    }
+
+    const _x = typeof config
+    function type(name: keyof PluginConfig, _: typeof x[], v: any = config[name], noUndefined = false) {
+        if (!noUndefined) _ = _.concat('undefined')
+        if (!_.includes(typeof v)) throw new ConfigError(`type of ${name} in the tsconfig is not correct`)
+        if (_.includes('object') && typeof v === null) throw new ConfigError(`${name} can't be null!`)
+    }
+    function length(name: keyof PluginConfig, v: any = config[name]) {
+        if (typeof v === 'string' && v.length === 0) throw new ConfigError(name + ' cannot be an empty string')
+    }
+    function enumCheck<T extends keyof PluginConfig>(name: T, enums: PluginConfig[T][], v: any = config[name]) {
+        if (typeof v === 'string' && !enums.includes(v as any))
+            throw new ConfigError(`When ${name} is a string, it must be the enum ${enums}, but found ${v}`)
+    }
+    function falseOnly(name: keyof PluginConfig, v: any = config[name]) {
+        if (typeof v === 'boolean' && v === true) throw new ConfigError(`When ${name} is a boolean, it must be false`)
+    }
+}

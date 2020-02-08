@@ -1,0 +1,1 @@
+// When key is a string, it must be the enum snowpack,umd,unpkg,pikacdn, but found unknown

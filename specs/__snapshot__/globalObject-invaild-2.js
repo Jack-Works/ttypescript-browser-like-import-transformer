@@ -1,0 +1,1 @@
+// globalObject cannot be an empty string

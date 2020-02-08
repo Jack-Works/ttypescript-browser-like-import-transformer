@@ -1,0 +1,1 @@
+// When dynamicImportPathRewrite is a string, it must be the enum auto, but found invalid

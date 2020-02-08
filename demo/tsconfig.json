@@ -2,10 +2,10 @@
     "compilerOptions": {
         "plugins": [
             {
-                "transform": "../src/node.ts",
-                "globalObject": "window",
+                "transform": "../cjs/node.js",
+                "globalObject": "",
                 "dynamicImportPathRewrite": {
-                    "type": "custom",
+                    "type": "customx",
                     "function": "x => Promise.reject('Ahhh')"
                 },
                 "bareModuleRewrite": {
