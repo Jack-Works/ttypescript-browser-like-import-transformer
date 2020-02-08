@@ -290,7 +290,7 @@ function importOrExportClauseToUMD(
     globalObject = ctx.config.globalObject,
 ): { variableNames: Identifier[]; statements: Statement[] } {
     const { node, ts, path } = ctx
-    const umdAccess = getUMDAccess(umdName, globalObject, ctx, false)
+    const umdAccess = getUMDExpressionForModule(umdName, globalObject, ctx, false)
     const umdAccessDefault = ts.createPropertyAccess(umdAccess, 'default')
     const ids: Identifier[] = []
     const statements: Statement[] = []
@@ -396,11 +396,10 @@ function importOrExportClauseToUMD(
         )
     }
 }
-function getDefaultCall(ts: ts, sourceFile: SourceFile, e: Expression) {
-    const id = createTopLevelScopedHelper(ts, sourceFile, importDefaultHelper)
-    return ts.createCall(id, undefined, [e])
-}
-function getUMDAccess(
+/**
+ * Return a ts.Expression for the given UMD name and config.
+ */
+function getUMDExpressionForModule(
     umdName: string,
     globalObject: PluginConfig['globalObject'],
     ctx: Pick<Context<any>, 'context' | 'sourceFile' | 'ts'>,
@@ -410,13 +409,14 @@ function getUMDAccess(
     const compilerOptions = context.getCompilerOptions()
     const wrapHelper =
         noWrapHelper === false && (compilerOptions.esModuleInterop || compilerOptions.allowSyntheticDefaultImports)
-    const umdAccess = (wrapHelper ? (e: Expression) => getDefaultCall(ts, sourceFile, e) : <T>(x: T) => x)(
+    const umdAccess = (wrapHelper ? getDefaultCall : <T>(x: T) => x)(
         ts.createPropertyAccess(ts.createIdentifier(globalObject === undefined ? 'globalThis' : globalObject), umdName),
     )
     return umdAccess
-}
-function createDynamicImport(ts: ts, args: Expression[]) {
-    return ts.createCall(ts.createToken(ts.SyntaxKind.ImportKeyword) as any, void 0, args)
+    function getDefaultCall(e: Expression) {
+        const id = createTopLevelScopedHelper(ts, sourceFile, importDefaultHelper)
+        return ts.createCall(id, undefined, [e])
+    }
 }
 function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args: Expression[]): Expression[] {
     const { ts, config, node, sourceFile } = ctx
@@ -430,7 +430,7 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
             case 'noop':
                 return [node]
             case 'rewrite': {
-                return [createDynamicImport(ts, [ts.createLiteral(rewriteStrategy.nextPath), ...rest])]
+                return [createDynamicImport(ts.createLiteral(rewriteStrategy.nextPath), ...rest)]
             }
             case 'umd': {
                 if (rest.length !== 0) {
@@ -444,7 +444,12 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
                         ]),
                     ]
                 }
-                const umdAccess = getUMDAccess(rewriteStrategy.target, rewriteStrategy.globalObject, ctx, true)
+                const umdAccess = getUMDExpressionForModule(
+                    rewriteStrategy.target,
+                    rewriteStrategy.globalObject,
+                    ctx,
+                    true,
+                )
                 return [ts.createCall(ts.createIdentifier('Promise.resolve'), undefined, [umdAccess])]
             }
             default: {
@@ -483,6 +488,10 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
             })
         }
         return [ts.createCall(customFunction, undefined, [first, builtinHelper])]
+    }
+
+    function createDynamicImport(...args: Expression[]) {
+        return ts.createCall(ts.createToken(ts.SyntaxKind.ImportKeyword) as any, void 0, args)
     }
 }
 
