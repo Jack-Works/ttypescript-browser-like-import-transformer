@@ -10,5 +10,5 @@
         "moduleResolution": "node",
         "rootDir": "./"
     },
-    "files": ["./core.ts", "./node.ts", "./run-tests.ts"]
+    "files": ["./core.ts", "./node.ts", "./run-tests.ts", "./well-known-umd.ts"]
 }
