@@ -1,10 +1,10 @@
 const a = __bindCheck(global.a, ["default"], "a", "global.a").default;
 const b = __bindCheck(global.b, ["default"], "b", "global.b").default;
 const { c, d } = __bindCheck(global.b, ["c", "d"], "b", "global.b");
-const e = global.c;
+const e = __bindCheck(global.c, [], "c", "global.c");
 const { c_1, d_1 } = __bindCheck(global.b, ["c", "d"], "b", "global.b");
 export { c_1 as c, d_1 as d };
-const e_1 = global.c;
+const e_1 = __bindCheck(global.c, [], "c", "global.c");
 export { e_1 as e };
 console.log('Should run after all imports', a, b, c, d, e, a1, b1, c1, d1, e1, a2, b2, c2, d2, e2);
 "import \"d\" is eliminated because it expected to have no side effects.";
@@ -36,11 +36,20 @@ __dynImportTransform(y);
 // invalid dynamic import (invalid currently)
 __dynImport2Ary("This dynamic import has more than 1 arguments and don't know how to transform", y, 'second argument');
 function __bindCheck(value, name, path, mappedName) {
+    const head = `The requested module '${path}' (mapped as ${mappedName})`;
+    if (value === undefined) {
+        value = {};
+        if (name.length === 0)
+            console.warn(`${head} doesn't provides a valid export object. This is likely to be a mistake. Did you forget to set ${mappedName}?`);
+    }
+    if (typeof value !== "object" || value === null) { //example.com'
+        throw new SyntaxError(`${head} provides an invalid export object. The provided record is type of ${typeof value}`);
+    }
     for (const i of name) {
         if (!Object.hasOwnProperty.call(value, i))
-            throw new SyntaxError(`Uncaught SyntaxError: The requested module '${path}' (mapped as ${mappedName}) does not provide an export named '${i}'`);
+            throw new SyntaxError(`${head} does not provide an export named '${i}'`);
     }
-    return value;
+    return value; //example.com/'
 }
 function __dynImportTransform(path) {
     const BareModuleRewriteSimple = { "snowpack": "snowpack", "umd": "umd", "unpkg": "unpkg", "pikacdn": "pikacdn" };
