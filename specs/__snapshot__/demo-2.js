@@ -1,6 +1,6 @@
 const React = __bindCheck(__esModuleCheck(globalThis.React), ["default"], "react", "globalThis.React").default;
-const MUI = __bindCheck(__esModuleCheck(window.MaterialUI.core), [], "@material-ui/core", "window.MaterialUI.core");
-const MUILab = __bindCheck(__esModuleCheck(window.MaterialUI.labs), [], "@material-ui/labs", "window.MaterialUI.labs");
+const MUI = __bindCheck(window.MaterialUI.core, [], "@material-ui/core", "window.MaterialUI.core");
+const MUILab = __bindCheck(window.MaterialUI.labs, [], "@material-ui/labs", "window.MaterialUI.labs");
 import lodash from "https://cdn.pika.dev/lodash-es";
 import * as AsyncCall from "https://unpkg.com/async-call-rpc@latest/?module";
 import fs from 'std:fs';

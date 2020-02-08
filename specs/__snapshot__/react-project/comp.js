@@ -1,5 +1,5 @@
 const React = __bindCheck(__esModuleCheck(globalThis.React), ["default"], "react", "globalThis.React").default;
-const { useState } = __bindCheck(__esModuleCheck(globalThis.React), ["useState"], "react", "globalThis.React");
+const { useState } = __bindCheck(globalThis.React, ["useState"], "react", "globalThis.React");
 export function Comp() {
     const [s, sS] = useState('');
     return React.createElement("h1", null,
