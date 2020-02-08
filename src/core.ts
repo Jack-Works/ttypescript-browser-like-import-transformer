@@ -116,6 +116,7 @@ function moduleSpecifierTransform(
     if (opt === false) return { type: 'noop' }
     const { path, config, ts } = ctx
     if (isBrowserCompatibleModuleSpecifier(path)) {
+        if (path === '.') return { type: 'noop' }
         if (config.appendExtensionName === false) return { type: 'noop' }
         if (config.appendExtensionNameForRemote !== true && isHTTPModuleSpecifier(path)) return { type: 'noop' }
         const nextPath = appendExtensionName(
