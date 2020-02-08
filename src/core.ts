@@ -33,13 +33,14 @@ type Context<T extends Node> = {
     config: PluginConfig
     context: TransformationContext
     node: T
+    queryWellknownUMD: (path: string) => string | undefined
 }
 const _with = <T extends Node>(ctx: Context<any>, node: T) => ({ ...ctx, node } as Context<T>)
 /**
  * Create the Transformer
  * This file should not use any value import so the Typescript runtime is given from the environment
  */
-export default function createTransformer(ts: ts) {
+export default function createTransformer(ts: ts, queryWellknownUMD: (path: string) => string | undefined) {
     // ? Can't rely on the ts.Program because don't want to create on during the test.
     return function(_program: unknown, config: PluginConfig) {
         validateConfig(config)
@@ -79,11 +80,11 @@ export default function createTransformer(ts: ts) {
                         ts.isStringLiteral(node.moduleSpecifier)
                     ) {
                         const path = node.moduleSpecifier.text
-                        const args: Context<Node> = { config, ts, context, node, path, sourceFile }
+                        const args: Context<Node> = { config, ts, context, node, path, sourceFile, queryWellknownUMD }
                         return updateImportExportDeclaration(_with(args, node))
                     } else if (dynamicImportArgs) {
                         return transformDynamicImport(
-                            { config, ts, context, node: node as CallExpression, sourceFile },
+                            { config, ts, context, node: node as CallExpression, sourceFile, queryWellknownUMD },
                             Array.from(dynamicImportArgs),
                         )
                     }
@@ -110,11 +111,11 @@ const parsedRegExpCache = new Map<string, RegExp | null>()
  * So the typescript runtime is optional.
  */
 function moduleSpecifierTransform(
-    ctx: Pick<Context<any>, 'config' | 'path'> & { ts?: ts },
+    ctx: Pick<Context<any>, 'config' | 'path' | 'queryWellknownUMD'> & { ts?: ts },
     opt = ctx.config.bareModuleRewrite,
 ): { type: 'rewrite'; nextPath: string } | { type: 'error'; reason: string } | { type: 'noop' } | BareModuleRewriteUMD {
     if (opt === false) return { type: 'noop' }
-    const { path, config, ts } = ctx
+    const { path, config, ts, queryWellknownUMD } = ctx
     if (isBrowserCompatibleModuleSpecifier(path)) {
         if (path === '.') return { type: 'noop' }
         if (config.appendExtensionName === false) return { type: 'noop' }
@@ -212,6 +213,8 @@ function moduleSpecifierTransform(
         return path + expectedExt
     }
     function importPathToUMDName(path: string) {
+        const predefined = queryWellknownUMD(path)
+        if (predefined) return predefined
         const reg = path.match(/[a-zA-Z0-9_]+/g)
         if (!reg) return null
         const x = [...reg].join(' ')
@@ -644,7 +647,7 @@ function runtimeTransform(
     path: string,
     dynamicImport: (path: string) => Promise<any>,
 ): Promise<any> | null {
-    const result = moduleSpecifierTransform({ config, path })
+    const result = moduleSpecifierTransform({ config, path, queryWellknownUMD: () => undefined })
     const header = `ttypescript-browser-like-import-transformer: Runtime transform error:`
     switch (result.type) {
         case 'error':

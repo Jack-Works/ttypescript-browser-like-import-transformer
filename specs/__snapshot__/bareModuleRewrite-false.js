@@ -17,17 +17,20 @@ function __dynamicImportHelper(path) {
     function runtimeTransform(config, path, dynamicImport) {
         const result = moduleSpecifierTransform({ config, path
             // relative import without ext name
+            ,
+            queryWellknownUMD: () => undefined
         });
         const header = `ttypescript-browser-like-import-transformer: Runtime transform error:`;
         switch (result.type) {
             case "error":
-                console.error(header, result.reason, `raw specifier:`, path);
+                console // Static dynamic import
+                    .error(header, result.reason, `raw specifier:`, path);
                 return null;
+            // dynamic dynamic import
             case "rewrite":
                 return dynamicImport(result.nextPath);
             case "umd":
-                if (config.globalObject === "globalThis" || config
-                    .globalObject === undefined)
+                if (config.globalObject === "globalThis" || config.globalObject === undefined)
                     return Promise.resolve(globalThis[result.target]);
                 if (config.globalObject === "window")
                     return Promise.resolve(window[result.target]);
@@ -39,7 +42,7 @@ function __dynamicImportHelper(path) {
         var _a, _b, _c, _d;
         if (opt === false)
             return { type: "noop" };
-        const { path, config, ts } = ctx;
+        const { path, config, ts, queryWellknownUMD } = ctx;
         if (isBrowserCompatibleModuleSpecifier(path)) {
             if (path === ".")
                 return { type: "noop" };
@@ -136,6 +139,9 @@ function __dynamicImportHelper(path) {
             return path + expectedExt;
         }
         function importPathToUMDName(path) {
+            const predefined = queryWellknownUMD(path);
+            if (predefined)
+                return predefined;
             const reg = path.match(/[a-zA-Z0-9_]+/g);
             if (!reg)
                 return null;

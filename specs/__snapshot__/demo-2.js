@@ -1,7 +1,7 @@
 function __ttsc_importDefault(mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 }
-const React = __ttsc_importDefault(globalThis.react).default;
+const React = __ttsc_importDefault(globalThis.React).default;
 const MUI = __ttsc_importDefault(window.MaterialUI.core);
 const MUILab = __ttsc_importDefault(window.MaterialUI.labs);
 import lodash from "https://cdn.pika.dev/lodash-es";

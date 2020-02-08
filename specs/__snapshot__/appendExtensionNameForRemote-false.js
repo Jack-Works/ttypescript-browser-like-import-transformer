@@ -13,20 +13,17 @@ function __dynamicImportHelper(path) {
         return null;
     }
     function runtimeTransform(config, path, dynamicImport) {
-        const result = moduleSpecifierTransform({ config, path });
+        const result = moduleSpecifierTransform({ config, path, queryWellknownUMD: () => undefined });
         const header = `ttypescript-browser-like-import-transformer: Runtime transform error:`;
         switch (result.type) {
             case "error":
-                console.error(header, result.reason, `raw specifier:`, path);
+                console.error(header, result.reason, `raw specifier:`, path); //example.com')
+                // dynamic dynamic import
                 return null;
             case "rewrite":
-                // dynamic dynamic import
-                return dynamicImport(result.nextPath
-                // invalid dynamic import (invalid currently)
-                ); // invalid dynamic import (invalid currently)
+                return dynamicImport(result.nextPath);
             case "umd":
-                if (config
-                    .globalObject === "globalThis" || config.globalObject === undefined)
+                if (config.globalObject === "globalThis" || config.globalObject === undefined)
                     return Promise.resolve(globalThis[result.target]);
                 if (config.globalObject === "window")
                     return Promise.resolve(window[result.target]);
@@ -38,7 +35,7 @@ function __dynamicImportHelper(path) {
         var _a, _b, _c, _d;
         if (opt === false)
             return { type: "noop" };
-        const { path, config, ts } = ctx;
+        const { path, config, ts, queryWellknownUMD } = ctx;
         if (isBrowserCompatibleModuleSpecifier(path)) {
             if (path === ".")
                 return { type: "noop" };
@@ -135,6 +132,9 @@ function __dynamicImportHelper(path) {
             return path + expectedExt;
         }
         function importPathToUMDName(path) {
+            const predefined = queryWellknownUMD(path);
+            if (predefined)
+                return predefined;
             const reg = path.match(/[a-zA-Z0-9_]+/g);
             if (!reg)
                 return null;

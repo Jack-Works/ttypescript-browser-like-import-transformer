@@ -23,7 +23,7 @@ On the other hand, it is hard to run ES Module codes with Node style dependencie
     ```
 
 1. You should use ESModule like target (`es2015`, `esnext`, etc) in your compiler options
-    ```json
+    ```jsonc
     // tsconfig.json
     {
         "compilerOptions": {
