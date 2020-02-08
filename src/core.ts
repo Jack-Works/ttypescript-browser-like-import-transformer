@@ -301,9 +301,9 @@ function importOrExportClauseToUMD(
     ctx: Context<ImportClause | NamespaceExport | NamedExports>,
     globalObject = ctx.config.globalObject,
 ): { variableNames: Identifier[]; statements: Statement[] } {
-    const { node, ts, path } = ctx
-    const umdAccess = getUMDExpressionForModule(umdName, globalObject, ctx, false)
-    const umdAccessDefault = ts.createPropertyAccess(umdAccess, 'default')
+    const { node, ts, path, sourceFile } = ctx
+    const umdHelper = createTopLevelScopedHelper(ts, sourceFile, umdImportHelper)
+    const [umdAccess, globalIdentifier] = getUMDExpressionForModule(umdName, globalObject, ctx, false)
     const ids: Identifier[] = []
     const statements: Statement[] = []
     if (ts.isImportClause(node)) {
@@ -379,7 +379,11 @@ function importOrExportClauseToUMD(
         return getAssignment(namedImport.name, umdAccess)
     }
     function getDefaultImport(defaultImport: Identifier) {
-        return getAssignment(defaultImport, umdAccessDefault)
+        // ? const defaultImportIdentifier = __importBindingCheck(value, name, path, mappedName)
+        return getAssignment(
+            defaultImport,
+            ts.createPropertyAccess(createCheckedUMDAccess(ts.createLiteral('default')), 'default'),
+        )
     }
     /** const _id_ = _target_ */
     function getAssignment(id: Identifier, target: Expression) {
@@ -391,6 +395,7 @@ function importOrExportClauseToUMD(
     function transformNamedImportExport(namedImport: NamedImportsOrExports, modifiers: Modifier[] = []) {
         const elements: Array<ImportSpecifier | ExportSpecifier> = []
         namedImport.elements.forEach((y: typeof elements[0]) => elements.push(y))
+        // ? const { a: b, c: d } = __importBindingCheck(value, name, path, mappedName)
         return ts.createVariableStatement(
             modifiers,
             ts.createVariableDeclarationList(
@@ -400,31 +405,39 @@ function importOrExportClauseToUMD(
                             elements.map(x => ts.createBindingElement(undefined, x.propertyName, x.name, undefined)),
                         ),
                         undefined,
-                        umdAccess,
+                        createCheckedUMDAccess(...elements.map(x => ts.createLiteral(x.name.text))),
                     ),
                 ],
                 ts.NodeFlags.Const,
             ),
         )
     }
+    function createCheckedUMDAccess(...names: StringLiteral[]) {
+        return ts.createCall(umdHelper, void 0, [
+            umdAccess,
+            ts.createArrayLiteral(names),
+            ts.createLiteral(path),
+            ts.createLiteral(globalIdentifier + '.' + umdName),
+        ])
+    }
 }
 /**
  * Return a ts.Expression for the given UMD name and config.
+ * the second return is the globalObject identifier
  */
 function getUMDExpressionForModule(
     umdName: string,
     globalObject: PluginConfig['globalObject'],
     ctx: Pick<Context<any>, 'context' | 'sourceFile' | 'ts'>,
     noWrapHelper: boolean,
-) {
+): [Expression, string] {
     const { context, sourceFile, ts } = ctx
     const compilerOptions = context.getCompilerOptions()
     const wrapHelper =
         noWrapHelper === false && (compilerOptions.esModuleInterop || compilerOptions.allowSyntheticDefaultImports)
-    const umdAccess = (wrapHelper ? getDefaultCall : <T>(x: T) => x)(
-        ts.createPropertyAccess(ts.createIdentifier(globalObject === undefined ? 'globalThis' : globalObject), umdName),
-    )
-    return umdAccess
+    const globalIdentifier = ts.createIdentifier(globalObject === undefined ? 'globalThis' : globalObject)
+    const umdAccess = (wrapHelper ? getDefaultCall : <T>(x: T) => x)(ts.createPropertyAccess(globalIdentifier, umdName))
+    return [umdAccess, globalIdentifier.text]
     function getDefaultCall(e: Expression) {
         const id = createTopLevelScopedHelper(ts, sourceFile, importDefaultHelper)
         return ts.createCall(id, undefined, [e])
@@ -456,7 +469,7 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
                         ]),
                     ]
                 }
-                const umdAccess = getUMDExpressionForModule(
+                const [umdAccess] = getUMDExpressionForModule(
                     rewriteStrategy.target,
                     rewriteStrategy.globalObject,
                     ctx,
@@ -630,6 +643,13 @@ function writeSourceFileMeta<T, E extends T, Q>(
 }
 //#endregion
 
+const umdImportHelper = `function __importBindingCheck(value, name, path, mappedName) {
+    for (const i of name) {
+        if (!Object.hasOwnProperty.call(value, i))
+            throw new SyntaxError(\`Uncaught SyntaxError: The requested module '\${path}' (mapped as \${mappedName}) does not provide an export named '\${i}'\`);
+    }
+    return value;
+}`
 const importDefaultHelper = `function __ttsc_importDefault(mod) {
      return (mod && mod.__esModule) ? mod : { "default": mod };
 };`

@@ -1,5 +1,6 @@
 const map = new Map([
     ['react', 'React'],
+    ['react-dom', 'ReactDOM'],
     ['vue', 'Vue'],
     ['@material-ui/core', 'MaterialUI'],
 ])

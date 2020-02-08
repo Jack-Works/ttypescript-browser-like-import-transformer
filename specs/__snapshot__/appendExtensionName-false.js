@@ -1,3 +1,10 @@
+function __importBindingCheck(value, name, path, mappedName) {
+    for (const i of name) {
+        if (!Object.hasOwnProperty.call(value, i))
+            throw new SyntaxError(`Uncaught SyntaxError: The requested module '${path}' (mapped as ${mappedName}) does not provide an export named '${i}'`);
+    }
+    return value;
+}
 function __dynamicImportHelper(path) {
     const BareModuleRewriteSimple = { "snowpack": "snowpack",
         // Node style import
@@ -154,11 +161,11 @@ function __dynamicImportTransformFailedHelper2(reason, ...args) {
     ); // Node style import
     return import(args[0], args[1]);
 }
-const a = globalThis.a.default;
-const b = globalThis.b.default;
-const { c, d } = globalThis.b;
+const a = __importBindingCheck(globalThis.a, ["default"], "a", "globalThis.a").default;
+const b = __importBindingCheck(globalThis.b, ["default"], "b", "globalThis.b").default;
+const { c, d } = __importBindingCheck(globalThis.b, ["c", "d"], "b", "globalThis.b");
 const e = globalThis.c;
-const { c_1, d_1 } = globalThis.b;
+const { c_1, d_1 } = __importBindingCheck(globalThis.b, ["c", "d"], "b", "globalThis.b");
 export { c_1 as c, d_1 as d };
 const e_1 = globalThis.c;
 export { e_1 as e };
