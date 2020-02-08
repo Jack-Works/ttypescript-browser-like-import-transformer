@@ -1,3 +1,5 @@
+const __customImportHelper_1 = async (path, defaultImpl) => { return await defaultImpl(path); };
+__customImportHelper_1('react' + x, __dynImportTransform);
 function __dynImportTransform(path) {
     const BareModuleRewriteSimple = { "snowpack": "snowpack", "umd": "umd", "unpkg": "unpkg", "pikacdn": "pikacdn" };
     const parsedRegExpCache = new Map();
@@ -139,5 +141,3 @@ function __dynImportTransform(path) {
         }
     }
 }
-const __customImportHelper_1 = async (path, defaultImpl) => { return await defaultImpl(path); };
-__customImportHelper_1('react' + x, __dynImportTransform);

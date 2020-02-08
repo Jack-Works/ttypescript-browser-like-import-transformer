@@ -1,3 +1,40 @@
+const a = __bindCheck(globalThis.a, ["default"], "a", "globalThis.a").default;
+const b = __bindCheck(globalThis.b, ["default"], "b", "globalThis.b").default;
+const { c, d } = __bindCheck(globalThis.b, ["c", "d"], "b", "globalThis.b");
+const e = globalThis.c;
+const { c_1, d_1 } = __bindCheck(globalThis.b, ["c", "d"], "b", "globalThis.b");
+export { c_1 as c, d_1 as d };
+const e_1 = globalThis.c;
+export { e_1 as e };
+console.log('Should run after all imports', a, b, c, d, e, a1, b1, c1, d1, e1, a2, b2, c2, d2, e2);
+"import \"d\" is eliminated because it expected to have no side effects.";
+// relative import without ext name
+import a1 from "./a.js";
+import b1, { c1, d1 } from "./b.js";
+import * as e1 from "/c.js";
+import "./d.js";
+// browser style import
+import a2 from "http://example.com/.js";
+import b2, { c2, d2 } from "https://example.com.js";
+import * as e2 from "http://example.com/.js";
+import "http://example.com/.js";
+const x = 1;
+export { x };
+// relative import without ext name
+export { c1, d1 } from "./b.js";
+export * as e1 from "./c.js";
+// browser style import
+export { c2, d2 } from "http://example.com/.js";
+export * as e2 from "http://example.com/.js";
+// Static dynamic import
+Promise.resolve(globalThis.a);
+import("./a.js");
+import("https://example.com.js");
+// dynamic dynamic import
+const y = '';
+__dynImportTransform(y);
+// invalid dynamic import (invalid currently)
+__dynImport2Ary("This dynamic import has more than 1 arguments and don't know how to transform", y, 'second argument');
 function __bindCheck(value, name, path, mappedName) {
     for (const i of name) {
         if (!Object.hasOwnProperty.call(value, i))
@@ -158,40 +195,3 @@ function __dynImport2Ary(reason, ...args) {
     console.warn(reason, ...args);
     return import(args[0], args[1]);
 }
-const a = __bindCheck(globalThis.a, ["default"], "a", "globalThis.a").default;
-const b = __bindCheck(globalThis.b, ["default"], "b", "globalThis.b").default;
-const { c, d } = __bindCheck(globalThis.b, ["c", "d"], "b", "globalThis.b");
-const e = globalThis.c;
-const { c_1, d_1 } = __bindCheck(globalThis.b, ["c", "d"], "b", "globalThis.b");
-export { c_1 as c, d_1 as d };
-const e_1 = globalThis.c;
-export { e_1 as e };
-console.log('Should run after all imports', a, b, c, d, e, a1, b1, c1, d1, e1, a2, b2, c2, d2, e2);
-"import \"d\" is eliminated because it expected to have no side effects.";
-// relative import without ext name
-import a1 from "./a.js";
-import b1, { c1, d1 } from "./b.js";
-import * as e1 from "/c.js";
-import "./d.js";
-// browser style import
-import a2 from "http://example.com/.js";
-import b2, { c2, d2 } from "https://example.com.js";
-import * as e2 from "http://example.com/.js";
-import "http://example.com/.js";
-const x = 1;
-export { x };
-// relative import without ext name
-export { c1, d1 } from "./b.js";
-export * as e1 from "./c.js";
-// browser style import
-export { c2, d2 } from "http://example.com/.js";
-export * as e2 from "http://example.com/.js";
-// Static dynamic import
-Promise.resolve(globalThis.a);
-import("./a.js");
-import("https://example.com.js");
-// dynamic dynamic import
-const y = '';
-__dynImportTransform(y);
-// invalid dynamic import (invalid currently)
-__dynImport2Ary("This dynamic import has more than 1 arguments and don't know how to transform", y, 'second argument');

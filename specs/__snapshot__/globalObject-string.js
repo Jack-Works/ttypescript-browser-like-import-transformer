@@ -1,3 +1,40 @@
+const a = __bindCheck(global.a, ["default"], "a", "global.a").default;
+const b = __bindCheck(global.b, ["default"], "b", "global.b").default;
+const { c, d } = __bindCheck(global.b, ["c", "d"], "b", "global.b");
+const e = global.c;
+const { c_1, d_1 } = __bindCheck(global.b, ["c", "d"], "b", "global.b");
+export { c_1 as c, d_1 as d };
+const e_1 = global.c;
+export { e_1 as e };
+console.log('Should run after all imports', a, b, c, d, e, a1, b1, c1, d1, e1, a2, b2, c2, d2, e2);
+"import \"d\" is eliminated because it expected to have no side effects.";
+// relative import without ext name
+import a1 from "./a.js";
+import b1, { c1, d1 } from "./b.js";
+import * as e1 from "/c.js";
+import "./d.js";
+// browser style import
+import a2 from 'http://example.com/';
+import b2, { c2, d2 } from 'https://example.com';
+import * as e2 from 'http://example.com/';
+import 'http://example.com/';
+const x = 1;
+export { x };
+// relative import without ext name
+export { c1, d1 } from "./b.js";
+export * as e1 from "./c.js";
+// browser style import
+export { c2, d2 } from 'http://example.com/';
+export * as e2 from 'http://example.com/';
+// Static dynamic import
+Promise.resolve(global.a);
+import("./a.js");
+import('https://example.com');
+// dynamic dynamic import
+const y = '';
+__dynImportTransform(y);
+// invalid dynamic import (invalid currently)
+__dynImport2Ary("This dynamic import has more than 1 arguments and don't know how to transform", y, 'second argument');
 function __bindCheck(value, name, path, mappedName) {
     for (const i of name) {
         if (!Object.hasOwnProperty.call(value, i))
@@ -157,40 +194,3 @@ function __dynImport2Ary(reason, ...args) {
     console.warn(reason, ...args);
     return import(args[0], args[1]);
 }
-const a = __bindCheck(global.a, ["default"], "a", "global.a").default;
-const b = __bindCheck(global.b, ["default"], "b", "global.b").default;
-const { c, d } = __bindCheck(global.b, ["c", "d"], "b", "global.b");
-const e = global.c;
-const { c_1, d_1 } = __bindCheck(global.b, ["c", "d"], "b", "global.b");
-export { c_1 as c, d_1 as d };
-const e_1 = global.c;
-export { e_1 as e };
-console.log('Should run after all imports', a, b, c, d, e, a1, b1, c1, d1, e1, a2, b2, c2, d2, e2);
-"import \"d\" is eliminated because it expected to have no side effects.";
-// relative import without ext name
-import a1 from "./a.js";
-import b1, { c1, d1 } from "./b.js";
-import * as e1 from "/c.js";
-import "./d.js";
-// browser style import
-import a2 from 'http://example.com/';
-import b2, { c2, d2 } from 'https://example.com';
-import * as e2 from 'http://example.com/';
-import 'http://example.com/';
-const x = 1;
-export { x };
-// relative import without ext name
-export { c1, d1 } from "./b.js";
-export * as e1 from "./c.js";
-// browser style import
-export { c2, d2 } from 'http://example.com/';
-export * as e2 from 'http://example.com/';
-// Static dynamic import
-Promise.resolve(global.a);
-import("./a.js");
-import('https://example.com');
-// dynamic dynamic import
-const y = '';
-__dynImportTransform(y);
-// invalid dynamic import (invalid currently)
-__dynImport2Ary("This dynamic import has more than 1 arguments and don't know how to transform", y, 'second argument');

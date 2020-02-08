@@ -49,19 +49,23 @@ export default function createTransformer(ts: ts, queryWellknownUMD: (path: stri
                 let visitedSourceFile = ts.visitEachChild(sourceFile, visitor, context)
                 // ? hoistedHelper and hoistedUMDImport will be added ^ in the visitor
                 const hoistedHelper = Array.from(topLevelScopedHelperMap.get(sourceFile)?.values() || []).map(x => x[1])
+                const languageHoistableDeclarations = hoistedHelper.filter(ts.isFunctionDeclaration)
+                const languageNotHoistableDeclarations = hoistedHelper.filter(x => !ts.isFunctionDeclaration(x))
                 const hoistedUMDImport = Array.from(hoistUMDImportDeclaration.get(sourceFile)?.values() || [])
                 visitedSourceFile = ts.updateSourceFileNode(
                     visitedSourceFile,
                     Array.from(
                         new Set([
-                            // ? Hoisted helper must comes first, because in case of custom dynamic import handler
-                            // ? there will be a const f = () => ... declaration, it must appear at the top
-                            ...hoistedHelper,
+                            // ? Some helper must be hoisted manually,
+                            // ? like const f = () => ...declaration
+                            ...languageNotHoistableDeclarations,
                             // ? Then UMD import should be introduces before any other statements.
                             // ? UMD import declarations might use helper defined in the hoistedHelper
                             ...hoistedUMDImport,
                             // ? original statements
                             ...visitedSourceFile.statements,
+                            // ? The function declaration helper can comes at last.
+                            ...languageHoistableDeclarations,
                         ]),
                     ),
                     visitedSourceFile.isDeclarationFile,
