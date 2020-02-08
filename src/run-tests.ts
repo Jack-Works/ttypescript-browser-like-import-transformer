@@ -2,7 +2,7 @@ import { statSync, readdirSync, readFileSync, writeFileSync } from 'fs'
 import { join } from 'path'
 import { isMainThread, workerData, Worker } from 'worker_threads'
 import { execSync } from 'child_process'
-import { ConfigError, TransformError } from './core.js'
+import { ConfigError } from './core.js'
 
 const dir = join(__dirname, '../specs/tests/')
 // "/// {}"
@@ -72,7 +72,7 @@ async function worker(script: WorkerParam = workerData) {
             })
             outputText = result.outputText
         } catch (e) {
-            if (e instanceof ConfigError || e instanceof TransformError) outputText = '// ' + e.message
+            if (e instanceof ConfigError) outputText = '// ' + e.message
             else throw e
         }
         writeFileSync(join(snapshotDir, script.filename.replace(/tsx$/g, 'jsx').replace(/ts$/, 'js')), outputText)

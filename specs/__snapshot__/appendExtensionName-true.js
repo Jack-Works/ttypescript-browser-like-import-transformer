@@ -4,45 +4,35 @@ function __dynamicImportHelper(path) {
         "umd": "umd", "unpkg": "unpkg", "pikacdn": "pikacdn" };
     const parsedRegExpCache = new Map();
     const config = { "after": true, "appendExtensionName": true };
-    function _(path) {
+    function dynamicImport(path) {
         return import(path);
     }
-    const __ = __runtimeTransform(
-    // browser style import
-    path, _);
-    if (__ === null)
-        return _(path);
-    return __;
-    function parseJS(...a) { return null; }
-    function __runtimeTransform(path, dyn) {
-        const result //example.com/'
-         = moduleSpecifierTransform({ config, path // Node style export
+    const result = runtimeTransform(config, path, dynamicImport);
+    if (result ===
+        null)
+        return dynamicImport(path);
+    return result;
+    function parseJS(...a) {
+        return null;
+    }
+    function runtimeTransform(config, path, dynamicImport) {
+        const result = moduleSpecifierTransform({ config, path // relative import without ext name
          });
+        const header = `ttypescript-browser-like-import-transformer: Runtime transform error:`;
         switch (result.type) {
             case "error":
+                console.error(header, result.reason, `raw specifier:`, path);
                 return null;
-            case "noop": return null;
             case "rewrite":
-                return dyn(result
-                    .nextPath);
+                return dynamicImport(result.nextPath);
             case "umd":
-                if (config.globalObject === "globalThis" || // Static dynamic import
-                    config.globalObject ===
-                        undefined)
+                if (config.globalObject === "globalThis" || config.globalObject === undefined)
                     return Promise.resolve(globalThis[result.target]);
                 if (config.globalObject === "window")
                     return Promise.resolve(window[result.target]);
-                return Promise.reject("Unreachable transform case");
-            default: return Promise.reject("Unreachable transform case");
+                return Promise.reject(header + "Unreachable transform case");
+            default: return Promise.reject(header + "Unreachable transform case");
         }
-    }
-    function isBrowserCompatibleModuleSpecifier(path) {
-        return isHTTPModuleSpecifier(path) || isLocalModuleSpecifier(path);
-    }
-    function appendExtensionName(path, expectedExt) {
-        if (path.endsWith(expectedExt))
-            return path;
-        return path + expectedExt;
     }
     function moduleSpecifierTransform(ctx, opt = ctx.config.bareModuleRewrite) {
         var _a, _b, _c, _d;
@@ -119,21 +109,29 @@ function __dynamicImportHelper(path) {
             }
         }
         return { type: "noop" };
-    }
-    function isHTTPModuleSpecifier(path) {
-        return path.startsWith("http://") || path.startsWith("https://");
-    }
-    function isLocalModuleSpecifier(path) {
-        return path.startsWith(".") || path.startsWith("/");
-    }
-    function importPathToUMDName(path) {
-        const reg = path.match(/[a-zA-Z0-9_]+/g);
-        if (!reg)
+        function isBrowserCompatibleModuleSpecifier(path) {
+            return isHTTPModuleSpecifier(path) || isLocalModuleSpecifier(path);
+        }
+        function isHTTPModuleSpecifier(path) {
+            return path.startsWith("http://") || path.startsWith("https://");
+        }
+        function isLocalModuleSpecifier(path) {
+            return path.startsWith(".") || path.startsWith("/");
+        }
+        function appendExtensionName(path, expectedExt) {
+            if (path.endsWith(expectedExt))
+                return path;
+            return path + expectedExt;
+        }
+        function importPathToUMDName(path) {
+            const reg = path.match(/[a-zA-Z0-9_]+/g);
+            if (!reg)
+                return null;
+            const x = [...reg].join(" ");
+            if (x.length)
+                return x.replace(/(?:^\w|[A-Z]|\b\w)/g, (letter, index) => index == 0 ? letter.toLowerCase() : letter.toUpperCase()).replace(/\s+/g, "");
             return null;
-        const x = [...reg].join(" ");
-        if (x.length)
-            return x.replace(/(?:^\w|[A-Z]|\b\w)/g, (letter, index) => index == 0 ? letter.toLowerCase() : letter.toUpperCase()).replace(/\s+/g, "");
-        return null;
+        }
     }
 }
 function __dynamicImportTransformFailedHelper(reason, ...args) {

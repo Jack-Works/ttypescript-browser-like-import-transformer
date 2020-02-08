@@ -21,12 +21,12 @@ import {
     CallExpression,
     StringLiteral,
 } from 'typescript'
-
-export class TransformError extends Error {}
+/** All ConfigError should go though this class
+ * so the test framework can catch it instead of fail the whole test process */
 export class ConfigError extends Error {}
 
 type ts = typeof import('typescript')
-type Ctx<T extends Node> = {
+type Context<T extends Node> = {
     ts: ts
     path: string
     sourceFile: SourceFile
@@ -34,8 +34,13 @@ type Ctx<T extends Node> = {
     context: TransformationContext
     node: T
 }
-const ctx_ = <T extends Node>(ctx: Ctx<any>, node: T) => ({ ...ctx, node } as Ctx<T>)
+const _with = <T extends Node>(ctx: Context<any>, node: T) => ({ ...ctx, node } as Context<T>)
+/**
+ * Create the Transformer
+ * This file should not use any value import so the Typescript runtime is given from the environment
+ */
 export default function createTransformer(ts: ts) {
+    // ? Can't rely on the ts.Program because don't want to create on during the test.
     return function(_program: unknown, config: PluginConfig) {
         validateConfig(config)
         return (context: TransformationContext) => {
@@ -74,8 +79,8 @@ export default function createTransformer(ts: ts) {
                         ts.isStringLiteral(node.moduleSpecifier)
                     ) {
                         const path = node.moduleSpecifier.text
-                        const args: Ctx<Node> = { config, ts, context, node, path, sourceFile }
-                        return updateImportExportDeclaration(ctx_(args, node))
+                        const args: Context<Node> = { config, ts, context, node, path, sourceFile }
+                        return updateImportExportDeclaration(_with(args, node))
                     } else if (dynamicImportArgs) {
                         return transformDynamicImport(
                             { config, ts, context, node: node as CallExpression, sourceFile },
@@ -89,36 +94,11 @@ export default function createTransformer(ts: ts) {
     }
 }
 //#region Pure Helpers
-function isBrowserCompatibleModuleSpecifier(path: string) {
-    return isHTTPModuleSpecifier(path) || isLocalModuleSpecifier(path)
-}
-function isHTTPModuleSpecifier(path: string) {
-    return path.startsWith('http://') || path.startsWith('https://')
-}
-function isLocalModuleSpecifier(path: string) {
-    return path.startsWith('.') || path.startsWith('/')
-}
 function isDynamicImport(ts: ts, node: Node): NodeArray<Expression> | null {
     if (!ts.isCallExpression(node)) return null
     if (node.expression.kind === ts.SyntaxKind.ImportKeyword) {
         return node.arguments
     }
-    return null
-}
-function appendExtensionName(path: string, expectedExt: string) {
-    if (path.endsWith(expectedExt)) return path
-    return path + expectedExt
-}
-function importPathToUMDName(path: string) {
-    const reg = path.match(/[a-zA-Z0-9_]+/g)
-    if (!reg) return null
-    const x = [...reg].join(' ')
-    if (x.length)
-        return x
-            .replace(/(?:^\w|[A-Z]|\b\w)/g, (letter, index) =>
-                index == 0 ? letter.toLowerCase() : letter.toUpperCase(),
-            )
-            .replace(/\s+/g, '')
     return null
 }
 function unreachable(_x: never): never {
@@ -130,7 +110,7 @@ const parsedRegExpCache = new Map<string, RegExp | null>()
  * So the typescript runtime is optional.
  */
 function moduleSpecifierTransform(
-    ctx: Pick<Ctx<any>, 'config' | 'path'> & { ts?: ts },
+    ctx: Pick<Context<any>, 'config' | 'path'> & { ts?: ts },
     opt = ctx.config.bareModuleRewrite,
 ): { type: 'rewrite'; nextPath: string } | { type: 'error'; reason: string } | { type: 'noop' } | BareModuleRewriteUMD {
     if (opt === false) return { type: 'noop' }
@@ -209,6 +189,31 @@ function moduleSpecifierTransform(
         }
     }
     return { type: 'noop' }
+    function isBrowserCompatibleModuleSpecifier(path: string) {
+        return isHTTPModuleSpecifier(path) || isLocalModuleSpecifier(path)
+    }
+    function isHTTPModuleSpecifier(path: string) {
+        return path.startsWith('http://') || path.startsWith('https://')
+    }
+    function isLocalModuleSpecifier(path: string) {
+        return path.startsWith('.') || path.startsWith('/')
+    }
+    function appendExtensionName(path: string, expectedExt: string) {
+        if (path.endsWith(expectedExt)) return path
+        return path + expectedExt
+    }
+    function importPathToUMDName(path: string) {
+        const reg = path.match(/[a-zA-Z0-9_]+/g)
+        if (!reg) return null
+        const x = [...reg].join(' ')
+        if (x.length)
+            return x
+                .replace(/(?:^\w|[A-Z]|\b\w)/g, (letter, index) =>
+                    index == 0 ? letter.toLowerCase() : letter.toUpperCase(),
+                )
+                .replace(/\s+/g, '')
+        return null
+    }
 }
 //#endregion
 //#region Transformers
@@ -224,7 +229,7 @@ function moduleSpecifierTransform(
  */
 const hoistUMDImportDeclaration = new WeakMap<SourceFile, Set<Statement>>()
 function updateImportExportDeclaration(
-    ctx: Ctx<ImportDeclaration | ExportDeclaration>,
+    ctx: Context<ImportDeclaration | ExportDeclaration>,
     opt = ctx.config.bareModuleRewrite,
 ): Statement[] {
     const { node, sourceFile, ts } = ctx
@@ -261,7 +266,7 @@ function updateImportExportDeclaration(
                 }" is eliminated because it expected to have no side effects.`
                 return [ts.createExpressionStatement(ts.createLiteral(text))]
             }
-            const { statements } = importOrExportClauseToUMD(nextPath, ctx_(ctx, clause), globalObject)
+            const { statements } = importOrExportClauseToUMD(nextPath, _with(ctx, clause), globalObject)
             writeSourceFileMeta(sourceFile, hoistUMDImportDeclaration, new Set<Statement>(), _ => {
                 statements.forEach(x => _.add(x))
             })
@@ -281,7 +286,7 @@ function updateImportExportDeclaration(
  */
 function importOrExportClauseToUMD(
     umdName: string,
-    ctx: Ctx<ImportClause | NamespaceExport | NamedExports>,
+    ctx: Context<ImportClause | NamespaceExport | NamedExports>,
     globalObject = ctx.config.globalObject,
 ): { variableNames: Identifier[]; statements: Statement[] } {
     const { node, ts, path } = ctx
@@ -323,7 +328,7 @@ function importOrExportClauseToUMD(
             ),
             ts.createLiteral(path),
         )
-        const updatedGhost = updateImportExportDeclaration(ctx_(ctx, ghostImportDeclaration))
+        const updatedGhost = updateImportExportDeclaration(_with(ctx, ghostImportDeclaration))
         const exportDeclaration = ts.createExportDeclaration(
             void 0,
             void 0,
@@ -345,7 +350,7 @@ function importOrExportClauseToUMD(
             ts.createImportClause(undefined, ts.createNamespaceImport(ghostBinding)),
             ts.createLiteral(path),
         )
-        const updatedGhost = updateImportExportDeclaration(ctx_(ctx, ghostImportDeclaration))
+        const updatedGhost = updateImportExportDeclaration(_with(ctx, ghostImportDeclaration))
         const exportDeclaration = ts.createExportDeclaration(
             void 0,
             void 0,
@@ -398,7 +403,7 @@ function getDefaultCall(ts: ts, sourceFile: SourceFile, e: Expression) {
 function getUMDAccess(
     umdName: string,
     globalObject: PluginConfig['globalObject'],
-    ctx: Pick<Ctx<any>, 'context' | 'sourceFile' | 'ts'>,
+    ctx: Pick<Context<any>, 'context' | 'sourceFile' | 'ts'>,
     noWrapHelper: boolean,
 ) {
     const { context, sourceFile, ts } = ctx
@@ -413,7 +418,7 @@ function getUMDAccess(
 function createDynamicImport(ts: ts, args: Expression[]) {
     return ts.createCall(ts.createToken(ts.SyntaxKind.ImportKeyword) as any, void 0, args)
 }
-function transformDynamicImport(ctx: Omit<Ctx<CallExpression>, 'path'>, args: Expression[]): Expression[] {
+function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args: Expression[]): Expression[] {
     const { ts, config, node, sourceFile } = ctx
     const [first, ...rest] = args
     if (ts.isStringLiteralLike(first)) {
@@ -613,39 +618,42 @@ const dynamicImportFailedHelper = (
     console.warn(reason, ...args)
     return import(${args.map((_, i) => `args[${i}]`).join(', ')});
 };`
+/**
+ * This function will run in the browser if there is any "import(x)" expressions
+ */
+function runtimeTransform(
+    config: PluginConfig,
+    path: string,
+    dynamicImport: (path: string) => Promise<any>,
+): Promise<any> | null {
+    const result = moduleSpecifierTransform({ config, path })
+    const header = `ttypescript-browser-like-import-transformer: Runtime transform error:`
+    switch (result.type) {
+        case 'error':
+            console.error(header, result.reason, `raw specifier:`, path)
+            return null
+        case 'rewrite':
+            return dynamicImport(result.nextPath)
+        case 'umd':
+            if (config.globalObject === 'globalThis' || config.globalObject === undefined)
+                return Promise.resolve((globalThis as any)[result.target])
+            if (config.globalObject === 'window') return Promise.resolve((window as any)[result.target])
+            return Promise.reject(header + 'Unreachable transform case')
+        default:
+            return Promise.reject(header + 'Unreachable transform case')
+    }
+}
 const dynamicImportHelper = (config: PluginConfig) => `function __dynamicImportHelper(path) {
     const BareModuleRewriteSimple = ${JSON.stringify(BareModuleRewriteSimple)}
     const parsedRegExpCache = new Map()
     const config = ${JSON.stringify(config)}
-    function _(path) { return import(path); }
-    const __ = __runtimeTransform(path, _);
-    if (__ === null) return _(path);
-    return __;
+    function dynamicImport(path) { return import(path); }
+    const result = ${runtimeTransform.name}(config, path, dynamicImport);
+    if (result === null) return dynamicImport(path);
+    return result;
     function parseJS(...a) { return null }
-    ${function __runtimeTransform(path: string, dyn: (path: string) => Promise<any>) {
-        const result = moduleSpecifierTransform({ config, path })
-        switch (result.type) {
-            case 'error':
-                return null
-            case 'noop':
-                return null
-            case 'rewrite':
-                return dyn(result.nextPath)
-            case 'umd':
-                if (config.globalObject === 'globalThis' || config.globalObject === undefined)
-                    return Promise.resolve((globalThis as any)[result.target])
-                if (config.globalObject === 'window') return Promise.resolve((window as any)[result.target])
-                return Promise.reject('Unreachable transform case')
-            default:
-                return Promise.reject('Unreachable transform case')
-        }
-    }.toString()}
-    ${isBrowserCompatibleModuleSpecifier.toString()}
-    ${appendExtensionName.toString()}
+    ${runtimeTransform.toString()}
     ${moduleSpecifierTransform.toString()}
-    ${isHTTPModuleSpecifier.toString()}
-    ${isLocalModuleSpecifier.toString()}
-    ${importPathToUMDName.toString()}
 };`
 function validateConfig(config: PluginConfig) {
     type('appendExtensionName', ['string', 'boolean'])

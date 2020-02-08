@@ -4,47 +4,44 @@ function __dynamicImportHelper(path) {
         "umd": "umd", "unpkg": "unpkg", "pikacdn": "pikacdn" };
     const parsedRegExpCache = new Map();
     const config = { "after": true, "bareModuleRewrite": "snowpack" };
-    function _(path) {
+    function dynamicImport(path) {
         return import(path);
     }
-    const __ = __runtimeTransform(path, _);
-    if (__ === null)
-        return _(path);
-    return __;
-    function parseJS(...a) { return null; }
-    function __runtimeTransform(path, dyn) {
-        const result = moduleSpecifierTransform({ config,
-            // Node style export
+    const result = 
+    // browser style import
+    runtimeTransform(config, path, dynamicImport); //example.com/'
+    if (result
+        === null)
+        return dynamicImport(path);
+    return result;
+    function parseJS(...a) {
+        return null;
+    }
+    function runtimeTransform(config, path, dynamicImport) {
+        const result = moduleSpecifierTransform({ config
+            // relative import without ext name
+            ,
+            // relative import without ext name
             path });
+        const header = `ttypescript-browser-like-import-transformer: Runtime transform error:`;
         switch (result.type) {
             case "error":
-                return null;
-            case "noop":
+                console.error(header, //example.com/'
+                // Static dynamic import
+                result.reason, 
+                // Static dynamic import
+                `raw specifier:`, path);
                 return null;
             case "rewrite":
-                return dyn(result.nextPath);
+                return dynamicImport(result.nextPath);
             case "umd":
-                if (config.globalObject === "globalThis" || config.globalObject
-                    === undefined)
-                    return Promise.resolve(
-                    // dynamic dynamic import
-                    globalThis[result.target]);
-                if (config
-                    // invalid dynamic import (invalid currently)
-                    .
-                        globalObject === "window")
+                if (config.globalObject === "globalThis" || config.globalObject === undefined)
+                    return Promise.resolve(globalThis[result.target]);
+                if (config.globalObject === "window")
                     return Promise.resolve(window[result.target]);
-                return Promise.reject("Unreachable transform case");
-            default: return Promise.reject("Unreachable transform case");
+                return Promise.reject(header + "Unreachable transform case");
+            default: return Promise.reject(header + "Unreachable transform case");
         }
-    }
-    function isBrowserCompatibleModuleSpecifier(path) {
-        return isHTTPModuleSpecifier(path) || isLocalModuleSpecifier(path);
-    }
-    function appendExtensionName(path, expectedExt) {
-        if (path.endsWith(expectedExt))
-            return path;
-        return path + expectedExt;
     }
     function moduleSpecifierTransform(ctx, opt = ctx.config.bareModuleRewrite) {
         var _a, _b, _c, _d;
@@ -121,21 +118,29 @@ function __dynamicImportHelper(path) {
             }
         }
         return { type: "noop" };
-    }
-    function isHTTPModuleSpecifier(path) {
-        return path.startsWith("http://") || path.startsWith("https://");
-    }
-    function isLocalModuleSpecifier(path) {
-        return path.startsWith(".") || path.startsWith("/");
-    }
-    function importPathToUMDName(path) {
-        const reg = path.match(/[a-zA-Z0-9_]+/g);
-        if (!reg)
+        function isBrowserCompatibleModuleSpecifier(path) {
+            return isHTTPModuleSpecifier(path) || isLocalModuleSpecifier(path);
+        }
+        function isHTTPModuleSpecifier(path) {
+            return path.startsWith("http://") || path.startsWith("https://");
+        }
+        function isLocalModuleSpecifier(path) {
+            return path.startsWith(".") || path.startsWith("/");
+        }
+        function appendExtensionName(path, expectedExt) {
+            if (path.endsWith(expectedExt))
+                return path;
+            return path + expectedExt;
+        }
+        function importPathToUMDName(path) {
+            const reg = path.match(/[a-zA-Z0-9_]+/g);
+            if (!reg)
+                return null;
+            const x = [...reg].join(" ");
+            if (x.length)
+                return x.replace(/(?:^\w|[A-Z]|\b\w)/g, (letter, index) => index == 0 ? letter.toLowerCase() : letter.toUpperCase()).replace(/\s+/g, "");
             return null;
-        const x = [...reg].join(" ");
-        if (x.length)
-            return x.replace(/(?:^\w|[A-Z]|\b\w)/g, (letter, index) => index == 0 ? letter.toLowerCase() : letter.toUpperCase()).replace(/\s+/g, "");
-        return null;
+        }
     }
 }
 function __dynamicImportTransformFailedHelper(reason, ...args) {
