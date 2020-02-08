@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## 1.1.0 (2020-02-08)
+
+### Bug Fixes
+
+* wrong helper on esModuleInterop ([ab4cb59](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/commit/ab4cb59eca34ada0bb44145adc297f7eaba70747))
+
 ## 1.0.0 (2020-02-08)
 
 
