@@ -80,26 +80,25 @@ export default function createTransformer(ts: ts) {
                     sf.libReferenceDirectives,
                 )
                 return sf
-            }
 
-            function visitor(node: Node): VisitResult<Node> {
-                const dynamicImportArgs = isDynamicImport(ts, node)
-                const sourceFile = node.getSourceFile()
-                if (
-                    (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) &&
-                    node.moduleSpecifier &&
-                    ts.isStringLiteral(node.moduleSpecifier)
-                ) {
-                    const path = node.moduleSpecifier.text
-                    const args: Ctx<Node> = { config, ts, context, node, path, sourceFile }
-                    return updateImportExportDeclaration(ctx_(args, node))
-                } else if (dynamicImportArgs) {
-                    return transformDynamicImport(
-                        { config, ts, context, node: node as CallExpression, sourceFile },
-                        Array.from(dynamicImportArgs),
-                    )
+                function visitor(node: Node): VisitResult<Node> {
+                    const dynamicImportArgs = isDynamicImport(ts, node)
+                    if (
+                        (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) &&
+                        node.moduleSpecifier &&
+                        ts.isStringLiteral(node.moduleSpecifier)
+                    ) {
+                        const path = node.moduleSpecifier.text
+                        const args: Ctx<Node> = { config, ts, context, node, path, sourceFile }
+                        return updateImportExportDeclaration(ctx_(args, node))
+                    } else if (dynamicImportArgs) {
+                        return transformDynamicImport(
+                            { config, ts, context, node: node as CallExpression, sourceFile },
+                            Array.from(dynamicImportArgs),
+                        )
+                    }
+                    return ts.visitEachChild(node, visitor, context)
                 }
-                return ts.visitEachChild(node, visitor, context)
             }
         }
     }
@@ -301,7 +300,7 @@ function importOrExportClauseToUMD(
     globalObject = ctx.config.globalObject,
 ): { variableNames: Identifier[]; statements: Statement[] } {
     const { node, ts, path } = ctx
-    const umdAccess = getUMDAccess(umdName, globalObject, ctx)
+    const umdAccess = getUMDAccess(umdName, globalObject, ctx, false)
     const umdAccessDefault = ts.createPropertyAccess(umdAccess, 'default')
     const ids: Identifier[] = []
     const statements: Statement[] = []
@@ -412,21 +411,16 @@ function getDefaultCall(ts: ts, sourceFile: SourceFile, e: Expression) {
 }
 function getUMDAccess(
     umdName: string,
-    globalObject: string | undefined | false,
+    globalObject: PluginConfig['globalObject'],
     ctx: Pick<Ctx<any>, 'context' | 'sourceFile' | 'ts'>,
-    noWrapHelper: boolean = false,
+    noWrapHelper: boolean,
 ) {
     const { context, sourceFile, ts } = ctx
     const compilerOptions = context.getCompilerOptions()
     const wrapHelper =
-        (noWrapHelper === false && compilerOptions.esModuleInterop) || compilerOptions.allowSyntheticDefaultImports
+        noWrapHelper === false && (compilerOptions.esModuleInterop || compilerOptions.allowSyntheticDefaultImports)
     const umdAccess = (wrapHelper ? (e: Expression) => getDefaultCall(ts, sourceFile, e) : <T>(x: T) => x)(
-        globalObject === false
-            ? ts.createIdentifier(umdName)
-            : ts.createPropertyAccess(
-                  ts.createIdentifier(globalObject === undefined ? 'globalThis' : globalObject),
-                  umdName,
-              ),
+        ts.createPropertyAccess(ts.createIdentifier(globalObject === undefined ? 'globalThis' : globalObject), umdName),
     )
     return umdAccess
 }
@@ -623,7 +617,7 @@ function writeSourceFileMeta<T, E extends T, Q>(
 }
 //#endregion
 
-const importDefaultHelper = `function __importDefault(mod) {
+const importDefaultHelper = `function __ttsc_importDefault(mod) {
      return (mod && mod.__esModule) ? mod : { "default": mod };
 };`
 const dynamicImportFailedHelper = (
