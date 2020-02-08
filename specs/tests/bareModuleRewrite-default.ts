@@ -1,0 +1,2 @@
+/// { bareModuleRewrite: undefined }
+//@ default.ts

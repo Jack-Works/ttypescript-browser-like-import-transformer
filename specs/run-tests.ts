@@ -31,30 +31,33 @@ async function worker() {
     const sharedCompilerOptions = require('./tsconfig.json')
     const script: WorkerParam = workerData
     if (statSync(script.path).isFile()) {
-        const file = readFileSync(script.path, 'utf-8')
-        const inlineConfig = file.match(inlineConfigReg)
-        const refFile = file.match(refFileReg)
-        const source = refFile
-            ? readFileSync(script.path.replace(script.filename, refFile[1]), 'utf-8').replace(inlineConfigReg, '')
-            : file.replace(inlineConfigReg, '')
-        const result = ts.transpileModule(source, {
-            compilerOptions: { ...sharedCompilerOptions.compilerOptions },
-            transformers: {
-                after: [
-                    transformer.default(
-                        {},
-                        {
-                            after: true,
-                            ...eval('(' + inlineConfig[1] + ')'),
-                        },
-                    ),
-                ],
-            },
-        })
-        writeFileSync(
-            join(snapshotDir, script.filename.replace(/tsx$/g, 'jsx').replace(/ts$/, 'js')),
-            result.outputText,
-        )
+        let outputText = ''
+        try {
+            const file = readFileSync(script.path, 'utf-8')
+            const inlineConfig = file.match(inlineConfigReg)
+            const refFile = file.match(refFileReg)
+            const source = refFile
+                ? readFileSync(script.path.replace(script.filename, refFile[1]), 'utf-8').replace(inlineConfigReg, '')
+                : file.replace(inlineConfigReg, '')
+            const result = ts.transpileModule(source, {
+                compilerOptions: { ...sharedCompilerOptions.compilerOptions },
+                transformers: {
+                    after: [
+                        transformer.default(
+                            {},
+                            {
+                                after: true,
+                                ...eval('(' + inlineConfig[1] + ')'),
+                            },
+                        ),
+                    ],
+                },
+            })
+            outputText = result.outputText
+        } catch (e) {
+            outputText = '// ' + e.message
+        }
+        writeFileSync(join(snapshotDir, script.filename.replace(/tsx$/g, 'jsx').replace(/ts$/, 'js')), outputText)
     } else {
         const cmd = `yarn ttsc --target ESNext --module ESNext -p ${join(script.path, 'tsconfig.json')} --outDir ${join(
             snapshotDir,

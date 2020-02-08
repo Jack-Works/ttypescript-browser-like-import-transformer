@@ -69,9 +69,9 @@ export default function createTransformer(ts: ts) {
                 sf = ts.updateSourceFileNode(
                     sf,
                     [
+                        ...hoistedHelper,
                         ...hoistedUMDImport,
                         ...sf.statements.filter(x => !hoistedUMDImport.includes(x)),
-                        ...hoistedHelper,
                     ],
                     sf.isDeclarationFile,
                     sf.referencedFiles,
@@ -482,12 +482,8 @@ function transformDynamicImport(ctx: Omit<Ctx<CallExpression>, 'path'>, args: Ex
         if (opt === false) return [node]
         const builtinHelper = createTopLevelScopedHelper(ts, sourceFile, dynamicImportHelper(config))
         if (opt === 'auto' || opt === undefined) return [ts.createCall(builtinHelper, void 0, args)]
-        const f = parseJS(ts, opt.function, (x): x is ArrowFunction | FunctionExpression => {
-            if (ts.isFunctionDeclaration(x)) return true
-            if (ts.isArrowFunction(x)) return true
-            return false
-        })
-        if (!f) throw new Error('Unable to parse the function. It must be a FunctionExpression or an ArrowFunction')
+        const f = parseJS(ts, opt.function, ts.isArrowFunction)
+        if (!f) throw new Error('Unable to parse the function. It must be an ArrowFunction')
         const customFunction =
             topLevelScopedHelperMap.get(sourceFile)?.get('__customImportHelper')?.[0] ||
             ts.createUniqueName('__customImportHelper')

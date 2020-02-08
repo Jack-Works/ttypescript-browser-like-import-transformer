@@ -1,28 +1,19 @@
 function __dynamicImportHelper(path) {
-    const BareModuleRewriteSimple = { "snowpack": "snowpack",
-        // Node style import
-        "umd": "umd", "unpkg": "unpkg", "pikacdn": "pikacdn" };
+    const BareModuleRewriteSimple = { "snowpack": "snowpack", "umd": "umd", "unpkg": "unpkg", "pikacdn": "pikacdn" };
     const parsedRegExpCache = new Map();
-    const config = { "after": true, "bareModuleRewrite": "snowpack" };
-    function _(path) {
-        return import(path);
-    }
+    const config = { "after": true, "dynamicImportPathRewrite": "auto" };
+    function _(path) { return import(path); }
     const __ = __runtimeTransform(path, _);
     if (__ === null)
         return _(path);
     return __;
     function parseJS(...a) { return null; }
     function __runtimeTransform(path, dyn) {
-        const result = moduleSpecifierTransform({ config,
-            // Node style export
-            path });
+        const result = moduleSpecifierTransform({ config, path });
         switch (result.type) {
-            case "error":
-                return null;
-            case "noop":
-                return null;
-            case "rewrite":
-                return dyn(result.nextPath);
+            case "error": return null;
+            case "noop": return null;
+            case "rewrite": return dyn(result.nextPath);
             case "umd":
                 if (config.globalObject === false)
                     return Promise.reject("When using runtime transform, globalObject must be \"globalThis\" or \"window\"");
@@ -133,42 +124,10 @@ function __dynamicImportHelper(path) {
 }
 function __dynamicImportTransformFailedHelper(reason, ...args) {
     console.warn(reason, ...args);
-    // Node style import
     return import(args[0], args[1]);
 }
-console.log('Should run after all imports', a, b, c, d, e, a1, b1, c1, d1, e1, a2, b2, c2, d2, e2);
-// Node style import
-import a from "/web_modules/a.js";
-import b, { c, d } from "/web_modules/b.js";
-import * as e from "/web_modules/c.js";
-import "/web_modules/d.js";
-// relative import without ext name
-import a1 from "./a.js";
-import b1, { c1, d1 } from "./b.js";
-import * as e1 from "/c.js";
-import "./d.js";
-// browser style import
-import a2 from 'http://example.com/';
-import b2, { c2, d2 } from 'https://example.com';
-import * as e2 from 'http://example.com/';
-import 'http://example.com/';
-const x = 1;
-export { x };
-// Node style export
-export { c, d } from "/web_modules/b.js";
-export * as e from "/web_modules/c.js";
-// relative import without ext name
-export { c1, d1 } from "./b.js";
-export * as e1 from "./c.js";
-// browser style import
-export { c2, d2 } from 'http://example.com/';
-export * as e2 from 'http://example.com/';
-// Static dynamic import
-import("/web_modules/a.js");
+Promise.resolve(globalThis.a);
 import("./a.js");
-import('https://example.com');
-// dynamic dynamic import
-const y = '';
-__dynamicImportHelper(y);
-// invalid dynamic import (invalid currently)
-__dynamicImportTransformFailedHelper("This dynamic import has more than 1 arguments and don't know how to transform", y, 'second argument');
+const x = '';
+__dynamicImportHelper(x);
+__dynamicImportTransformFailedHelper("This dynamic import has more than 1 arguments and don't know how to transform", x, 'y');
