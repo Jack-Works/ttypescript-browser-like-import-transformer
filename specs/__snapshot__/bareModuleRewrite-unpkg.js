@@ -1,30 +1,29 @@
-function __dynamicImportHelper(path) {
-    const BareModuleRewriteSimple = { "snowpack": "snowpack",
-        // Node style import
-        "umd": "umd", "unpkg": "unpkg", "pikacdn": "pikacdn" };
+function __dynImportTransform(path) {
+    const BareModuleRewriteSimple = { "snowpack": "snowpack", "umd": "umd", "unpkg": "unpkg", "pikacdn": "pikacdn" };
     const parsedRegExpCache = new Map();
     const config = { "after": true, "bareModuleRewrite": "unpkg" };
     function dynamicImport(path) {
         return import(path);
     }
     const result = runtimeTransform(config, path, dynamicImport);
-    if ( //example.com/'
-    result === null)
-        return dynamicImport(path); //example.com'
+    if (result ===
+        null)
+        return dynamicImport(path);
     return result;
-    function parseJS(//example.com/'
-    ...a) {
+    function parseJS(...a) {
         return null;
     }
     function runtimeTransform(config, path, dynamicImport) {
-        const result = moduleSpecifierTransform({ config, path, queryWellknownUMD: () => undefined });
+        const result = moduleSpecifierTransform({ config, path // relative import without ext name
+            , queryWellknownUMD: () => undefined });
         const header = `ttypescript-browser-like-import-transformer: Runtime transform error:`;
         switch (result.type) {
             case "error":
-                console.error(header, result.
-                    reason, `raw specifier:`, path);
-                return null; // dynamic dynamic import
-            case "rewrite": return dynamicImport(result.nextPath);
+                console.error(header, result.reason, `raw specifier:`, path);
+                return null;
+            // dynamic dynamic import
+            case "rewrite":
+                return dynamicImport(result.nextPath);
             case "umd":
                 if (config.globalObject === "globalThis" || config.globalObject === undefined)
                     return Promise.resolve(globalThis[result.target]);
@@ -148,10 +147,8 @@ function __dynamicImportHelper(path) {
         }
     }
 }
-function __dynamicImportTransformFailedHelper2(reason, ...args) {
-    console.warn(reason, ...args
-    // Node style import
-    ); // Node style import
+function __dynImport2Ary(reason, ...args) {
+    console.warn(reason, ...args);
     return import(args[0], args[1]);
 }
 console.log('Should run after all imports', a, b, c, d, e, a1, b1, c1, d1, e1, a2, b2, c2, d2, e2);
@@ -187,6 +184,6 @@ import("./a.js");
 import('https://example.com');
 // dynamic dynamic import
 const y = '';
-__dynamicImportHelper(y);
+__dynImportTransform(y);
 // invalid dynamic import (invalid currently)
-__dynamicImportTransformFailedHelper2("This dynamic import has more than 1 arguments and don't know how to transform", y, 'second argument');
+__dynImport2Ary("This dynamic import has more than 1 arguments and don't know how to transform", y, 'second argument');

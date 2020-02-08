@@ -1,14 +1,12 @@
-function __importBindingCheck(value, name, path, mappedName) {
+function __bindCheck(value, name, path, mappedName) {
     for (const i of name) {
         if (!Object.hasOwnProperty.call(value, i))
             throw new SyntaxError(`Uncaught SyntaxError: The requested module '${path}' (mapped as ${mappedName}) does not provide an export named '${i}'`);
     }
     return value;
 }
-function __dynamicImportHelper(path) {
-    const BareModuleRewriteSimple = { "snowpack": "snowpack",
-        // Node style import
-        "umd": "umd", "unpkg": "unpkg", "pikacdn": "pikacdn" };
+function __dynImportTransform(path) {
+    const BareModuleRewriteSimple = { "snowpack": "snowpack", "umd": "umd", "unpkg": "unpkg", "pikacdn": "pikacdn" };
     const parsedRegExpCache = new Map();
     const config = { "after": true, "globalObject": "global" };
     function dynamicImport(path) {
@@ -18,25 +16,19 @@ function __dynamicImportHelper(path) {
     if (result === null)
         return dynamicImport(path);
     return result;
-    function parseJS(...a //example.com/'
-    ) {
+    function parseJS(...a) {
         return null;
     }
     function runtimeTransform(config, path, dynamicImport) {
-        const result = moduleSpecifierTransform({ config, path,
-            // relative import without ext name
-            queryWellknownUMD: () => undefined });
+        const result = moduleSpecifierTransform({ config, path, queryWellknownUMD: () => undefined });
         const header = `ttypescript-browser-like-import-transformer: Runtime transform error:`;
         switch (result.type) {
             case "error":
-                console
+                console.
                     // Static dynamic import
-                    .
-                        // Static dynamic import
-                        error(header, result.reason, `raw specifier:`, path);
+                    error(header, result.reason, `raw specifier:`, path);
                 return null;
-            case // dynamic dynamic import
-             "rewrite":
+            case "rewrite":
                 return dynamicImport(result.nextPath);
             case "umd":
                 if (config.globalObject === "globalThis" || config.globalObject === undefined)
@@ -161,17 +153,15 @@ function __dynamicImportHelper(path) {
         }
     }
 }
-function __dynamicImportTransformFailedHelper2(reason, ...args) {
-    console.warn(reason, ...args
-    // Node style import
-    ); // Node style import
+function __dynImport2Ary(reason, ...args) {
+    console.warn(reason, ...args);
     return import(args[0], args[1]);
 }
-const a = __importBindingCheck(global.a, ["default"], "a", "global.a").default;
-const b = __importBindingCheck(global.b, ["default"], "b", "global.b").default;
-const { c, d } = __importBindingCheck(global.b, ["c", "d"], "b", "global.b");
+const a = __bindCheck(global.a, ["default"], "a", "global.a").default;
+const b = __bindCheck(global.b, ["default"], "b", "global.b").default;
+const { c, d } = __bindCheck(global.b, ["c", "d"], "b", "global.b");
 const e = global.c;
-const { c_1, d_1 } = __importBindingCheck(global.b, ["c", "d"], "b", "global.b");
+const { c_1, d_1 } = __bindCheck(global.b, ["c", "d"], "b", "global.b");
 export { c_1 as c, d_1 as d };
 const e_1 = global.c;
 export { e_1 as e };
@@ -201,6 +191,6 @@ import("./a.js");
 import('https://example.com');
 // dynamic dynamic import
 const y = '';
-__dynamicImportHelper(y);
+__dynImportTransform(y);
 // invalid dynamic import (invalid currently)
-__dynamicImportTransformFailedHelper2("This dynamic import has more than 1 arguments and don't know how to transform", y, 'second argument');
+__dynImport2Ary("This dynamic import has more than 1 arguments and don't know how to transform", y, 'second argument');

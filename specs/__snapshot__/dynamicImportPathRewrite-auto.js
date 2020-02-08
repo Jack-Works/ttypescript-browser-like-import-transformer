@@ -1,4 +1,4 @@
-function __dynamicImportHelper(path) {
+function __dynImportTransform(path) {
     const BareModuleRewriteSimple = { "snowpack": "snowpack", "umd": "umd", "unpkg": "unpkg", "pikacdn": "pikacdn" };
     const parsedRegExpCache = new Map();
     const config = { "after": true, "dynamicImportPathRewrite": "auto" };
@@ -139,12 +139,12 @@ function __dynamicImportHelper(path) {
         }
     }
 }
-function __dynamicImportTransformFailedHelper2(reason, ...args) {
+function __dynImport2Ary(reason, ...args) {
     console.warn(reason, ...args);
     return import(args[0], args[1]);
 }
 Promise.resolve(globalThis.a);
 import("./a.js");
 const x = '';
-__dynamicImportHelper(x);
-__dynamicImportTransformFailedHelper2("This dynamic import has more than 1 arguments and don't know how to transform", x, 'y');
+__dynImportTransform(x);
+__dynImport2Ary("This dynamic import has more than 1 arguments and don't know how to transform", x, 'y');

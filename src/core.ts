@@ -302,7 +302,7 @@ function importOrExportClauseToUMD(
     globalObject = ctx.config.globalObject,
 ): { variableNames: Identifier[]; statements: Statement[] } {
     const { node, ts, path, sourceFile } = ctx
-    const umdHelper = createTopLevelScopedHelper(ts, sourceFile, umdImportHelper)
+    const umdHelper = createTopLevelScopedHelper(ts, sourceFile, umdBindCheck)
     const [umdAccess, globalIdentifier] = getUMDExpressionForModule(umdName, globalObject, ctx, false)
     const ids: Identifier[] = []
     const statements: Statement[] = []
@@ -643,21 +643,31 @@ function writeSourceFileMeta<T, E extends T, Q>(
 }
 //#endregion
 
-const umdImportHelper = `function __importBindingCheck(value, name, path, mappedName) {
+const umdBindCheck = `function __bindCheck(value, name, path, mappedName) {
     for (const i of name) {
         if (!Object.hasOwnProperty.call(value, i))
             throw new SyntaxError(\`Uncaught SyntaxError: The requested module '\${path}' (mapped as \${mappedName}) does not provide an export named '\${i}'\`);
     }
     return value;
 }`
-const importDefaultHelper = `function __ttsc_importDefault(mod) {
+const importDefaultHelper = `function __esModuleCheck(mod) {
      return (mod && mod.__esModule) ? mod : { "default": mod };
 };`
-const dynamicImportFailedHelper = (args: Expression[]) => `function __dynamicImportTransformFailedHelper${
-    args.length
-}(reason, ...args) {
+const dynamicImportFailedHelper = (args: Expression[]) => `function __dynImport${args.length}Ary(reason, ...args) {
     console.warn(reason, ...args)
     return import(${args.map((_, i) => `args[${i}]`).join(', ')});
+};`
+const dynamicImportHelper = (config: PluginConfig) => `function __dynImportTransform(path) {
+    const BareModuleRewriteSimple = ${JSON.stringify(BareModuleRewriteSimple)}
+    const parsedRegExpCache = new Map()
+    const config = ${JSON.stringify(config)}
+    function dynamicImport(path) { return import(path); }
+    const result = ${runtimeTransform.name}(config, path, dynamicImport);
+    if (result === null) return dynamicImport(path);
+    return result;
+    function parseJS(...a) { return null }
+    ${runtimeTransform.toString()}
+    ${moduleSpecifierTransform.toString()}
 };`
 /**
  * This function will run in the browser if there is any "import(x)" expressions
@@ -684,18 +694,6 @@ function runtimeTransform(
             return Promise.reject(header + 'Unreachable transform case')
     }
 }
-const dynamicImportHelper = (config: PluginConfig) => `function __dynamicImportHelper(path) {
-    const BareModuleRewriteSimple = ${JSON.stringify(BareModuleRewriteSimple)}
-    const parsedRegExpCache = new Map()
-    const config = ${JSON.stringify(config)}
-    function dynamicImport(path) { return import(path); }
-    const result = ${runtimeTransform.name}(config, path, dynamicImport);
-    if (result === null) return dynamicImport(path);
-    return result;
-    function parseJS(...a) { return null }
-    ${runtimeTransform.toString()}
-    ${moduleSpecifierTransform.toString()}
-};`
 function validateConfig(config: PluginConfig) {
     type('appendExtensionName', ['string', 'boolean'])
     type('appendExtensionNameForRemote', ['boolean'])
