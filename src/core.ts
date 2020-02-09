@@ -1,3 +1,4 @@
+const helperURL = 'https://unpkg.com/@magic-works/ttypescript-browser-like-import-transformer@$version$/es/ttsclib.js'
 import {
     TransformationContext,
     SourceFile,
@@ -39,6 +40,7 @@ type Context<T extends Node> = {
     context: TransformationContext
     node: T
     queryWellknownUMD: (path: string) => string | undefined
+    version: string
     ttsclib: typeof import('./ttsclib')
 }
 const _with = <T extends Node>(ctx: Context<any>, node: T) => ({ ...ctx, node } as Context<T>)
@@ -46,7 +48,10 @@ const _with = <T extends Node>(ctx: Context<any>, node: T) => ({ ...ctx, node } 
  * Create the Transformer
  * This file should not use any value import so the Typescript runtime is given from the environment
  */
-export default function createTransformer(ts: ts, core: Pick<Context<any>, 'queryWellknownUMD' | 'ttsclib'>) {
+export default function createTransformer(
+    ts: ts,
+    core: Pick<Context<any>, 'queryWellknownUMD' | 'ttsclib' | 'version'>,
+) {
     // ? Can't rely on the ts.Program because don't want to create on during the test.
     return function(_program: unknown, config: PluginConfig) {
         validateConfig(config)
@@ -199,7 +204,6 @@ function importOrExportClauseToUMD(
     globalObject = ctx.config.globalObject,
 ): { variableNames: Identifier[]; statements: Statement[] } {
     const { node, ts, path, sourceFile, context, ttsclib } = ctx
-    const [, createUMDBindCheck] = createTopLevelScopedHelper(ts, sourceFile, ttsclib.__UMDBindCheck, [])
     const [umdAccess, globalIdentifier] = getUMDExpressionForModule(umdName, globalObject, ctx)
     const ids: Identifier[] = []
     const statements: Statement[] = []
@@ -285,12 +289,7 @@ function importOrExportClauseToUMD(
     function getDefaultImport(defaultImport: Identifier) {
         let umdAccess: Expression
         if (esModuleInterop) {
-            const [, createESModuleInteropCall] = createTopLevelScopedHelper(
-                ts,
-                sourceFile,
-                ttsclib.__esModuleInterop,
-                [],
-            )
+            const [, createESModuleInteropCall] = createTopLevelScopedHelper(ctx, ttsclib.__esModuleInterop, [])
             umdAccess = createCheckedUMDAccess(createESModuleInteropCall, ts.createLiteral('default'))
         } else {
             umdAccess = createCheckedUMDAccess(x => x, ts.createLiteral('default'))
@@ -326,7 +325,7 @@ function importOrExportClauseToUMD(
         )
     }
     function createCheckedUMDAccess(wrapper: (x: Expression) => Expression, ...names: StringLiteral[]) {
-        const [, createUMDBindCheck] = createTopLevelScopedHelper(ts, sourceFile, ttsclib.__UMDBindCheck, [])
+        const [, createUMDBindCheck] = createTopLevelScopedHelper(ctx, ttsclib.__UMDBindCheck, [])
         return createUMDBindCheck(
             wrapper(umdAccess),
             ts.createArrayLiteral(names),
@@ -361,7 +360,7 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
         })
         switch (rewriteStrategy.type) {
             case 'error':
-                const [id] = createTopLevelScopedHelper(ts, sourceFile, dynamicImportFailedHelper(args), [])
+                const [id] = createTopLevelScopedHelper(ctx, dynamicImportFailedHelper(args), [])
                 return [ts.createCall(id, void 0, [ts.createLiteral(rewriteStrategy.reason), ...args])]
             case 'noop':
                 return [node]
@@ -370,7 +369,7 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
             }
             case 'umd': {
                 if (rest.length !== 0) {
-                    const [id] = createTopLevelScopedHelper(ts, sourceFile, dynamicImportFailedHelper(args), [])
+                    const [id] = createTopLevelScopedHelper(ctx, dynamicImportFailedHelper(args), [])
                     return [
                         ts.createCall(id, void 0, [
                             ts.createLiteral(
@@ -389,7 +388,7 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
         }
     } else {
         if (rest.length !== 0) {
-            const [id] = createTopLevelScopedHelper(ts, sourceFile, dynamicImportFailedHelper(args), [])
+            const [id] = createTopLevelScopedHelper(ctx, dynamicImportFailedHelper(args), [])
             return [
                 ts.createCall(id, void 0, [
                     ts.createLiteral("This dynamic import has more than 1 arguments and don't know how to transform"),
@@ -400,16 +399,15 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
         const opt = config.dynamicImportPathRewrite
         if (opt === false) return [node]
         const [dynamicImportTransformIdentifier, createDynamicImportTransform] = createTopLevelScopedHelper(
-            ts,
-            sourceFile,
+            ctx,
             ttsclib.__dynamicImportTransform,
             [parseJS(ts, ttsclib.moduleSpecifierTransform.toString(), ts.isFunctionDeclaration)!],
         )
         const stringifiedConfig = ts.createCall(ts.createIdentifier('JSON.parse'), void 0, [
             ts.createLiteral(JSON.stringify(config)),
         ])
-        const [dynamicImportNative] = createTopLevelScopedHelper(ts, sourceFile, dynamicImportNativeString, [])
-        const [umdBindCheck] = createTopLevelScopedHelper(ts, sourceFile, ttsclib.__UMDBindCheck, [])
+        const [dynamicImportNative] = createTopLevelScopedHelper(ctx, dynamicImportNativeString, [])
+        const [umdBindCheck] = createTopLevelScopedHelper(ctx, ttsclib.__UMDBindCheck, [])
         if (opt === 'auto' || opt === undefined) {
             /**
              * __dynamicImportTransform(config, path, dynamicImportNative, __UMDBindCheck)
@@ -433,12 +431,7 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
                 x.set('__customImportHelper', [customFunction, decl])
             })
         }
-        const [__customImportHelper, createCustomImportHelper] = createTopLevelScopedHelper(
-            ts,
-            sourceFile,
-            ttsclib.__customDynamicImportHelper,
-            [],
-        )
+        const [, createCustomImportHelper] = createTopLevelScopedHelper(ctx, ttsclib.__customDynamicImportHelper, [])
         /**
          * __customImportHelper(
          *     path,
@@ -518,6 +511,16 @@ export interface PluginConfig {
      * @default /web_modules/
      */
     webModulePath?: string
+    /**
+     * Specify where is the helper is.
+     *
+     * - "inline": All helpers will emitted in each file
+     * - "auto": Let the transform do it
+     * - string: A URL, will import helper from that place.
+     *
+     * @default auto
+     */
+    importHelpers?: 'inline' | 'auto' | string
 }
 export type BareModuleRewriteObject = false | BareModuleRewriteSimple | BareModuleRewriteUMD
 export interface DynamicImportPathRewriteCustom {
@@ -533,10 +536,6 @@ export type BareModuleRewriteUMD = {
 }
 //#endregion
 //#region ts helper
-const topLevelScopedHelperMap = new WeakMap<
-    SourceFile,
-    Map<string | ((...args: any) => void), [Identifier, Statement]>
->()
 type LevelUp<T> = T extends string
     ? StringLiteral
     : T extends number
@@ -551,17 +550,41 @@ type LevelUpArgs<T extends any[]> = {
 }
 type CastArray<T> = T extends any[] ? T : never
 type CastFunction<T> = T extends (...a: any[]) => any ? T : (...a: never[]) => any
+const topLevelScopedHelperMap = new WeakMap<
+    SourceFile,
+    Map<string | ((...args: any) => void), [Identifier, Statement]>
+>()
 function createTopLevelScopedHelper<F extends string | ((...args: any[]) => any)>(
-    ts: ts,
-    sf: SourceFile,
+    context: Pick<Context<any>, 'ts' | 'sourceFile' | 'config' | 'ttsclib' | 'version'>,
     helper: F | string,
     additionDeclarations: FunctionDeclaration[],
 ): readonly [Identifier, (...args: CastArray<LevelUpArgs<Parameters<CastFunction<F>>>>) => Expression] {
-    const result = topLevelScopedHelperMap.get(sf)?.get(helper)
+    const { config, ts, sourceFile, ttsclib, version } = context
+    const result = topLevelScopedHelperMap.get(sourceFile)?.get(helper)
     if (result) return [result[0], (...args: any) => ts.createCall(result[0], void 0, args)] as const
     const _f = parseJS(ts, helper.toString(), ts.isFunctionDeclaration)
     if (!_f) throw new Error('helper must be a function declaration')
-    const uniqueName = ts.createFileLevelUniqueName(_f.name!.text)
+    // ? if the function name is in the ttsclib, return a import declaration
+    const fnName = _f.name!.text
+    const uniqueName = ts.createFileLevelUniqueName(fnName)
+    const returnValue = [uniqueName, (...args: any) => ts.createCall(uniqueName, void 0, args)] as const
+    if (fnName in ttsclib && config.importHelpers !== 'inline') {
+        const url = config.importHelpers === 'auto' ? helperURL : config.importHelpers ?? helperURL
+        // ? import { __helperName as uniqueName } from 'url'
+        const importDeclaration = ts.createImportDeclaration(
+            void 0,
+            void 0,
+            ts.createImportClause(
+                void 0,
+                ts.createNamedImports([ts.createImportSpecifier(uniqueName, ts.createIdentifier(fnName))]),
+            ),
+            ts.createLiteral(url.replace('$version$', version)),
+        )
+        writeSourceFileMeta(sourceFile, topLevelScopedHelperMap, new Map(), x =>
+            x.set(helper, [uniqueName, importDeclaration]),
+        )
+        return returnValue
+    }
     const f = ts.updateFunctionDeclaration(
         _f,
         void 0,
@@ -575,8 +598,8 @@ function createTopLevelScopedHelper<F extends string | ((...args: any[]) => any)
     )
     ts.setEmitFlags(f, ts.EmitFlags.NoComments)
     ts.setEmitFlags(f, ts.EmitFlags.NoNestedComments)
-    writeSourceFileMeta(sf, topLevelScopedHelperMap, new Map(), x => x.set(helper, [uniqueName, f]))
-    return [uniqueName, (...args: any) => ts.createCall(uniqueName, void 0, args)] as const
+    writeSourceFileMeta(sourceFile, topLevelScopedHelperMap, new Map(), x => x.set(helper, [uniqueName, f]))
+    return returnValue
 }
 
 function parseJS<T extends Node = Node>(
@@ -619,9 +642,11 @@ function validateConfig(config: PluginConfig) {
     type('dynamicImportPathRewrite', ['boolean', 'string', 'object'])
     type('globalObject', ['string'])
     type('webModulePath', ['string'])
+    type('importHelpers', ['string'])
 
     length('globalObject')
     length('webModulePath')
+    length('importHelpers')
 
     enumCheck('dynamicImportPathRewrite', ['auto'])
     const enums = Object.keys(BareModuleRewriteSimpleEnumLocal) as BareModuleRewriteSimple[]

@@ -66,6 +66,19 @@
                     "default": "/web_modules/",
                     "type": "string",
                     "title": "webModulePath"
+                },
+                "importHelpers": {
+                    "description": "Specify where is the helper is.",
+                    "default": "auto",
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "enum": ["auto", "inline"]
+                        }
+                    ],
+                    "title": "webModulePath"
                 }
             }
         },
