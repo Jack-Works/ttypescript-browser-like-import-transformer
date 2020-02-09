@@ -25,6 +25,8 @@ import {
     ArrayLiteralExpression,
     FunctionDeclaration,
     BooleanLiteral,
+    Program,
+    CompilerOptions,
 } from 'typescript'
 import { BareModuleRewriteSimpleEnum, BareModuleRewriteSimple } from './ttsclib'
 /** All ConfigError should go though this class
@@ -40,6 +42,7 @@ type Context<T extends Node> = {
     context: TransformationContext
     node: T
     queryWellknownUMD: (path: string) => string | undefined
+    queryImportMap: (opt: ImportMapFunctionOpts) => string | null
     version: string
     ttsclib: typeof import('./ttsclib')
 }
@@ -50,13 +53,32 @@ const _with = <T extends Node>(ctx: Context<any>, node: T) => ({ ...ctx, node } 
  */
 export default function createTransformer(
     ts: ts,
-    core: Pick<Context<any>, 'queryWellknownUMD' | 'ttsclib' | 'version'>,
+    core: Pick<Context<any>, 'queryWellknownUMD' | 'ttsclib' | 'version' | 'queryImportMap'>,
 ) {
     // ? Can't rely on the ts.Program because don't want to create on during the test.
-    return function(_program: unknown, config: PluginConfig) {
-        validateConfig(config)
+    return function(_program: Pick<Program, 'getCurrentDirectory'>, config: PluginConfig) {
         return (context: TransformationContext) => {
+            validateConfig(config, context.getCompilerOptions())
             return (sourceFile: SourceFile) => {
+                const importMapOverwritten: typeof import('./ttsclib').moduleSpecifierTransform = function(ctx, opt) {
+                    if (!config.importMap) return core.ttsclib.moduleSpecifierTransform(ctx, opt)
+                    const result = core.queryImportMap({
+                        config,
+                        sourceFilePath: sourceFile.fileName,
+                        currentWorkingDirectory: _program.getCurrentDirectory(),
+                        moduleSpecifier: ctx.path,
+                        rootDir: context.getCompilerOptions().rootDir!,
+                    })
+                    if (result) return { type: 'rewrite', nextPath: result }
+                    return core.ttsclib.moduleSpecifierTransform(ctx, opt)
+                }
+                // ? inlie generation is rely on it.
+                importMapOverwritten.toString = () => core.ttsclib.moduleSpecifierTransform.toString()
+                const ttsclib: typeof import('./ttsclib') = {
+                    ...core.ttsclib,
+                    moduleSpecifierTransform: importMapOverwritten,
+                }
+
                 let visitedSourceFile = ts.visitEachChild(sourceFile, visitor, context)
                 // ? hoistedHelper and hoistedUMDImport will be added ^ in the visitor
                 const hoistedHelper = Array.from(topLevelScopedHelperMap.get(sourceFile)?.values() || []).map(x => x[1])
@@ -95,11 +117,11 @@ export default function createTransformer(
                         ts.isStringLiteral(node.moduleSpecifier)
                     ) {
                         const path = node.moduleSpecifier.text
-                        const args: Context<Node> = { config, ts, context, node, path, sourceFile, ...core }
+                        const args: Context<Node> = { config, ts, context, node, path, sourceFile, ...core, ttsclib }
                         return updateImportExportDeclaration(_with(args, node))
                     } else if (dynamicImportArgs) {
                         return transformDynamicImport(
-                            { config, ts, context, node: node as CallExpression, sourceFile, ...core },
+                            { config, ts, context, node: node as CallExpression, sourceFile, ...core, ttsclib },
                             Array.from(dynamicImportArgs),
                         )
                     }
@@ -509,8 +531,21 @@ export interface PluginConfig {
     /**
      * Used in snowpack. web_modules module path
      * @default /web_modules/
+     * @deprecated
      */
     webModulePath?: string
+    /**
+     * Use import map to resolve paths. (Note: import map has the highest priority.)
+     */
+    importMap?:
+        | {
+              type: 'map'
+              mapPath: string
+              mapObject?: object
+              simulateRuntimeImportMapPosition: string
+              simulateRuntimeSourceRoot?: string
+          }
+        | { type: 'function'; function: (opt: ImportMapFunctionOpts) => string | null }
     /**
      * Specify where is the helper is.
      *
@@ -521,6 +556,13 @@ export interface PluginConfig {
      * @default auto
      */
     importHelpers?: 'inline' | 'auto' | string
+}
+export type ImportMapFunctionOpts = {
+    moduleSpecifier: string
+    sourceFilePath: string
+    currentWorkingDirectory: string
+    rootDir: string
+    config: PluginConfig
 }
 export type BareModuleRewriteObject = false | BareModuleRewriteSimple | BareModuleRewriteUMD
 export interface DynamicImportPathRewriteCustom {
@@ -635,7 +677,7 @@ const dynamicImportFailedHelper = (args: Expression[]) => `function __dynamicImp
 const dynamicImportNativeString = `function __dynamicImportNative(path) {
     return import(path);
 };`
-function validateConfig(config: PluginConfig) {
+function validateConfig(config: PluginConfig, options: CompilerOptions) {
     type('appendExtensionName', ['string', 'boolean'])
     type('appendExtensionNameForRemote', ['boolean'])
     type('bareModuleRewrite', ['boolean', 'string', 'object'])
@@ -643,6 +685,9 @@ function validateConfig(config: PluginConfig) {
     type('globalObject', ['string'])
     type('webModulePath', ['string'])
     type('importHelpers', ['string'])
+    type('importMap', ['object'])
+
+    if (config.importMap && !options.rootDir) throw new ConfigError('When using importMap, rootDir must be set')
 
     length('globalObject')
     length('webModulePath')

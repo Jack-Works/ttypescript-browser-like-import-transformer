@@ -21,9 +21,9 @@
     },
     "dependencies": {},
     "devDependencies": {
-        "standard-version": "^7.1.0",
-        "ts-node": "^8.6.2",
-        "ttypescript": "^1.5.10",
+        "standard-version": "latest",
+        "ts-node": "latest",
+        "ttypescript": "latest",
         "typescript": "next",
         "@types/node": "latest"
     },
@@ -31,6 +31,9 @@
         "ts-node": "^8.0.2",
         "ttypescript": "^1.5.0",
         "typescript": "^3.2.2"
+    },
+    "optionalDependencies": {
+        "@jsenv/import-map": "^6.7.2"
     },
     "files": [
         "src",

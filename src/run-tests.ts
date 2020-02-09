@@ -3,6 +3,7 @@ import { join } from 'path'
 import { isMainThread, workerData, Worker } from 'worker_threads'
 import { execSync } from 'child_process'
 import { ConfigError } from './core.js'
+import { cwd } from 'process'
 
 const dir = join(__dirname, '../specs/tests/')
 // "/// {}"
@@ -68,7 +69,7 @@ async function worker(script: WorkerParam = workerData) {
                 transformers: {
                     after: [
                         transformer.default(
-                            {},
+                            { getCurrentDirectory: cwd },
                             {
                                 after: true,
                                 ...tryEval(inlineConfig[1]),
