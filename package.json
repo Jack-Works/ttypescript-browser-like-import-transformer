@@ -10,9 +10,9 @@
         "release": "standard-version",
         "test": "node ./cjs/run-tests.js",
         "start:cjs": "tsc -w -p src",
-        "start:es": "tsc -w -p src --module ES2016 --outDir ./es",
+        "start:es": "tsc -w -p src --module ESNext --outDir ./es",
         "build:cjs": "tsc -p src",
-        "build:es": "tsc -p src --module ES2016 --outDir ./es"
+        "build:es": "tsc -p src --module ESNext --outDir ./es"
     },
     "standard-version": {
         "skip": {
