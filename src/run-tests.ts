@@ -39,7 +39,7 @@ if (isMainThread) {
 async function worker(script: WorkerParam = workerData) {
     const ts = await import('typescript')
     const transformer = await import('./node.js')
-    const sharedCompilerOptions = require('../specs/tsconfig.json')
+    const sharedCompilerOptions = JSON.parse(readFileSync(join(__dirname, '../specs/tsconfig.json'), 'utf-8'))
     if (statSync(script.path).isFile()) {
         let outputText = ''
         try {

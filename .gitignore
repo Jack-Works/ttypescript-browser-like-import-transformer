@@ -1,5 +1,8 @@
 src/*.js
 cjs/
+es/
+dts/
+.vscode/
 
 # Logs
 logs

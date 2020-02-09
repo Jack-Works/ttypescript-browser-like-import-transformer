@@ -31,59 +31,67 @@ import('./a');
 import('https://example.com');
 // dynamic dynamic import
 const y = '';
-__dynImportTransform(y);
+__dynamicImportTransform(JSON.parse("{\"after\":true,\"bareModuleRewrite\":false}"), y, __dynamicImportNative, __UMDBindCheck);
 // invalid dynamic import (invalid currently)
-__dynImport2Ary("This dynamic import has more than 1 arguments and don't know how to transform", y, 'second argument');
-function __dynImportTransform(path) {
-    const BareModuleRewriteSimple = { "snowpack": "snowpack", "umd": "umd", "unpkg": "unpkg", "pikacdn": "pikacdn" };
-    const parsedRegExpCache = new Map();
-    const config = { "after": true, "bareModuleRewrite": false };
-    function dynamicImport(path) {
-        return import(path);
-    }
-    const result = runtimeTransform(config, path, dynamicImport);
-    if (result === null)
-        return dynamicImport(path);
-    return result;
-    function parseJS(... //example.com/'
-    a) {
-        return null;
-    }
-    function runtimeTransform(config, path, dynamicImport) {
-        const result = moduleSpecifierTransform({ config, path
-            // relative import without ext name
-            ,
-            // relative import without ext name
-            queryWellknownUMD: () => undefined
-        });
-        const header = `ttypescript-browser-like-import-transformer: Runtime transform error:`;
-        switch (result.type) {
-            case "error":
-                console
-                    // Static dynamic import
-                    .
-                        error(header, result.reason, `raw specifier:`, path);
-                return null;
-            case "rewrite":
-                return dynamicImport(result.nextPath);
-            case "umd":
+__dynamicImport2Ary("This dynamic import has more than 1 arguments and don't know how to transform", y, 'second argument');
+function __dynamicImportTransform(config, _path, dynamicImport, UMDBindCheck) {
+    if (typeof _path !== "string")
+        _path = String(_path);
+    const path = _path;
+    const result = moduleSpecifierTransform({
+        config,
+        path, queryWellknownUMD: () => void 0, parseRegExp: () => {
+            console.warn("RegExp rule is not supported in runtime yet");
+            return null;
+        },
+    });
+    const header = `ttypescript-browser-like-import-transformer: Runtime transform error:`;
+    switch (result
+        .type) {
+        case "noop":
+            return dynamicImport(path);
+        case "error":
+            console.error(header, result.reason, `raw specifier:`, path);
+            return dynamicImport(path);
+        case "rewrite": return dynamicImport(result.nextPath);
+        case "umd":
+            {
+                const _ = (v) => {
+                    var _a;
+                    return UMDBindCheck(v, [], path, `${(_a = result.globalObject) !== null && _a !== void 0 ? _a : "globalThis"}.${result.target}`, false);
+                };
                 if (config.globalObject === "globalThis" || config.globalObject === undefined)
-                    return Promise.resolve(globalThis[result.target]);
+                    return Promise.resolve(globalThis[result.target]).then(_);
                 if (config.globalObject === "window")
-                    return Promise.resolve(window[result.target]);
+                    return Promise.resolve(window[result.target]).then(_);
                 return Promise.reject(header + "Unreachable transform case");
-            default: return Promise.reject(header + "Unreachable transform case");
-        }
+            }
+        default: unreachable(result);
     }
-    function moduleSpecifierTransform(ctx, opt = ctx.config.bareModuleRewrite) {
+    function unreachable(_x) {
+        throw new Error("Unreachable case" + _x);
+    }
+    function moduleSpecifierTransform(context, opt = context.config.bareModuleRewrite) {
         var _a, _b, _c, _d;
+        let BareModuleRewriteSimpleEnumLocal;
+        (function (BareModuleRewriteSimpleEnumLocal) {
+            BareModuleRewriteSimpleEnumLocal["snowpack"] = "snowpack";
+            BareModuleRewriteSimpleEnumLocal["umd"] = "umd";
+            BareModuleRewriteSimpleEnumLocal["unpkg"] = "unpkg";
+            BareModuleRewriteSimpleEnumLocal["pikacdn"] = "pikacdn";
+        })(BareModuleRewriteSimpleEnumLocal || (BareModuleRewriteSimpleEnumLocal
+            = {}));
+        const BareModuleRewriteSimple = BareModuleRewriteSimpleEnumLocal;
         if (opt === false)
-            return { type: "noop" };
-        const { path, config, ts, queryWellknownUMD } = ctx;
+            return { type: "noop"
+            };
+        const { path, config, queryWellknownUMD } = context;
         if (isBrowserCompatibleModuleSpecifier(path)) {
             if (path === ".")
-                return { type: "noop" };
-            if (config.appendExtensionName === false)
+                return { type: "noop"
+                };
+            if (config.appendExtensionName ===
+                false)
                 return { type: "noop" };
             if (config.appendExtensionNameForRemote !== true && isHTTPModuleSpecifier(path))
                 return { type: "noop" };
@@ -112,33 +120,17 @@ function __dynImportTransform(path) {
                 const rules = opt;
                 for (const rule in rules) {
                     const ruleValue = rules[rule];
-                    if (ts) {
-                        if (!parsedRegExpCache.has(rule)) {
-                            const literal = parseJS(ts, rule, ts.isRegularExpressionLiteral);
-                            if (rule.startsWith("/") && literal === null) {
-                                console.error("Might be an invalid regexp:", rule);
-                            }
-                            if (literal) {
-                                try {
-                                    const next = eval(literal.text);
-                                    parsedRegExpCache.set(rule, next);
-                                }
-                                catch (e) {
-                                    console.error("Might be invalid regexp:", literal.text);
-                                    console.error(e);
-                                }
-                            }
-                        }
+                    let regexp = undefined;
+                    if (rule.startsWith("/")) {
+                        regexp = context.parseRegExp(rule);
+                        if (!regexp)
+                            console.error("Might be an invalid regexp:", rule);
                     }
-                    else if (rule.startsWith("/")) {
-                        console.warn("RegExp rule is not supported in runtime due to the risk of eval");
-                    }
-                    const regexp = parsedRegExpCache.get(rule);
                     if (regexp && path.match(regexp)) {
                         if (ruleValue === false)
                             return { type: "noop" };
                         if (typeof ruleValue === "string")
-                            return moduleSpecifierTransform(ctx, ruleValue);
+                            return moduleSpecifierTransform(context, ruleValue);
                         const nextPath = path.replace(regexp, ruleValue.target);
                         if (!nextPath)
                             return {
@@ -152,7 +144,7 @@ function __dynImportTransform(path) {
                         if (ruleValue === false)
                             return { type: "noop" };
                         if (typeof ruleValue === "string")
-                            return moduleSpecifierTransform(ctx, ruleValue);
+                            return moduleSpecifierTransform(context, ruleValue);
                         return {
                             type: "umd", target: ruleValue.target, globalObject: (_d = ruleValue.globalObject) !== null && _d !== void 0 ? _d : config.globalObject,
                         };
@@ -189,7 +181,33 @@ function __dynImportTransform(path) {
         }
     }
 }
-function __dynImport2Ary(reason, ...args) {
+function __dynamicImportNative(path) {
+    return import(path);
+}
+function __UMDBindCheck(mod, bindings, path, mappedName, hasESModuleInterop) {
+    const head = `The requested module '${path}' (mapped as ${mappedName})`;
+    const umdInvalid = `${head} doesn't provides a valid export object. This is likely to be a mistake. Did you forget to set ${mappedName}?`;
+    if (mod === undefined) {
+        mod = {};
+        if (bindings.length === 0) {
+            console.warn(umdInvalid);
+        }
+    }
+    if (typeof mod !== "object" || mod === null) {
+        throw new SyntaxError(`${head} provides an invalid export object. The provided record is type of ${typeof mod}`);
+    }
+    if (hasESModuleInterop && bindings.toString() === "default" && mod
+        .
+            default === undefined) {
+        throw new SyntaxError(umdInvalid);
+    }
+    for (const i of bindings) {
+        if (!Object.hasOwnProperty.call(mod, i))
+            throw new SyntaxError(`${head} does not provide an export named '${i}'`);
+    }
+    return mod;
+}
+function __dynamicImport2Ary(reason, ...args) {
     console.warn(reason, ...args);
     return import(args[0], args[1]);
 }

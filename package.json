@@ -8,7 +8,11 @@
     "license": "MIT",
     "scripts": {
         "release": "standard-version",
-        "test": "node ./cjs/run-tests.js"
+        "test": "node ./cjs/run-tests.js",
+        "start:cjs": "tsc -w -p src",
+        "start:es": "tsc -w -p src --module ES2016 --outDir ./es",
+        "build:cjs": "tsc -p src",
+        "build:es": "tsc -p src --module ES2016 --outDir ./es"
     },
     "standard-version": {
         "skip": {
@@ -30,6 +34,8 @@
     },
     "files": [
         "src",
-        "cjs"
+        "cjs",
+        "es",
+        "dts"
     ]
 }
