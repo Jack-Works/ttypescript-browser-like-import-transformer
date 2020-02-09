@@ -1,6 +1,6 @@
 {
     "name": "@magic-works/ttypescript-browser-like-import-transformer",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "description": "A custom transformer that can be used with ttypescript to transform ts imports to browser style imports",
     "main": "cjs/node.js",
     "repository": "https://github.com/Jack-Works/ttypescript-browser-like-import-transformer",
@@ -8,18 +8,23 @@
     "license": "MIT",
     "scripts": {
         "release": "standard-version",
-        "test": "node ./cjs/run-tests.js"
+        "test": "node ./cjs/run-tests.js",
+        "start:cjs": "tsc -w -p src",
+        "start:es": "tsc -w -p src --module ES2016 --outDir ./es",
+        "build:cjs": "tsc -p src",
+        "build:es": "tsc -p src --module ES2016 --outDir ./es"
     },
     "standard-version": {
         "skip": {
-            "tag": true
+            "tag": true,
+            "commit": true
         }
     },
     "dependencies": {},
     "devDependencies": {
-        "standard-version": "^7.1.0",
-        "ts-node": "^8.6.2",
-        "ttypescript": "^1.5.10",
+        "standard-version": "latest",
+        "ts-node": "latest",
+        "ttypescript": "latest",
         "typescript": "next",
         "@types/node": "latest"
     },
@@ -28,8 +33,13 @@
         "ttypescript": "^1.5.0",
         "typescript": "^3.2.2"
     },
+    "optionalDependencies": {
+        "@jsenv/import-map": "^6.7.2"
+    },
     "files": [
         "src",
-        "cjs"
+        "cjs",
+        "es",
+        "dts"
     ]
 }

@@ -8,7 +8,10 @@
         "noImplicitReturns": true,
         "noFallthroughCasesInSwitch": true,
         "moduleResolution": "node",
-        "rootDir": "./"
+        "rootDir": "./",
+        "declaration": true,
+        "declarationDir": "../dts",
+        "declarationMap": true
     },
-    "files": ["./core.ts", "./node.ts", "./run-tests.ts", "./well-known-umd.ts"]
+    "files": ["./core.ts", "./node.ts", "./run-tests.ts", "./well-known-umd.ts", "./ttsclib.ts"]
 }

@@ -1,0 +1,3 @@
+/// { importHelpers: "auto" }
+
+import(x)
