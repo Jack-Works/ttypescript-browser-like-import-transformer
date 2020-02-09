@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## 1.2.0 (2020-02-09)
+
+
+### Features
+
+* add a new option importHelpers ([92d461a](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/commit/92d461a099407afe319c8dbf9e464dbd31ed653c))
+* add import map ([7aa74df](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/commit/7aa74dfd432c5f9bf78f6a48ab8018ab8b4c40ce))
+* make each n-ary dyn import call has its own failed helper ([c6e0559](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/commit/c6e0559c85e00f4fd417c0f5fde86e41278cf239))
+* move helpers into a seperate file and fix some dynamic import logic ([d7427d0](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/commit/d7427d0bc5d20a53004c07a793b2f2379acbaf4a))
+
+
 ## 1.1.0 (2020-02-08)
 
 ### Bug Fixes
