@@ -346,3 +346,43 @@ import('a')
 // after
 import('https://cdn.example.com/web_modules/a.js')
 ```
+
+### `importHelpers`?: string
+
+Choose where to inject the helpers needed to do the transform.
+
+-   `"auto"`: Use the transformer default
+-   `"inline"`: All the import helpers will be injected in the file
+-   `string`: A URL, will used as the target of the import path.
+
+**Default value**: `"auto"`
+
+#### `{ importHelpers: "auto" }`
+
+```ts
+// before
+import(x)
+
+// after
+import { __dynamicImportTransform } from 'https://unpkg.com/@magic-works/ttypescript-browser-like-import-transformer@1.1.0/es/ttsclib.js'
+import { __UMDBindCheck } from 'https://unpkg.com/@magic-works/ttypescript-browser-like-import-transformer@1.1.0/es/ttsclib.js'
+__dynamicImportTransform(JSON.parse('{"after":true,"importHelpers":"auto"}'), x, __dynamicImportNative, __UMDBindCheck)
+function __dynamicImportNative(path) {
+    return import(path)
+}
+```
+
+#### `{ importHelpers: "https://cdn.example.com/ttsc-$version$.js" }`
+
+```ts
+// before
+import(x)
+
+// after
+import { __dynamicImportTransform } from 'https://cdn.example.com/ttsc-1.2.0.js'
+import { __UMDBindCheck } from 'https://cdn.example.com/ttsc-1.2.0.js'
+__dynamicImportTransform(JSON.parse('{"after":true,"importHelpers":"auto"}'), x, __dynamicImportNative, __UMDBindCheck)
+function __dynamicImportNative(path) {
+    return import(path)
+}
+```
