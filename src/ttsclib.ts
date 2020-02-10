@@ -5,7 +5,12 @@
  * and expected to run in any ES2020 compatible environment (with console.warn).
  */
 
-import { PluginConfig, BareModuleRewriteUMD, BareModuleRewriteObject, CustomTransformationContext } from './core'
+import {
+    BareModuleRewriteUMD,
+    CustomTransformationContext,
+    NormalizedPluginConfig,
+    NormalizedBareModuleRewrite,
+} from './core'
 
 /**
  * This function is a helper for UMD transform.
@@ -78,7 +83,7 @@ export function __esModuleInterop(mod: object) {
  * @param dynamicImport dynamic importer
  */
 export function __dynamicImportTransform(
-    config: PluginConfig,
+    config: NormalizedPluginConfig,
     _path: unknown,
     dynamicImport: (path: string) => Promise<unknown>,
     UMDBindCheck: typeof __UMDBindCheck,
@@ -120,7 +125,7 @@ export function __dynamicImportTransform(
 
 export function __customDynamicImportHelper(
     _: typeof __dynamicImportTransform,
-    c: PluginConfig,
+    c: NormalizedPluginConfig,
     d: (x: string) => Promise<unknown>,
     u: typeof __UMDBindCheck,
 ) {
@@ -151,45 +156,55 @@ type ModuleSpecifierTransformResult =
  * @internal
  */
 export function moduleSpecifierTransform(
-    context: {
-        parseRegExp: (string: string) => RegExp | null
-    } & Pick<CustomTransformationContext<any>, 'config' | 'path' | 'queryWellknownUMD' | 'queryPackageVersion'>,
-    opt = context.config.bareModuleRewrite,
+    context: Readonly<
+        {
+            parseRegExp: (string: string) => RegExp | null
+        } & Pick<CustomTransformationContext<any>, 'config' | 'path' | 'queryWellknownUMD' | 'queryPackageVersion'>
+    >,
+    opt: NormalizedBareModuleRewrite = context.config.bareModuleRewrite || { type: 'simple', enum: 'umd' },
 ): ModuleSpecifierTransformResult {
-    enum BareModuleRewriteSimpleEnumLocal {
-        snowpack = 'snowpack',
-        umd = 'umd',
-        unpkg = 'unpkg',
-        pikacdn = 'pikacdn',
-    }
-    const BareModuleRewriteSimple: BareModuleRewriteSimpleEnum = BareModuleRewriteSimpleEnumLocal
-    if (opt === false) return { type: 'noop' }
+    const noop = { type: 'noop' } as const
+    if (opt.type === 'noop') return noop
+
     const { path, config, queryWellknownUMD, parseRegExp, queryPackageVersion } = context
     if (isBrowserCompatibleModuleSpecifier(path)) {
-        if (path === '.') return { type: 'noop' }
-        if (config.appendExtensionName === false) return { type: 'noop' }
-        if (config.appendExtensionNameForRemote !== true && isHTTPModuleSpecifier(path)) return { type: 'noop' }
+        if (path === '.') return noop
+        if (config.appendExtensionName === false) return noop
+        if (config.appendExtensionNameForRemote !== true && isHTTPModuleSpecifier(path)) return noop
         const nextPath = appendExtensionName(
             path,
             config.appendExtensionName === true ? '.js' : config.appendExtensionName ?? '.js',
         )
         return { type: 'rewrite', nextPath: nextPath }
     }
-    switch (opt) {
-        case BareModuleRewriteSimple.snowpack:
-            return { nextPath: `${config.webModulePath ?? '/web_modules/'}${path}.js`, type: 'rewrite' }
-        case BareModuleRewriteSimple.pikacdn:
-        case BareModuleRewriteSimple.unpkg: {
-            const version = queryPackageVersion(path)
-            const table = {
-                [BareModuleRewriteSimple.pikacdn]: 'https://cdn.pika.dev/%1@%2',
-                [BareModuleRewriteSimple.unpkg]: 'https://unpkg.com/%1@%2/?module',
+    switch (opt.type) {
+        case 'simple': {
+            const e = opt.enum
+            switch (e) {
+                case 'snowpack':
+                    return { nextPath: `${config.webModulePath ?? '/web_modules/'}${path}.js`, type: 'rewrite' }
+                case 'pikacdn':
+                case 'unpkg': {
+                    const version = queryPackageVersion(path)
+                    return {
+                        type: 'rewrite',
+                        nextPath: (e === 'pikacdn' ? 'https://cdn.pika.dev/%1@%2' : 'https://unpkg.com/%1@%2/?module')
+                            .replace('%1', path)
+                            .replace('%2', version || 'latest'),
+                    }
+                }
+                case 'umd':
+                    const umdName = importPathToUMDName(path)
+                    if (!umdName) return { type: 'error', reason: 'Cannot transform this import path to a UMD name' }
+                    return moduleSpecifierTransform(context, { type: 'umd', target: umdName })
+                default:
+                    return {
+                        type: 'error',
+                        reason: 'unreachable case default at type simple in moduleSpecifierTransform',
+                    }
             }
-            return { nextPath: table[opt].replace('%1', path).replace('%2', version || 'latest'), type: 'rewrite' }
         }
-        case BareModuleRewriteSimple.umd:
-        // ? the default
-        case undefined: {
+        case 'umd': {
             const nextPath = importPathToUMDName(path)
             if (!nextPath) {
                 const err = `The transformer doesn't know how to transform this module specifier. Please specify the transform rule in the config.`
@@ -197,42 +212,46 @@ export function moduleSpecifierTransform(
             }
             return { type: 'umd', target: nextPath, globalObject: config.globalObject }
         }
-        default: {
-            const rules: Record<string, BareModuleRewriteObject> = opt
-            for (const rule in rules) {
-                const ruleValue = rules[rule]
+        case 'url': {
+            const [ns, _pkg] = path.split('/')
+            const pkg = ns.startsWith('@') ? `${ns}/${_pkg}` : ns
+
+            const { noVersion, withVersion } = opt
+            const version = queryPackageVersion(path)
+            let string: string | undefined = void 0
+            if (version && withVersion) string = withVersion.replace(/\$version\$/g, version)
+            if ((version && !withVersion && noVersion) || (!version && noVersion)) string = noVersion
+            if (string) return { type: 'rewrite', nextPath: string.replace(/\$packageName\$/g, pkg) }
+            return {
+                type: 'error',
+                reason: `The rule is too ambiguous so don't know how to transform this path`,
+            }
+        }
+        case 'complex': {
+            for (const [rule, ruleValue] of opt.config) {
                 let regexp: RegExp | null | undefined = undefined
                 if (rule.startsWith('/')) {
                     regexp = parseRegExp(rule)
                     if (!regexp) console.error('Might be an invalid regexp:', rule)
                 }
-                if (regexp && path.match(regexp)) {
-                    if (ruleValue === false) return { type: 'noop' }
-                    if (typeof ruleValue === 'string') return moduleSpecifierTransform(context, ruleValue)
-                    const nextPath = path.replace(regexp, ruleValue.target)
-                    if (!nextPath)
-                        return {
-                            type: 'error',
-                            reason: 'The transform result is an empty string. Skipped.',
-                        }
-                    return {
-                        type: 'umd',
-                        target: nextPath,
-                        globalObject: ruleValue.globalObject ?? config.globalObject,
-                    }
-                } else if (rule === path) {
-                    if (ruleValue === false) return { type: 'noop' }
-                    if (typeof ruleValue === 'string') return moduleSpecifierTransform(context, ruleValue)
-                    return {
-                        type: 'umd',
-                        target: ruleValue.target,
-                        globalObject: ruleValue.globalObject ?? config.globalObject,
-                    }
+                const matching = (regexp && path.match(regexp)) || rule === path
+                if (!matching) continue
+
+                if (ruleValue.type !== 'umd') return moduleSpecifierTransform(context, ruleValue)
+
+                const nextPath = rule === path ? ruleValue.target : path.replace(regexp!, ruleValue.target)
+                if (!nextPath) return { type: 'error', reason: 'The transform result is an empty string' }
+                return {
+                    type: 'umd',
+                    target: nextPath,
+                    globalObject: ruleValue.globalObject ?? config.globalObject,
                 }
             }
+            return noop
         }
+        default:
+            return { type: 'error', reason: 'unreachable case in moduleSpecifierTransform' }
     }
-    return { type: 'noop' }
     function isBrowserCompatibleModuleSpecifier(path: string) {
         return isHTTPModuleSpecifier(path) || isLocalModuleSpecifier(path)
     }

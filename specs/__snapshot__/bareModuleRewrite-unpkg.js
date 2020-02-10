@@ -33,7 +33,7 @@ import("./a.js");
 import('https://example.com');
 // dynamic dynamic import
 const y = '';
-__dynamicImportTransform(JSON.parse("{\"after\":true,\"bareModuleRewrite\":\"unpkg\"}"), y, __dynamicImportNative, __UMDBindCheck);
+__dynamicImportTransform(JSON.parse("{\"after\":true,\"bareModuleRewrite\":{\"enum\":\"unpkg\",\"type\":\"simple\"}}"), y, __dynamicImportNative, __UMDBindCheck);
 // invalid dynamic import (invalid currently)
 __dynamicImport2Ary("This dynamic import has more than 1 arguments and don't know how to transform", y, 'second argument');
 function __dynamicImportNative(path) {
