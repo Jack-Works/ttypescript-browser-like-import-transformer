@@ -1,5 +1,5 @@
-import { __UMDBindCheck as __UMDBindCheck } from "https://unpkg.com/@magic-works/ttypescript-browser-like-import-transformer@1.2.0/es/ttsclib.js";
-import { __dynamicImportTransform as __dynamicImportTransform } from "https://unpkg.com/@magic-works/ttypescript-browser-like-import-transformer@1.2.0/es/ttsclib.js";
+import { __UMDBindCheck as __UMDBindCheck } from "https://unpkg.com/@magic-works/ttypescript-browser-like-import-transformer@1.3.0/es/ttsclib.js";
+import { __dynamicImportTransform as __dynamicImportTransform } from "https://unpkg.com/@magic-works/ttypescript-browser-like-import-transformer@1.3.0/es/ttsclib.js";
 const a = __UMDBindCheck(globalThis.a, ["default"], "a", "globalThis.a", false).default;
 const b = __UMDBindCheck(globalThis.b, ["default"], "b", "globalThis.b", false).default;
 const { c, d } = __UMDBindCheck(globalThis.b, ["c", "d"], "b", "globalThis.b", false);
