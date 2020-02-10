@@ -1,4 +1,3 @@
-const helperURL = 'https://unpkg.com/@magic-works/ttypescript-browser-like-import-transformer@$version$/es/ttsclib.js'
 import {
     TransformationContext,
     SourceFile,
@@ -42,10 +41,11 @@ type Context<T extends Node> = {
     context: TransformationContext
     node: T
     queryWellknownUMD: (path: string) => string | undefined
-    queryImportMap: (opt: ImportMapFunctionOpts) => string | null
-    version: string
+    importMapResolve: (opt: ImportMapFunctionOpts) => string | null
+    queryPackageVersion(pkg: string): string | null
     ttsclib: typeof import('./ttsclib')
 }
+export type CustomTransformationContext<T extends Node> = Context<T>
 const _with = <T extends Node>(ctx: Context<any>, node: T) => ({ ...ctx, node } as Context<T>)
 /**
  * Create the Transformer
@@ -53,7 +53,7 @@ const _with = <T extends Node>(ctx: Context<any>, node: T) => ({ ...ctx, node } 
  */
 export default function createTransformer(
     ts: ts,
-    core: Pick<Context<any>, 'queryWellknownUMD' | 'ttsclib' | 'version' | 'queryImportMap'>,
+    core: Pick<Context<any>, 'queryWellknownUMD' | 'ttsclib' | 'queryPackageVersion' | 'importMapResolve'>,
 ) {
     // ? Can't rely on the ts.Program because don't want to create on during the test.
     return function(_program: Pick<Program, 'getCurrentDirectory'>, config: PluginConfig) {
@@ -62,7 +62,7 @@ export default function createTransformer(
             return (sourceFile: SourceFile) => {
                 const importMapOverwritten: typeof import('./ttsclib').moduleSpecifierTransform = function(ctx, opt) {
                     if (!config.importMap) return core.ttsclib.moduleSpecifierTransform(ctx, opt)
-                    const result = core.queryImportMap({
+                    const result = core.importMapResolve({
                         config,
                         sourceFilePath: sourceFile.fileName,
                         currentWorkingDirectory: _program.getCurrentDirectory(),
@@ -597,11 +597,11 @@ const topLevelScopedHelperMap = new WeakMap<
     Map<string | ((...args: any) => void), [Identifier, Statement]>
 >()
 function createTopLevelScopedHelper<F extends string | ((...args: any[]) => any)>(
-    context: Pick<Context<any>, 'ts' | 'sourceFile' | 'config' | 'ttsclib' | 'version'>,
+    context: Pick<Context<any>, 'ts' | 'sourceFile' | 'config' | 'ttsclib' | 'queryPackageVersion'>,
     helper: F | string,
     additionDeclarations: FunctionDeclaration[],
 ): readonly [Identifier, (...args: CastArray<LevelUpArgs<Parameters<CastFunction<F>>>>) => Expression] {
-    const { config, ts, sourceFile, ttsclib, version } = context
+    const { config, ts, sourceFile, ttsclib, queryPackageVersion } = context
     const result = topLevelScopedHelperMap.get(sourceFile)?.get(helper)
     if (result) return [result[0], (...args: any) => ts.createCall(result[0], void 0, args)] as const
     const _f = parseJS(ts, helper.toString(), ts.isFunctionDeclaration)
@@ -611,6 +611,8 @@ function createTopLevelScopedHelper<F extends string | ((...args: any[]) => any)
     const uniqueName = ts.createFileLevelUniqueName(fnName)
     const returnValue = [uniqueName, (...args: any) => ts.createCall(uniqueName, void 0, args)] as const
     if (fnName in ttsclib && config.importHelpers !== 'inline') {
+        const helperURL =
+            'https://unpkg.com/@magic-works/ttypescript-browser-like-import-transformer@$version$/es/ttsclib.js'
         const url = config.importHelpers === 'auto' ? helperURL : config.importHelpers ?? helperURL
         // ? import { __helperName as uniqueName } from 'url'
         const importDeclaration = ts.createImportDeclaration(
@@ -620,7 +622,12 @@ function createTopLevelScopedHelper<F extends string | ((...args: any[]) => any)
                 void 0,
                 ts.createNamedImports([ts.createImportSpecifier(uniqueName, ts.createIdentifier(fnName))]),
             ),
-            ts.createLiteral(url.replace('$version$', version)),
+            ts.createLiteral(
+                url.replace(
+                    '$version$',
+                    queryPackageVersion('@magic-works/ttypescript-browser-like-import-transformer') || 'latest',
+                ),
+            ),
         )
         writeSourceFileMeta(sourceFile, topLevelScopedHelperMap, new Map(), x =>
             x.set(helper, [uniqueName, importDeclaration]),

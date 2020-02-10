@@ -1,4 +1,4 @@
-import { __UMDBindCheck as __UMDBindCheck } from "https://unpkg.com/@magic-works/ttypescript-browser-like-import-transformer@1.1.0/es/ttsclib.js";
+import { __UMDBindCheck as __UMDBindCheck } from "https://unpkg.com/@magic-works/ttypescript-browser-like-import-transformer@1.2.0/es/ttsclib.js";
 const x = __UMDBindCheck(globalThis.MaterialUI.core, ["default"], "@material-ui/core", "globalThis.MaterialUI.core", false).default;
 const i = __UMDBindCheck(globalThis.MaterialUI.icons, ["default"], "@material-ui/icons", "globalThis.MaterialUI.icons", false).default;
 const y = __UMDBindCheck(globalThis.lodash, ["default"], "lodash", "globalThis.lodash", false).default;

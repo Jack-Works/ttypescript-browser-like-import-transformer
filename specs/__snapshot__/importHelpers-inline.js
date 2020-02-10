@@ -5,10 +5,7 @@ function __dynamicImportTransform(config, _path, dynamicImport, UMDBindCheck) {
         _path = String(_path);
     const path = _path;
     const result = moduleSpecifierTransform({
-        config, path, queryWellknownUMD: () => void 0, parseRegExp: () => {
-            console.warn("RegExp rule is not supported in runtime yet");
-            return null;
-        },
+        config, path, queryWellknownUMD: () => void 0, parseRegExp: () => (console.warn("RegExp rule is not supported in runtime yet"), null), queryPackageVersion: () => null,
     });
     const header = `ttypescript-browser-like-import-transformer: Runtime transform error:`;
     switch (result.type) {
@@ -42,7 +39,7 @@ function __dynamicImportTransform(config, _path, dynamicImport, UMDBindCheck) {
         const BareModuleRewriteSimple = BareModuleRewriteSimpleEnumLocal;
         if (opt === false)
             return { type: "noop" };
-        const { path, config, queryWellknownUMD } = context;
+        const { path, config, queryWellknownUMD, parseRegExp, queryPackageVersion } = context;
         if (isBrowserCompatibleModuleSpecifier(path)) {
             if (path === ".")
                 return { type: "noop" };
@@ -54,13 +51,14 @@ function __dynamicImportTransform(config, _path, dynamicImport, UMDBindCheck) {
             return { type: "rewrite", nextPath: nextPath };
         }
         switch (opt) {
-            case BareModuleRewriteSimple.snowpack:
+            case BareModuleRewriteSimple.snowpack: return { nextPath: `${(_b = config.webModulePath) !== null && _b !== void 0 ? _b : "/web_modules/"}${path}.js`, type: "rewrite" };
             case BareModuleRewriteSimple.pikacdn:
             case BareModuleRewriteSimple.unpkg: {
+                const version = queryPackageVersion(path);
                 const table = {
-                    [BareModuleRewriteSimple.pikacdn]: "https://cdn.pika.dev/%1", [BareModuleRewriteSimple.unpkg]: "https://unpkg.com/%1@latest/?module", [BareModuleRewriteSimple.snowpack]: `${(_b = config.webModulePath) !== null && _b !== void 0 ? _b : "/web_modules/"}%1.js`,
+                    [BareModuleRewriteSimple.pikacdn]: "https://cdn.pika.dev/%1@%2", [BareModuleRewriteSimple.unpkg]: "https://unpkg.com/%1@%2/?module",
                 };
-                return { nextPath: table[opt].replace("%1", path), type: "rewrite" };
+                return { nextPath: table[opt].replace("%1", path).replace("%2", version || "latest"), type: "rewrite" };
             }
             case BareModuleRewriteSimple.umd:
             case undefined: {
@@ -77,7 +75,7 @@ function __dynamicImportTransform(config, _path, dynamicImport, UMDBindCheck) {
                     const ruleValue = rules[rule];
                     let regexp = undefined;
                     if (rule.startsWith("/")) {
-                        regexp = context.parseRegExp(rule);
+                        regexp = parseRegExp(rule);
                         if (!regexp)
                             console.error("Might be an invalid regexp:", rule);
                     }

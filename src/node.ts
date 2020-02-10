@@ -1,6 +1,9 @@
+/**
+ * In this file there some host helper functions that must run in node
+ */
 import creatTransform, { ImportMapFunctionOpts } from './core'
 import * as ts from 'typescript'
-import type {} from 'typescript'
+// import type {} from 'typescript'
 import * as ttsclib from './ttsclib'
 import { queryWellknownUMD } from './well-known-umd'
 import { readFileSync } from 'fs'
@@ -8,9 +11,21 @@ import { join, relative, posix } from 'path'
 export default creatTransform(ts, {
     queryWellknownUMD,
     ttsclib,
-    version: JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf-8')).version,
-    queryImportMap: importMapResolve,
+    importMapResolve,
+    queryPackageVersion,
 })
+
+function queryPackageVersion(path: string) {
+    const [a, b] = path.split('/')
+    // ? this may not work for node 13 package exports
+    const c = (a.startsWith('@') ? `${a}/${b}` : a) + '/package.json'
+    try {
+        if (path === '@magic-works/ttypescript-browser-like-import-transformer')
+            return require('../package.json').version
+        return JSON.parse(readFileSync(require.resolve(c), 'utf-8')).version
+    } catch {}
+    return null
+}
 
 /**
  * @experimental I don't know if it is working correctly...
@@ -48,12 +63,11 @@ function importMapResolve(opt: ImportMapFunctionOpts): string | null {
     map = lib.normalizeImportMap(map, imaginaryImportMapPath)
     // console.log({ rootPath, imaginarySourceRoot, importMapPath, imaginaryImportMapPath, sourceFileRelatedToRootPath, imaginarySourceFilePath, map, moduleSpecifier })
     try {
-        let resolved = lib
-            .resolveImport({
-                specifier: moduleSpecifier,
-                importer: imaginarySourceFilePath,
-                importMap: map,
-            })
+        let resolved = lib.resolveImport({
+            specifier: moduleSpecifier,
+            importer: imaginarySourceFilePath,
+            importMap: map,
+        })
         // ? e.g. ../../web_modules/x.js
         // const resolvedPathRelatedToModule = posix.relative(imaginarySourceFilePath, resolved)
         // console.log({ resolvedPathRelatedToModule, resolved })

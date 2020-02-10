@@ -5,7 +5,7 @@
  * and expected to run in any ES2020 compatible environment (with console.warn).
  */
 
-import { PluginConfig, BareModuleRewriteUMD, BareModuleRewriteObject } from './core'
+import { PluginConfig, BareModuleRewriteUMD, BareModuleRewriteObject, CustomTransformationContext } from './core'
 
 /**
  * This function is a helper for UMD transform.
@@ -89,10 +89,8 @@ export function __dynamicImportTransform(
         config,
         path,
         queryWellknownUMD: () => void 0,
-        parseRegExp: () => {
-            console.warn('RegExp rule is not supported in runtime yet')
-            return null
-        },
+        parseRegExp: () => (console.warn('RegExp rule is not supported in runtime yet'), null),
+        queryPackageVersion: () => null,
     })
     const header = `ttypescript-browser-like-import-transformer: Runtime transform error:`
     switch (result.type) {
@@ -154,11 +152,8 @@ type ModuleSpecifierTransformResult =
  */
 export function moduleSpecifierTransform(
     context: {
-        config: PluginConfig
-        path: string
-        queryWellknownUMD: (path: string) => string | undefined
         parseRegExp: (string: string) => RegExp | null
-    },
+    } & Pick<CustomTransformationContext<any>, 'config' | 'path' | 'queryWellknownUMD' | 'queryPackageVersion'>,
     opt = context.config.bareModuleRewrite,
 ): ModuleSpecifierTransformResult {
     enum BareModuleRewriteSimpleEnumLocal {
@@ -169,7 +164,7 @@ export function moduleSpecifierTransform(
     }
     const BareModuleRewriteSimple: BareModuleRewriteSimpleEnum = BareModuleRewriteSimpleEnumLocal
     if (opt === false) return { type: 'noop' }
-    const { path, config, queryWellknownUMD } = context
+    const { path, config, queryWellknownUMD, parseRegExp, queryPackageVersion } = context
     if (isBrowserCompatibleModuleSpecifier(path)) {
         if (path === '.') return { type: 'noop' }
         if (config.appendExtensionName === false) return { type: 'noop' }
@@ -182,14 +177,15 @@ export function moduleSpecifierTransform(
     }
     switch (opt) {
         case BareModuleRewriteSimple.snowpack:
+            return { nextPath: `${config.webModulePath ?? '/web_modules/'}${path}.js`, type: 'rewrite' }
         case BareModuleRewriteSimple.pikacdn:
         case BareModuleRewriteSimple.unpkg: {
+            const version = queryPackageVersion(path)
             const table = {
-                [BareModuleRewriteSimple.pikacdn]: 'https://cdn.pika.dev/%1',
-                [BareModuleRewriteSimple.unpkg]: 'https://unpkg.com/%1@latest/?module',
-                [BareModuleRewriteSimple.snowpack]: `${config.webModulePath ?? '/web_modules/'}%1.js`,
+                [BareModuleRewriteSimple.pikacdn]: 'https://cdn.pika.dev/%1@%2',
+                [BareModuleRewriteSimple.unpkg]: 'https://unpkg.com/%1@%2/?module',
             }
-            return { nextPath: table[opt].replace('%1', path), type: 'rewrite' }
+            return { nextPath: table[opt].replace('%1', path).replace('%2', version || 'latest'), type: 'rewrite' }
         }
         case BareModuleRewriteSimple.umd:
         // ? the default
@@ -207,7 +203,7 @@ export function moduleSpecifierTransform(
                 const ruleValue = rules[rule]
                 let regexp: RegExp | null | undefined = undefined
                 if (rule.startsWith('/')) {
-                    regexp = context.parseRegExp(rule)
+                    regexp = parseRegExp(rule)
                     if (!regexp) console.error('Might be an invalid regexp:', rule)
                 }
                 if (regexp && path.match(regexp)) {
