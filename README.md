@@ -101,26 +101,25 @@ import 'https://polyfill.io/'
 import 'https://polyfill.io/.js'
 ```
 
-### `bareModuleRewrite`?: false | BareModuleRewriteSimple | Record<string, BareModuleRewriteObject>
+### `bareModuleRewrite`?: false | BareModuleRewriteSimple | BareModuleRewriteURL | Record<string, BareModuleRewriteObject>
 
 This is the most powerful part of this transformer. You can specify the transform rule of bare imports (like `import 'React'`) to the form that browser can recognize.
 
 -   `false`: disable the transform
--   `BareModuleRewriteSimple`: See `enum BareModuleRewriteSimple` below
+-   `'snowpack'`: If you are using snowpack (https://github.com/pikapkg/snowpack)
+-   `'umd'`: Try to get imports from a global object.
+-   `'unpkg'`: Try to transform to https://unpkg.com/package@latest/index.js?module
+-   `'pikacdn'`: Try to transform to https://cdn.pika.dev/package
+-   `BareModuleRewriteURL`: See BareModuleRewriteURL below
 -   `Record<string, BareModuleRewriteObject>`: See "advance options" below
 
-##### enum BareModuleRewriteSimple
-
 ```ts
-enum BareModuleRewriteSimple {
-    // If you are using snowpack (https://github.com/pikapkg/snowpack)
-    snowpack = 'snowpack',
-    // Try to get imports from a global object.
-    umd = 'umd',
-    // Try to transform to https://unpkg.com/package@latest/index.js?module
-    unpkg = 'unpkg',
-    // Try to transform to https://cdn.pika.dev/package
-    pikacdn = 'pikacdn',
+type BareModuleRewriteURL = {
+    type: 'url'
+    // https://my-cdn.dev/$packageName$@$version$
+    withVersion?: string
+    // https://my-cdn.dev/$packageName$?latest
+    noVersion?: string
 }
 ```
 
@@ -144,7 +143,7 @@ You can use two kinds of matching rule to matching your import paths.
 #### BareModuleRewriteObject
 
 ```ts
-type BareModuleRewriteObject = false | BareModuleRewriteSimple | BareModuleRewriteUMD
+type BareModuleRewriteObject = false | BareModuleRewriteURL | BareModuleRewriteSimple | BareModuleRewriteUMD
 type BareModuleRewriteUMD = {
     // Rewrite as UMD
     type: 'umd'
@@ -191,6 +190,24 @@ import x from 'https://unpkg.com/react@latest/?module'
 import x from 'react'
 // after
 import x from 'https://cdn.pika.dev/react'
+```
+
+##### `bareModuleRewrite: { type: 'url', withVersion: 'std:$packageName$@$version$', noVersion: 'std:$packageName$' }`
+
+```ts
+// before
+import x from '@material-ui/core'
+import i from '@material-ui/icons'
+import y from 'lodash'
+import z from 'lodash-es'
+import w from 'typescript'
+
+// after
+import x from 'std:@material-ui/core'
+import i from 'std:@material-ui/icons'
+import y from 'std:lodash@4.17.15'
+import z from 'std:lodash-es'
+import w from 'std:typescript@3.8.0-dev.20200208'
 ```
 
 ##### `bareModuleRewrite: "umd"`

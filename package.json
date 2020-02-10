@@ -1,6 +1,6 @@
 {
     "name": "@magic-works/ttypescript-browser-like-import-transformer",
-    "version": "1.2.0",
+    "version": "1.3.0",
     "description": "A custom transformer that can be used with ttypescript to transform ts imports to browser style imports",
     "main": "cjs/node.js",
     "repository": "https://github.com/Jack-Works/ttypescript-browser-like-import-transformer",
@@ -10,9 +10,9 @@
         "release": "standard-version",
         "test": "node ./cjs/run-tests.js",
         "start:cjs": "tsc -w -p src",
-        "start:es": "tsc -w -p src --module ES2016 --outDir ./es",
+        "start:es": "tsc -w -p src --module ESNext --outDir ./es",
         "build:cjs": "tsc -p src",
-        "build:es": "tsc -p src --module ES2016 --outDir ./es"
+        "build:es": "tsc -p src --module ESNext --outDir ./es"
     },
     "standard-version": {
         "skip": {

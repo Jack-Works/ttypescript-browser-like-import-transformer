@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## 1.3.0 (2020-02-10)
+
+
+### Features
+
+* add a new option in bareModuleRewrite close [#2](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/issues/2) ([fdbf6df](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/commit/fdbf6df3e70c76b5d19e0f00dc522067c8a0d72b))
+* support version locking if possible close [#1](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/issues/1) ([41b94ed](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/commit/41b94ed70aa4ce482365859584056c6557d6d153))
+
 ## 1.2.0 (2020-02-09)
 
 
