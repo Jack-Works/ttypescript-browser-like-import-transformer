@@ -79,6 +79,12 @@ async function worker(script: WorkerParam = workerData) {
                 },
             })
             outputText = result.outputText
+            const diags = ts.formatDiagnostics(result.diagnostics || [], {
+                getCanonicalFileName: () => script.path,
+                getCurrentDirectory: () => '/tmp/',
+                getNewLine: () => '\n',
+            })
+            if (result.diagnostics?.length) outputText += '/* Diagnostics:' + diags + '*/'
         } catch (e) {
             if (e instanceof ConfigError) outputText = '// ' + e.message
             else throw e

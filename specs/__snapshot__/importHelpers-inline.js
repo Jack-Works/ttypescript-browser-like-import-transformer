@@ -11,7 +11,7 @@ function __dynamicImportTransform(config, _path, dynamicImport, UMDBindCheck) {
     switch (result.type) {
         case "noop": return dynamicImport(path);
         case "error":
-            console.error(header, result.reason, `raw specifier:`, path);
+            console.error(header, result.message, `raw specifier:`, path);
             return dynamicImport(path);
         case "rewrite": return dynamicImport(result.nextPath);
         case "umd": {
@@ -29,6 +29,15 @@ function __dynamicImportTransform(config, _path, dynamicImport, UMDBindCheck) {
     }
     function moduleSpecifierTransform(context, opt = context.config.bareModuleRewrite || { type: "simple", enum: "umd" }) {
         var _a, _b, _c;
+        let Diag;
+        (function (Diag) {
+            Diag[Diag["TransformToUMDFailed"] = 392859] = "TransformToUMDFailed";
+            Diag[Diag["TransformToUMDFailedCustom"] = 392860] = "TransformToUMDFailedCustom";
+        })(Diag || (Diag = {}));
+        const header = "@magic-works/ttypescript-browser-like-import-transformer: ";
+        const message = {
+            [Diag.TransformToUMDFailed]: header + "Failed to transform the path {0} to UMD import declaration.", [Diag.TransformToUMDFailedCustom]: header + "Failed to transform the path {0} to UMD import declaration. After applying the rule {1}, the result is an empty string.",
+        };
         const noop = { type: "noop" };
         if (opt.type === "noop")
             return noop;
@@ -58,19 +67,15 @@ function __dynamicImportTransform(config, _path, dynamicImport, UMDBindCheck) {
                     case "umd":
                         const umdName = importPathToUMDName(path);
                         if (!umdName)
-                            return { type: "error", reason: "Cannot transform this import path to a UMD name" };
+                            return error(Diag.TransformToUMDFailed, path, "");
                         return moduleSpecifierTransform(context, { type: "umd", target: umdName });
-                    default: return {
-                        type: "error", reason: "unreachable case default at type simple in moduleSpecifierTransform",
-                    };
+                    default: throw new Error("Unreachable case");
                 }
             }
             case "umd": {
                 const nextPath = importPathToUMDName(path);
-                if (!nextPath) {
-                    const err = `The transformer doesn't know how to transform this module specifier. Please specify the transform rule in the config.`;
-                    return { type: "error", reason: err };
-                }
+                if (!nextPath)
+                    return error(Diag.TransformToUMDFailed, path, "");
                 return { type: "umd", target: nextPath, globalObject: config.globalObject };
             }
             case "url": {
@@ -85,9 +90,7 @@ function __dynamicImportTransform(config, _path, dynamicImport, UMDBindCheck) {
                     string = noVersion;
                 if (string)
                     return { type: "rewrite", nextPath: string.replace(/\$packageName\$/g, pkg) };
-                return {
-                    type: "error", reason: `The rule is too ambiguous so don't know how to transform this path`,
-                };
+                return unreachable("url case");
             }
             case "complex": {
                 for (const [rule, ruleValue] of opt.config) {
@@ -104,14 +107,22 @@ function __dynamicImportTransform(config, _path, dynamicImport, UMDBindCheck) {
                         return moduleSpecifierTransform(context, ruleValue);
                     const nextPath = rule === path ? ruleValue.target : path.replace(regexp, ruleValue.target);
                     if (!nextPath)
-                        return { type: "error", reason: "The transform result is an empty string" };
+                        return error(Diag.TransformToUMDFailedCustom, path, rule);
                     return {
                         type: "umd", target: nextPath, globalObject: (_c = ruleValue.globalObject) !== null && _c !== void 0 ? _c : config.globalObject,
                     };
                 }
                 return noop;
             }
-            default: return { type: "error", reason: "unreachable case in moduleSpecifierTransform" };
+            default: return unreachable(" opt switch");
+        }
+        function error(type, arg0, arg1) {
+            return {
+                type: "error", message: message[type].replace("{0}", arg0).replace("{1}", arg1), code: type, key: Diag[type],
+            };
+        }
+        function unreachable(str) {
+            throw new Error("Unreachable case at " + str);
         }
         function isBrowserCompatibleModuleSpecifier(path) {
             return isHTTPModuleSpecifier(path) || isLocalModuleSpecifier(path);

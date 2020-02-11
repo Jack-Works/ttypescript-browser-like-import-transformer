@@ -26,6 +26,8 @@ import {
     BooleanLiteral,
     Program,
     CompilerOptions,
+    DiagnosticWithLocation,
+    DiagnosticMessage,
 } from 'typescript'
 import { BareModuleRewriteSimpleEnum, BareModuleRewriteSimple } from './ttsclib'
 /** All ConfigError should go though this class
@@ -175,7 +177,7 @@ function updateImportExportDeclaration(
     const rewriteStrategy = ttsclib.moduleSpecifierTransform({ ...context, parseRegExp: parseRegExp.bind(ts) }, opt)
     switch (rewriteStrategy.type) {
         case 'error':
-            return [ts.createExpressionStatement(ts.createLiteral(rewriteStrategy.reason)), node]
+            return [ts.createExpressionStatement(ts.createLiteral(rewriteStrategy.message)), node]
         case 'noop':
             return [node]
         case 'rewrite': {
@@ -386,7 +388,7 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
         switch (rewriteStrategy.type) {
             case 'error':
                 const [id] = createTopLevelScopedHelper(ctx, dynamicImportFailedHelper(args), [])
-                return [ts.createCall(id, void 0, [ts.createLiteral(rewriteStrategy.reason), ...args])]
+                return [ts.createCall(id, void 0, [ts.createLiteral(rewriteStrategy.message), ...args])]
             case 'noop':
                 return [node]
             case 'rewrite': {
