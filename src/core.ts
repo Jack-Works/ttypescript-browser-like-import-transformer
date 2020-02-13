@@ -26,8 +26,7 @@ import {
     BooleanLiteral,
     Program,
     CompilerOptions,
-    DiagnosticWithLocation,
-    DiagnosticMessage,
+    PropertyAccessExpression,
 } from 'typescript'
 import { BareModuleRewriteSimpleEnum, BareModuleRewriteSimple } from './ttsclib'
 /** All ConfigError should go though this class
@@ -148,13 +147,35 @@ function unreachable(_x: never): never {
     throw new Error('Unreachable case' + _x)
 }
 function parseRegExp(this: ts, s: string) {
-    const literal = parseJS(this, s, this.isRegularExpressionLiteral)
-    if (!literal) return null
+    const literal = parseJS(this, s, 'expression', this.isRegularExpressionLiteral)
+    if (literal.type !== 'ok') return null
     try {
-        return eval(literal.text)
+        return eval(literal.value.text)
     } catch {
         return null
     }
+}
+const runtimeMessageHeader = '@magic-works/ttypescript-browser-like-import-transformer: '
+function createThrowStatement(ts: ts, type: 'TypeError' | 'SyntaxError', message: string): Statement {
+    return ts.createThrow(
+        ts.createNew(ts.createIdentifier(type), void 0, [ts.createLiteral(runtimeMessageHeader + message)]),
+    )
+}
+function createThrowExpression(...[ts, type, message]: Parameters<typeof createThrowStatement>): Expression {
+    return ts.createCall(
+        ts.createParen(
+            ts.createArrowFunction(
+                undefined,
+                undefined,
+                [],
+                undefined,
+                ts.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
+                ts.createBlock([createThrowStatement(ts, type, message)], true),
+            ),
+        ),
+        undefined,
+        [],
+    )
 }
 //#endregion
 //#region Transformers
@@ -177,7 +198,7 @@ function updateImportExportDeclaration(
     const rewriteStrategy = ttsclib.moduleSpecifierTransform({ ...context, parseRegExp: parseRegExp.bind(ts) }, opt)
     switch (rewriteStrategy.type) {
         case 'error':
-            return [ts.createExpressionStatement(ts.createLiteral(rewriteStrategy.message)), node]
+            return [createThrowStatement(ts, 'SyntaxError', rewriteStrategy.message)]
         case 'noop':
             return [node]
         case 'rewrite': {
@@ -230,7 +251,7 @@ function importOrExportClauseToUMD(
     ctx: Context<ImportClause | NamespaceExport | NamedExports>,
     globalObject = ctx.config.globalObject,
 ): { variableNames: Identifier[]; statements: Statement[] } {
-    const { node, ts, path, sourceFile, context, ttsclib } = ctx
+    const { node, ts, path, context, ttsclib } = ctx
     const [umdAccess, globalIdentifier] = getUMDExpressionForModule(umdName, globalObject, ctx)
     const ids: Identifier[] = []
     const statements: Statement[] = []
@@ -368,14 +389,32 @@ function importOrExportClauseToUMD(
  */
 function getUMDExpressionForModule(
     umdName: string,
-    globalObject: PluginConfig['globalObject'],
+    globalObject: NormalizedPluginConfig['globalObject'],
     ctx: Pick<Context<any>, 'context' | 'sourceFile' | 'ts'>,
 ): [Expression, string] {
-    const { ts } = ctx
+    const { ts, sourceFile } = ctx
     const globalIdentifier = ts.createIdentifier(globalObject === undefined ? 'globalThis' : globalObject)
     const umdAccess = ts.createPropertyAccess(globalIdentifier, umdName)
+    const isSyntaxError =
+        parseJS(
+            ts,
+            `${globalObject}.${umdName}`,
+            'expression',
+            function(node): node is CallExpression | PropertyAccessExpression {
+                return ts.isCallExpression(node) || ts.isPropertyAccessExpression(node)
+            },
+            sourceFile.fileName,
+        ).type === 'syntax error'
+    if (isSyntaxError)
+        return [
+            createThrowExpression(ts, 'SyntaxError', 'Invalid source text after transform: ' + umdName),
+            globalIdentifier.text,
+        ]
     return [umdAccess, globalIdentifier.text]
 }
+const moreThan1ArgumentDynamicImportErrorMessage =
+    runtimeMessageHeader +
+    "Transform rule for this dependencies found, but this dynamic import has more than 1 argument, transformer don't know how to transform that and keep it untouched."
 function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args: Expression[]): Expression[] {
     const { ts, config, node, sourceFile, ttsclib } = ctx
     const [first, ...rest] = args
@@ -399,9 +438,7 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
                     const [id] = createTopLevelScopedHelper(ctx, dynamicImportFailedHelper(args), [])
                     return [
                         ts.createCall(id, void 0, [
-                            ts.createLiteral(
-                                "Transform rule found, but this dynamic import has more than 1 argument, don't know how to transform that.",
-                            ),
+                            ts.createLiteral(moreThan1ArgumentDynamicImportErrorMessage),
                             ...args,
                         ]),
                     ]
@@ -416,19 +453,21 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
     } else {
         if (rest.length !== 0) {
             const [id] = createTopLevelScopedHelper(ctx, dynamicImportFailedHelper(args), [])
-            return [
-                ts.createCall(id, void 0, [
-                    ts.createLiteral("This dynamic import has more than 1 arguments and don't know how to transform"),
-                    ...args,
-                ]),
-            ]
+            return [ts.createCall(id, void 0, [ts.createLiteral(moreThan1ArgumentDynamicImportErrorMessage), ...args])]
         }
         const opt = config.dynamicImportPathRewrite
         if (opt === false) return [node]
+        const moduleSpecifierTransform_ = parseJS(
+            ts,
+            ttsclib.moduleSpecifierTransform.toString(),
+            'statement',
+            ts.isFunctionDeclaration,
+        )
+        if (moduleSpecifierTransform_.type !== 'ok') throw new Error('Invalid state')
         const [dynamicImportTransformIdentifier, createDynamicImportTransform] = createTopLevelScopedHelper(
             ctx,
             ttsclib.__dynamicImportTransform,
-            [parseJS(ts, ttsclib.moduleSpecifierTransform.toString(), ts.isFunctionDeclaration)!],
+            [moduleSpecifierTransform_.value],
         )
         const stringifiedConfig = ts.createCall(ts.createIdentifier('JSON.parse'), void 0, [
             ts.createLiteral(JSON.stringify(config)),
@@ -441,8 +480,9 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
              */
             return [createDynamicImportTransform(stringifiedConfig, first, dynamicImportNative, umdBindCheck)]
         }
-        const f = parseJS(ts, opt.function, ts.isArrowFunction)
-        if (!f) throw new ConfigError('Unable to parse the function. It must be an ArrowFunction. Get: ' + opt.function)
+        const f = parseJS(ts, opt.function, 'expression', ts.isArrowFunction, sourceFile.fileName)
+        if (f.type !== 'ok')
+            throw new ConfigError('Unable to parse the function. It must be an ArrowFunction. Get: ' + opt.function)
         const customFunction =
             topLevelScopedHelperMap.get(sourceFile)?.get('__customImportHelper')?.[0] ||
             ts.createUniqueName('__customImportHelper')
@@ -450,7 +490,7 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
             const decl = ts.createVariableStatement(
                 undefined,
                 ts.createVariableDeclarationList(
-                    [ts.createVariableDeclaration(customFunction, undefined, f)],
+                    [ts.createVariableDeclaration(customFunction, undefined, f.value)],
                     ts.NodeFlags.Const,
                 ),
             )
@@ -619,10 +659,11 @@ function createTopLevelScopedHelper<F extends string | ((...args: any[]) => any)
     const { config, ts, sourceFile, ttsclib, queryPackageVersion } = context
     const result = topLevelScopedHelperMap.get(sourceFile)?.get(helper)
     if (result) return [result[0], (...args: any) => ts.createCall(result[0], void 0, args)] as const
-    const _f = parseJS(ts, helper.toString(), ts.isFunctionDeclaration)
-    if (!_f) throw new Error('helper must be a function declaration')
+    const parseResult = parseJS(ts, helper.toString(), 'statement', ts.isFunctionDeclaration)
+    if (parseResult.type !== 'ok') throw new Error('helper must be a function declaration, found ' + parseResult.error)
+    const parsedFunction = parseResult.value
     // ? if the function name is in the ttsclib, return a import declaration
-    const fnName = _f.name!.text
+    const fnName = parsedFunction.name!.text
     const uniqueName = ts.createFileLevelUniqueName(fnName)
     const returnValue = [uniqueName, (...args: any) => ts.createCall(uniqueName, void 0, args)] as const
     if (fnName in ttsclib && config.importHelpers !== 'inline') {
@@ -650,15 +691,17 @@ function createTopLevelScopedHelper<F extends string | ((...args: any[]) => any)
         return returnValue
     }
     const f = ts.updateFunctionDeclaration(
-        _f,
+        parsedFunction,
         void 0,
         void 0,
-        _f.asteriskToken,
-        ts.createFileLevelUniqueName(_f.name!.text),
+        parsedFunction.asteriskToken,
+        ts.createFileLevelUniqueName(parsedFunction.name!.text),
         void 0,
-        _f.parameters,
+        parsedFunction.parameters,
         void 0,
-        _f.body ? ts.updateBlock(_f.body, [..._f.body.statements, ...additionDeclarations]) : _f.body,
+        parsedFunction.body
+            ? ts.updateBlock(parsedFunction.body, [...parsedFunction.body.statements, ...additionDeclarations])
+            : parsedFunction.body,
     )
     ts.setEmitFlags(f, ts.EmitFlags.NoComments)
     ts.setEmitFlags(f, ts.EmitFlags.NoNestedComments)
@@ -668,15 +711,35 @@ function createTopLevelScopedHelper<F extends string | ((...args: any[]) => any)
 
 function parseJS<T extends Node = Node>(
     ts: ts,
-    x: string,
-    guard: (x: Node) => x is T = (_x): _x is T => true,
-): T | null {
-    const sf = ts.createSourceFile('_internal_.js', x, ts.ScriptTarget.ESNext, false, ts.ScriptKind.JS)
-    let _: Node = sf.getChildAt(0) as SyntaxList
-    _ = _.getChildAt(0)
-    if (guard(_)) return _
-    if (ts.isExpressionStatement(_) && guard(_.expression)) return _.expression
-    return null
+    source: string,
+    kind: 'expression' | 'statement',
+    typeGuard: (node: Node) => node is T = (_node): _node is T => true,
+    fileName: string = '_internal_.js',
+): { type: 'syntax error'; error: string } | { type: 'ok'; value: T } {
+    // force parse in JS mode
+    fileName += '.js'
+    const diagnostics = ts.transpileModule(source, { reportDiagnostics: true, fileName }).diagnostics || []
+    if (diagnostics.length > 0) {
+        return {
+            type: 'syntax error',
+            error: ts.formatDiagnostics(diagnostics, {
+                getCanonicalFileName: () => '',
+                getCurrentDirectory: () => '/tmp',
+                getNewLine: () => '\n',
+            }),
+        }
+    }
+    const sf = ts.createSourceFile(fileName, source, ts.ScriptTarget.ESNext, false, ts.ScriptKind.JS)
+    if (sf.statements.filter(x => !ts.isEmptyStatement(x)).length !== 1)
+        return { type: 'syntax error', error: 'Unexpected statement count ' + sf.statements.length }
+    const [firstStatement] = sf.statements
+    if (kind === 'expression') {
+        if (ts.isExpressionStatement(firstStatement) && typeGuard(firstStatement.expression))
+            return { type: 'ok', value: firstStatement.expression }
+    } else if (typeGuard(firstStatement)) {
+        return { type: 'ok', value: firstStatement }
+    }
+    return { type: 'syntax error', error: 'Unexpected SyntaxKind: ' + ts.SyntaxKind[firstStatement.kind] }
 }
 
 function writeSourceFileMeta<T, E extends T, Q>(

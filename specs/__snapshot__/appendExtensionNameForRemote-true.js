@@ -36,7 +36,7 @@ import("https://example.com.js");
 const y = '';
 __dynamicImportTransform(JSON.parse("{\"after\":true,\"appendExtensionNameForRemote\":true}"), y, __dynamicImportNative, __UMDBindCheck);
 // invalid dynamic import (invalid currently)
-__dynamicImport2Ary("This dynamic import has more than 1 arguments and don't know how to transform", y, 'second argument');
+__dynamicImport2Ary("@magic-works/ttypescript-browser-like-import-transformer: Transform rule for this dependencies found, but this dynamic import has more than 1 argument, transformer don't know how to transform that and keep it untouched.", y, 'second argument');
 function __dynamicImportNative(path) {
     return import(path);
 }

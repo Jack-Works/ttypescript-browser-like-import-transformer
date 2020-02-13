@@ -169,11 +169,9 @@ export function moduleSpecifierTransform(
         TransformToUMDFailed = 392859,
         TransformToUMDFailedCustom,
     }
-    const header = '@magic-works/ttypescript-browser-like-import-transformer: '
     const message = {
-        [Diag.TransformToUMDFailed]: header + 'Failed to transform the path {0} to UMD import declaration.',
+        [Diag.TransformToUMDFailed]: 'Failed to transform the path {0} to UMD import declaration.',
         [Diag.TransformToUMDFailedCustom]:
-            header +
             'Failed to transform the path {0} to UMD import declaration. After applying the rule {1}, the result is an empty string.',
     }
     const noop = { type: 'noop' } as const

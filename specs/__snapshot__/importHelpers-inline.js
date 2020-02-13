@@ -34,9 +34,8 @@ function __dynamicImportTransform(config, _path, dynamicImport, UMDBindCheck) {
             Diag[Diag["TransformToUMDFailed"] = 392859] = "TransformToUMDFailed";
             Diag[Diag["TransformToUMDFailedCustom"] = 392860] = "TransformToUMDFailedCustom";
         })(Diag || (Diag = {}));
-        const header = "@magic-works/ttypescript-browser-like-import-transformer: ";
         const message = {
-            [Diag.TransformToUMDFailed]: header + "Failed to transform the path {0} to UMD import declaration.", [Diag.TransformToUMDFailedCustom]: header + "Failed to transform the path {0} to UMD import declaration. After applying the rule {1}, the result is an empty string.",
+            [Diag.TransformToUMDFailed]: "Failed to transform the path {0} to UMD import declaration.", [Diag.TransformToUMDFailedCustom]: "Failed to transform the path {0} to UMD import declaration. After applying the rule {1}, the result is an empty string.",
         };
         const noop = { type: "noop" };
         if (opt.type === "noop")
