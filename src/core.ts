@@ -58,30 +58,34 @@ export default function createTransformer(
         'queryWellknownUMD' | 'ttsclib' | 'queryPackageVersion' | 'importMapResolve' | 'configParser' | 'ts'
     >,
 ) {
-    const { ts, configParser, importMapResolve, queryPackageVersion, queryWellknownUMD, ttsclib } = core
+    const { ts, configParser, importMapResolve } = core
     // ? Can't rely on the ts.Program because don't want to create on during the test.
     return function(_program: Pick<Program, 'getCurrentDirectory'>, configRaw: PluginConfigNotParsed) {
         return (context: TransformationContext) => {
             configParser.validateConfig(configRaw, context.getCompilerOptions())
             const config = configParser.normalizePluginConfig(configRaw)
             return (sourceFile: SourceFile) => {
-                const importMapOverwritten: typeof import('./ttsclib').moduleSpecifierTransform = function(ctx, opt) {
-                    if (!configRaw.importMap) return ttsclib.moduleSpecifierTransform(ctx, opt)
-                    const result = importMapResolve({
-                        config: configRaw,
-                        sourceFilePath: sourceFile.fileName,
-                        currentWorkingDirectory: _program.getCurrentDirectory(),
-                        moduleSpecifier: ctx.path,
-                        rootDir: context.getCompilerOptions().rootDir!,
-                    })
-                    if (result) return { type: 'rewrite', nextPath: result }
-                    return ttsclib.moduleSpecifierTransform(ctx, opt)
-                }
-                // ? inlie generation is rely on it.
-                importMapOverwritten.toString = () => ttsclib.moduleSpecifierTransform.toString()
-                const ttsclib: typeof import('./ttsclib') = {
+                const ttsclib = {
                     ...core.ttsclib,
-                    moduleSpecifierTransform: importMapOverwritten,
+                    moduleSpecifierTransform: new Proxy(core.ttsclib.moduleSpecifierTransform, {
+                        get(t, k) {
+                            if (k === 'toString') return () => core.ttsclib.moduleSpecifierTransform.toString()
+                            // @ts-ignore
+                            return t[k]
+                        },
+                        apply(t, _, [ctx, opt]: Parameters<typeof import('./ttsclib').moduleSpecifierTransform>) {
+                            if (!configRaw.importMap) return core.ttsclib.moduleSpecifierTransform(ctx, opt)
+                            const result = importMapResolve({
+                                config: configRaw,
+                                sourceFilePath: sourceFile.fileName,
+                                currentWorkingDirectory: _program.getCurrentDirectory(),
+                                moduleSpecifier: ctx.path,
+                                rootDir: context.getCompilerOptions().rootDir!,
+                            })
+                            if (result) return { type: 'rewrite', nextPath: result }
+                            return core.ttsclib.moduleSpecifierTransform(ctx, opt)
+                        },
+                    }),
                 }
 
                 let visitedSourceFile = ts.visitEachChild(sourceFile, visitor, context)
@@ -223,8 +227,13 @@ function updateImportExportDeclaration(
             const nextPath = rewriteStrategy.target
             const globalObject = rewriteStrategy.globalObject
             const clause = ts.isImportDeclaration(node) ? node.importClause : node.exportClause
+            const { umdImportPath } = rewriteStrategy
+            const umdImport = umdImportPath
+                ? [ts.createImportDeclaration(void 0, void 0, void 0, ts.createLiteral(umdImportPath))]
+                : []
             // ? if it have no clause, it must be an ImportDeclaration
             if (!clause) {
+                if (umdImportPath) return umdImport
                 const text = `import "${
                     (node.moduleSpecifier as StringLiteral).text
                 }" is eliminated because it expected to have no side effects in UMD transform.`
@@ -234,7 +243,7 @@ function updateImportExportDeclaration(
             writeSourceFileMeta(sourceFile, hoistUMDImportDeclaration, new Set<Statement>(), _ => {
                 statements.forEach(x => _.add(x))
             })
-            return statements
+            return [...umdImport, ...statements]
         }
         default:
             return unreachable(rewriteStrategy)
@@ -445,8 +454,18 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
                         ]),
                     ]
                 }
-                const [umdAccess] = getUMDExpressionForModule(rewriteStrategy.target, rewriteStrategy.globalObject, ctx)
-                return [ts.createCall(ts.createIdentifier('Promise.resolve'), undefined, [umdAccess])]
+                const { globalObject, umdImportPath } = rewriteStrategy
+                const warning =
+                    runtimeMessageHeader +
+                    "umdImportPath doesn't work for dynamic import. You must load it by yourself. Found config: " +
+                    umdImportPath
+                const warningCall = ts.createCall(ts.createIdentifier('console.warn'), void 0, [
+                    ts.createLiteral(warning),
+                ])
+                const [umdAccess] = getUMDExpressionForModule(rewriteStrategy.target, globalObject, ctx)
+                const param = [umdAccess]
+                if (umdImportPath) param.push(warningCall)
+                return [ts.createCall(ts.createIdentifier('Promise.resolve'), undefined, param)]
             }
             default: {
                 throw new Error('Unreachable case')
@@ -459,13 +478,12 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
         }
         const opt = config.dynamicImportPathRewrite
         if (opt === false) return [node]
-        const moduleSpecifierTransform_ = parseJS(
-            ts,
-            ttsclib.moduleSpecifierTransform.toString(),
-            'statement',
-            ts.isFunctionDeclaration,
-        )
-        if (moduleSpecifierTransform_.type !== 'ok') throw new Error('Invalid state')
+        const source = ttsclib.moduleSpecifierTransform.toString()
+        const moduleSpecifierTransform_ = parseJS(ts, source, 'statement', ts.isFunctionDeclaration)
+        if (moduleSpecifierTransform_.type !== 'ok') {
+            debugger
+            throw new Error('Invalid state' + source)
+        }
         const [dynamicImportTransformIdentifier, createDynamicImportTransform] = createTopLevelScopedHelper(
             ctx,
             ttsclib.__dynamicImportTransform,

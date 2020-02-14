@@ -28,14 +28,18 @@ function __dynamicImportTransform(config, _path, dynamicImport, UMDBindCheck) {
         throw new Error("Unreachable case" + _x);
     }
     function moduleSpecifierTransform(context, opt = context.config.bareModuleRewrite || { type: "simple", enum: "umd" }) {
-        var _a, _b, _c;
+        var _a, _b;
+        const packageNameRegExp = /\$packageName\$/g;
+        const versionRegExp = /\$version\$/g;
+        const umdNameRegExp = /\$umdName\$/g;
         let Diag;
         (function (Diag) {
             Diag[Diag["TransformToUMDFailed"] = 392859] = "TransformToUMDFailed";
             Diag[Diag["TransformToUMDFailedCustom"] = 392860] = "TransformToUMDFailedCustom";
+            Diag[Diag["QueryPackageVersionFailed"] = 392861] = "QueryPackageVersionFailed";
         })(Diag || (Diag = {}));
         const message = {
-            [Diag.TransformToUMDFailed]: "Failed to transform the path {0} to UMD import declaration.", [Diag.TransformToUMDFailedCustom]: "Failed to transform the path {0} to UMD import declaration. After applying the rule {1}, the result is an empty string.",
+            [Diag.TransformToUMDFailed]: "Failed to transform the path {0} to UMD import declaration.", [Diag.QueryPackageVersionFailed]: "Failed to query the package version of import {0}.", [Diag.TransformToUMDFailedCustom]: "Failed to transform the path {0} to UMD import declaration. After applying the rule {1}, the result is an empty string.",
         };
         const noop = { type: "noop" };
         if (opt.type === "noop")
@@ -64,18 +68,21 @@ function __dynamicImportTransform(config, _path, dynamicImport, UMDBindCheck) {
                         };
                     }
                     case "umd":
-                        const umdName = importPathToUMDName(path);
-                        if (!umdName)
+                        const target = importPathToUMDName(path);
+                        const { globalObject } = config;
+                        if (!target)
                             return error(Diag.TransformToUMDFailed, path, "");
-                        return moduleSpecifierTransform(context, { type: "umd", target: umdName });
-                    default: throw new Error("Unreachable case");
+                        const nextOpt = { type: "umd", target, globalObject, umdImportPath: void 0 };
+                        return moduleSpecifierTransform(context, nextOpt);
+                    default: return unreachable("simple type");
                 }
             }
             case "umd": {
-                const nextPath = importPathToUMDName(path);
-                if (!nextPath)
+                const target = importPathToUMDName(path);
+                if (!target)
                     return error(Diag.TransformToUMDFailed, path, "");
-                return { type: "umd", target: nextPath, globalObject: config.globalObject };
+                const [{ globalObject }, { umdImportPath }] = [config, opt];
+                return { type: "umd", target, globalObject, umdImportPath };
             }
             case "url": {
                 const [ns, _pkg] = path.split("/");
@@ -84,11 +91,11 @@ function __dynamicImportTransform(config, _path, dynamicImport, UMDBindCheck) {
                 const version = queryPackageVersion(path);
                 let string = void 0;
                 if (version && withVersion)
-                    string = withVersion.replace(/\$version\$/g, version);
+                    string = withVersion.replace(versionRegExp, version);
                 if ((version && !withVersion && noVersion) || (!version && noVersion))
                     string = noVersion;
                 if (string)
-                    return { type: "rewrite", nextPath: string.replace(/\$packageName\$/g, pkg) };
+                    return { type: "rewrite", nextPath: string.replace(packageNameRegExp, pkg) };
                 return unreachable("url case");
             }
             case "complex": {
@@ -104,12 +111,18 @@ function __dynamicImportTransform(config, _path, dynamicImport, UMDBindCheck) {
                         continue;
                     if (ruleValue.type !== "umd")
                         return moduleSpecifierTransform(context, ruleValue);
-                    const nextPath = rule === path ? ruleValue.target : path.replace(regexp, ruleValue.target);
-                    if (!nextPath)
+                    const target = rule === path ? ruleValue.target : path.replace(regexp, ruleValue.target);
+                    if (!target)
                         return error(Diag.TransformToUMDFailedCustom, path, rule);
-                    return {
-                        type: "umd", target: nextPath, globalObject: (_c = ruleValue.globalObject) !== null && _c !== void 0 ? _c : config.globalObject,
-                    };
+                    const umdName = importPathToUMDName(path);
+                    const version = queryPackageVersion(path);
+                    const { globalObject = config.globalObject, umdImportPath } = ruleValue;
+                    if (!umdName && (target.match(umdNameRegExp) || (umdImportPath === null || umdImportPath === void 0 ? void 0 : umdImportPath.match(umdNameRegExp))))
+                        return error(Diag.TransformToUMDFailed, path, rule);
+                    if (!version && (target.match(versionRegExp) || (umdImportPath === null || umdImportPath === void 0 ? void 0 : umdImportPath.match(versionRegExp))))
+                        return error(Diag.QueryPackageVersionFailed, path, rule);
+                    const [nextTarget, nextUMDImportPath] = [target, umdImportPath || ""].map(x => x.replace(packageNameRegExp, path).replace(umdNameRegExp, umdName).replace(versionRegExp, version));
+                    return { type: "umd", target: nextTarget, globalObject, umdImportPath: nextUMDImportPath };
                 }
                 return noop;
             }
@@ -121,6 +134,7 @@ function __dynamicImportTransform(config, _path, dynamicImport, UMDBindCheck) {
             };
         }
         function unreachable(str) {
+            debugger;
             throw new Error("Unreachable case at " + str);
         }
         function isBrowserCompatibleModuleSpecifier(path) {

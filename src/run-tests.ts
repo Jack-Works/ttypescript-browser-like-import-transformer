@@ -16,20 +16,21 @@ const snapshotDir = join(__dirname, '../specs/__snapshot__/')
 
 if (isMainThread) {
     for (const testFile of readdirSync(dir)) {
-        // worker({ path: join(dir, testFile), filename: testFile }).catch(x => {
-        //     console.error(x)
-        //     process.exit(1)
-        // })
-        const worker = new Worker(__filename, {
-            workerData: { path: join(dir, testFile), filename: testFile } as WorkerParam,
-        })
-        worker.on('error', e => {
-            console.error(e)
+        worker({ path: join(dir, testFile), filename: testFile }).catch(x => {
+            debugger
+            console.error(x)
             process.exit(1)
         })
-        worker.on('exit', code => {
-            if (code !== 0) throw new Error(`Worker stopped with exit code ${code}`)
-        })
+        // const worker = new Worker(__filename, {
+        //     workerData: { path: join(dir, testFile), filename: testFile } as WorkerParam,
+        // })
+        // worker.on('error', e => {
+        //     console.error(e)
+        //     process.exit(1)
+        // })
+        // worker.on('exit', code => {
+        //     if (code !== 0) throw new Error(`Worker stopped with exit code ${code}`)
+        // })
         // // worker.on('message', resolve)
     }
 } else {

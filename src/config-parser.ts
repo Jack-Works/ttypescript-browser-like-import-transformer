@@ -97,9 +97,8 @@ export function normalizePluginConfig(config: PluginConfigNotParsed): Normalized
         return {
             ...config,
             bareModuleRewrite: normalizedBareModuleRewrite(config.bareModuleRewrite),
-            raw: config,
         }
-    return { ...config, bareModuleRewrite: undefined, raw: config }
+    return { ...config, bareModuleRewrite: undefined }
 }
 
 enum BareModuleRewriteSimpleEnumLocal {
@@ -114,7 +113,6 @@ type BareModuleRewriteSimpleEnum = {
 }
 export interface NormalizedPluginConfig extends Omit<PluginConfigNotParsed, 'bareModuleRewrite'> {
     bareModuleRewrite?: NormalizedBareModuleRewrite
-    raw: PluginConfigNotParsed
 }
 export type NormalizedBareModuleRewrite =
     | BareModuleRewriteURL

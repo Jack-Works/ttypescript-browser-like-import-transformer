@@ -158,12 +158,17 @@ export function moduleSpecifierTransform(
     >,
     opt: NormalizedBareModuleRewrite = context.config.bareModuleRewrite || { type: 'simple', enum: 'umd' },
 ): ModuleSpecifierTransformResult {
+    const packageNameRegExp = /\$packageName\$/g
+    const versionRegExp = /\$version\$/g
+    const umdNameRegExp = /\$umdName\$/g
     enum Diag {
         TransformToUMDFailed = 392859,
         TransformToUMDFailedCustom,
+        QueryPackageVersionFailed,
     }
     const message = {
         [Diag.TransformToUMDFailed]: 'Failed to transform the path {0} to UMD import declaration.',
+        [Diag.QueryPackageVersionFailed]: 'Failed to query the package version of import {0}.',
         [Diag.TransformToUMDFailedCustom]:
             'Failed to transform the path {0} to UMD import declaration. After applying the rule {1}, the result is an empty string.',
     }
@@ -198,17 +203,21 @@ export function moduleSpecifierTransform(
                     }
                 }
                 case 'umd':
-                    const umdName = importPathToUMDName(path)
-                    if (!umdName) return error(Diag.TransformToUMDFailed, path, '')
-                    return moduleSpecifierTransform(context, { type: 'umd', target: umdName })
+                    const target = importPathToUMDName(path)
+                    const { globalObject } = config
+                    if (!target) return error(Diag.TransformToUMDFailed, path, '')
+                    // TODO: Collect some common CDN path maybe?
+                    const nextOpt: BareModuleRewriteUMD = { type: 'umd', target, globalObject, umdImportPath: void 0 }
+                    return moduleSpecifierTransform(context, nextOpt)
                 default:
-                    throw new Error('Unreachable case')
+                    return unreachable('simple type')
             }
         }
         case 'umd': {
-            const nextPath = importPathToUMDName(path)
-            if (!nextPath) return error(Diag.TransformToUMDFailed, path, '')
-            return { type: 'umd', target: nextPath, globalObject: config.globalObject }
+            const target = importPathToUMDName(path)
+            if (!target) return error(Diag.TransformToUMDFailed, path, '')
+            const [{ globalObject }, { umdImportPath }] = [config, opt]
+            return { type: 'umd', target, globalObject, umdImportPath }
         }
         case 'url': {
             const [ns, _pkg] = path.split('/')
@@ -217,9 +226,9 @@ export function moduleSpecifierTransform(
             const { noVersion, withVersion } = opt
             const version = queryPackageVersion(path)
             let string: string | undefined = void 0
-            if (version && withVersion) string = withVersion.replace(/\$version\$/g, version)
+            if (version && withVersion) string = withVersion.replace(versionRegExp, version)
             if ((version && !withVersion && noVersion) || (!version && noVersion)) string = noVersion
-            if (string) return { type: 'rewrite', nextPath: string.replace(/\$packageName\$/g, pkg) }
+            if (string) return { type: 'rewrite', nextPath: string.replace(packageNameRegExp, pkg) }
             return unreachable('url case')
         }
         case 'complex': {
@@ -234,13 +243,23 @@ export function moduleSpecifierTransform(
 
                 if (ruleValue.type !== 'umd') return moduleSpecifierTransform(context, ruleValue)
 
-                const nextPath = rule === path ? ruleValue.target : path.replace(regexp!, ruleValue.target)
-                if (!nextPath) return error(Diag.TransformToUMDFailedCustom, path, rule)
-                return {
-                    type: 'umd',
-                    target: nextPath,
-                    globalObject: ruleValue.globalObject ?? config.globalObject,
-                }
+                const target = rule === path ? ruleValue.target : path.replace(regexp!, ruleValue.target)
+                if (!target) return error(Diag.TransformToUMDFailedCustom, path, rule)
+
+                const umdName = importPathToUMDName(path)
+                const version = queryPackageVersion(path)
+                const { globalObject = config.globalObject, umdImportPath } = ruleValue
+                if (!umdName && (target.match(umdNameRegExp) || umdImportPath?.match(umdNameRegExp)))
+                    return error(Diag.TransformToUMDFailed, path, rule)
+                if (!version && (target.match(versionRegExp) || umdImportPath?.match(versionRegExp)))
+                    return error(Diag.QueryPackageVersionFailed, path, rule)
+                const [nextTarget, nextUMDImportPath] = [target, umdImportPath || ''].map(x =>
+                    x
+                        .replace(packageNameRegExp, path)
+                        .replace(umdNameRegExp, umdName!)
+                        .replace(versionRegExp, version!),
+                )
+                return { type: 'umd', target: nextTarget, globalObject, umdImportPath: nextUMDImportPath }
             }
             return noop
         }
@@ -256,6 +275,7 @@ export function moduleSpecifierTransform(
         }
     }
     function unreachable(str: string): never {
+        debugger
         throw new Error('Unreachable case at ' + str)
     }
     function isBrowserCompatibleModuleSpecifier(path: string) {

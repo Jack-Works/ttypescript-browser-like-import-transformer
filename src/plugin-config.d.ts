@@ -116,6 +116,10 @@ export interface BareModuleRewriteUMD {
      * @default "globalThis"
      */
     globalObject?: string
+    /**
+     * should be a URL. Will use a `import 'umdImportPath'` to load the UMD then deconstruct from it.
+     */
+    umdImportPath?: string
 }
 /**
  * Rewrite module to another URL
