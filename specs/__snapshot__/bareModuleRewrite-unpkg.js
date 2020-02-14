@@ -1,5 +1,5 @@
-import { __dynamicImportTransform as __dynamicImportTransform } from "https://unpkg.com/@magic-works/ttypescript-browser-like-import-transformer@1.3.0/es/ttsclib.js";
-import { __UMDBindCheck as __UMDBindCheck } from "https://unpkg.com/@magic-works/ttypescript-browser-like-import-transformer@1.3.0/es/ttsclib.js";
+import { __dynamicImportTransform as __dynamicImportTransform } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@1.3.0/es/ttsclib.min.js";
+import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@1.3.0/es/ttsclib.min.js";
 console.log('Should run after all imports', a, b, c, d, e, a1, b1, c1, d1, e1, a2, b2, c2, d2, e2);
 // Node style import
 import a from "https://unpkg.com/a@latest/?module";
@@ -35,7 +35,7 @@ import('https://example.com');
 const y = '';
 __dynamicImportTransform(JSON.parse("{\"after\":true,\"bareModuleRewrite\":{\"enum\":\"unpkg\",\"type\":\"simple\"}}"), y, __dynamicImportNative, __UMDBindCheck);
 // invalid dynamic import (invalid currently)
-__dynamicImport2Ary("This dynamic import has more than 1 arguments and don't know how to transform", y, 'second argument');
+__dynamicImport2Ary("@magic-works/ttypescript-browser-like-import-transformer: Transform rule for this dependencies found, but this dynamic import has more than 1 argument, transformer don't know how to transform that and keep it untouched.", y, 'second argument');
 function __dynamicImportNative(path) {
     return import(path);
 }

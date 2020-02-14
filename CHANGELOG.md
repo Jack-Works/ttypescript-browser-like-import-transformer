@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.4.0](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/compare/v1.3.0...v1.4.0) (2020-02-14)
+
+
+### Features
+
+* impl umdImportPath, close [#5](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/issues/5) ([16fd949](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/commit/16fd9494e53290bf89a5197939d9621f32ba8560))
+* validate syntax after transform, close [#4](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/issues/4) ([bf4b68b](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/commit/bf4b68b51681c6b9ff5dcc4f2908490276884aa3))
+
 ## 1.3.0 (2020-02-10)
 
 

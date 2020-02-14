@@ -2,7 +2,7 @@ import { statSync, readdirSync, readFileSync, writeFileSync } from 'fs'
 import { join } from 'path'
 import { isMainThread, workerData, Worker } from 'worker_threads'
 import { execSync } from 'child_process'
-import { ConfigError } from './core.js'
+import { ConfigError } from './config-parser'
 import { cwd } from 'process'
 
 const dir = join(__dirname, '../specs/tests/')
@@ -16,20 +16,21 @@ const snapshotDir = join(__dirname, '../specs/__snapshot__/')
 
 if (isMainThread) {
     for (const testFile of readdirSync(dir)) {
-        // worker({ path: join(dir, testFile), filename: testFile }).catch(x => {
-        //     console.error(x)
-        //     process.exit(1)
-        // })
-        const worker = new Worker(__filename, {
-            workerData: { path: join(dir, testFile), filename: testFile } as WorkerParam,
-        })
-        worker.on('error', e => {
-            console.error(e)
+        worker({ path: join(dir, testFile), filename: testFile }).catch(x => {
+            debugger
+            console.error(x)
             process.exit(1)
         })
-        worker.on('exit', code => {
-            if (code !== 0) throw new Error(`Worker stopped with exit code ${code}`)
-        })
+        // const worker = new Worker(__filename, {
+        //     workerData: { path: join(dir, testFile), filename: testFile } as WorkerParam,
+        // })
+        // worker.on('error', e => {
+        //     console.error(e)
+        //     process.exit(1)
+        // })
+        // worker.on('exit', code => {
+        //     if (code !== 0) throw new Error(`Worker stopped with exit code ${code}`)
+        // })
         // // worker.on('message', resolve)
     }
 } else {
@@ -79,6 +80,12 @@ async function worker(script: WorkerParam = workerData) {
                 },
             })
             outputText = result.outputText
+            const diags = ts.formatDiagnostics(result.diagnostics || [], {
+                getCanonicalFileName: () => script.path,
+                getCurrentDirectory: () => '/tmp/',
+                getNewLine: () => '\n',
+            })
+            if (result.diagnostics?.length) outputText += '/* Diagnostics:' + diags + '*/'
         } catch (e) {
             if (e instanceof ConfigError) outputText = '// ' + e.message
             else throw e

@@ -1,4 +1,4 @@
-import { __UMDBindCheck as __UMDBindCheck } from "https://unpkg.com/@magic-works/ttypescript-browser-like-import-transformer@1.3.0/es/ttsclib.js";
+import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@1.3.0/es/ttsclib.min.js";
 const x = __UMDBindCheck(globalThis.React, ["default"], "react", "globalThis.React", false).default;
 const { useState } = __UMDBindCheck(globalThis.React, ["useState"], "react", "globalThis.React", false);
 const React = __UMDBindCheck(globalThis.React, [], "react", "globalThis.React", false);
