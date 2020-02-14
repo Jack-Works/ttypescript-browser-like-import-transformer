@@ -2,7 +2,7 @@ import { statSync, readdirSync, readFileSync, writeFileSync } from 'fs'
 import { join } from 'path'
 import { isMainThread, workerData, Worker } from 'worker_threads'
 import { execSync } from 'child_process'
-import { ConfigError } from './core.js'
+import { ConfigError } from './config-parser'
 import { cwd } from 'process'
 
 const dir = join(__dirname, '../specs/tests/')

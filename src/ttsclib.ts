@@ -5,12 +5,9 @@
  * and expected to run in any ES2020 compatible environment (with console.warn).
  */
 
-import {
-    BareModuleRewriteUMD,
-    CustomTransformationContext,
-    NormalizedPluginConfig,
-    NormalizedBareModuleRewrite,
-} from './core'
+import { BareModuleRewriteUMD } from './plugin-config'
+import { CustomTransformationContext } from './core'
+import { NormalizedPluginConfig, NormalizedBareModuleRewrite } from './config-parser'
 
 /**
  * This function is a helper for UMD transform.
@@ -133,10 +130,6 @@ export function __customDynamicImportHelper(
     // ((_, a, c, d) => (b => __dynamicImportTransform(a, b, c, d)))(__dynamicImportTransform, config, dynamicImport, umdBindCheck)
 }
 //#region Internal code
-export type BareModuleRewriteSimple = 'snowpack' | 'umd' | 'unpkg' | 'pikacdn'
-export type BareModuleRewriteSimpleEnum = {
-    [key in BareModuleRewriteSimple]: key
-}
 type ModuleSpecifierTransformResult =
     | {
           type: 'rewrite'

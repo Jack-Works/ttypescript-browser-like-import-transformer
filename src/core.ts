@@ -16,7 +16,6 @@ import {
     Modifier,
     ExportSpecifier,
     ImportSpecifier,
-    SyntaxList,
     NamespaceExport,
     CallExpression,
     StringLiteral,
@@ -25,47 +24,50 @@ import {
     FunctionDeclaration,
     BooleanLiteral,
     Program,
-    CompilerOptions,
     PropertyAccessExpression,
 } from 'typescript'
-import { BareModuleRewriteSimpleEnum, BareModuleRewriteSimple } from './ttsclib'
-/** All ConfigError should go though this class
- * so the test framework can catch it instead of fail the whole test process */
-export class ConfigError extends Error {}
-
+import { PluginConfigNotParsed, ImportMapFunctionOpts } from './plugin-config'
+import { NormalizedPluginConfig } from './config-parser'
 type ts = typeof import('typescript')
-type Context<T extends Node> = {
-    ts: ts
+
+export interface CustomTransformationContext<T extends Node> {
+    ts: typeof import('typescript')
+    /**
+     * The current visiting path
+     */
     path: string
     sourceFile: SourceFile
     config: NormalizedPluginConfig
-    configRaw: PluginConfig
     context: TransformationContext
     node: T
     queryWellknownUMD: (path: string) => string | undefined
     importMapResolve: (opt: ImportMapFunctionOpts) => string | null
-    queryPackageVersion(pkg: string): string | null
+    queryPackageVersion: (pkg: string) => string | null
+    configParser: typeof import('./config-parser')
     ttsclib: typeof import('./ttsclib')
 }
-export type CustomTransformationContext<T extends Node> = Context<T>
+type Context<T extends Node> = CustomTransformationContext<T>
 const _with = <T extends Node>(ctx: Context<any>, node: T) => ({ ...ctx, node } as Context<T>)
 /**
  * Create the Transformer
  * This file should not use any value import so the Typescript runtime is given from the environment
  */
 export default function createTransformer(
-    ts: ts,
-    core: Pick<Context<any>, 'queryWellknownUMD' | 'ttsclib' | 'queryPackageVersion' | 'importMapResolve'>,
+    core: Pick<
+        Context<any>,
+        'queryWellknownUMD' | 'ttsclib' | 'queryPackageVersion' | 'importMapResolve' | 'configParser' | 'ts'
+    >,
 ) {
+    const { ts, configParser, importMapResolve, queryPackageVersion, queryWellknownUMD, ttsclib } = core
     // ? Can't rely on the ts.Program because don't want to create on during the test.
-    return function(_program: Pick<Program, 'getCurrentDirectory'>, configRaw: PluginConfig) {
+    return function(_program: Pick<Program, 'getCurrentDirectory'>, configRaw: PluginConfigNotParsed) {
         return (context: TransformationContext) => {
-            validateConfig(configRaw, context.getCompilerOptions())
-            const config = normalizePluginConfig(configRaw)
+            configParser.validateConfig(configRaw, context.getCompilerOptions())
+            const config = configParser.normalizePluginConfig(configRaw)
             return (sourceFile: SourceFile) => {
                 const importMapOverwritten: typeof import('./ttsclib').moduleSpecifierTransform = function(ctx, opt) {
-                    if (!configRaw.importMap) return core.ttsclib.moduleSpecifierTransform(ctx, opt)
-                    const result = core.importMapResolve({
+                    if (!configRaw.importMap) return ttsclib.moduleSpecifierTransform(ctx, opt)
+                    const result = importMapResolve({
                         config: configRaw,
                         sourceFilePath: sourceFile.fileName,
                         currentWorkingDirectory: _program.getCurrentDirectory(),
@@ -73,10 +75,10 @@ export default function createTransformer(
                         rootDir: context.getCompilerOptions().rootDir!,
                     })
                     if (result) return { type: 'rewrite', nextPath: result }
-                    return core.ttsclib.moduleSpecifierTransform(ctx, opt)
+                    return ttsclib.moduleSpecifierTransform(ctx, opt)
                 }
                 // ? inlie generation is rely on it.
-                importMapOverwritten.toString = () => core.ttsclib.moduleSpecifierTransform.toString()
+                importMapOverwritten.toString = () => ttsclib.moduleSpecifierTransform.toString()
                 const ttsclib: typeof import('./ttsclib') = {
                     ...core.ttsclib,
                     moduleSpecifierTransform: importMapOverwritten,
@@ -416,7 +418,7 @@ const moreThan1ArgumentDynamicImportErrorMessage =
     runtimeMessageHeader +
     "Transform rule for this dependencies found, but this dynamic import has more than 1 argument, transformer don't know how to transform that and keep it untouched."
 function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args: Expression[]): Expression[] {
-    const { ts, config, node, sourceFile, ttsclib } = ctx
+    const { ts, config, node, sourceFile, ttsclib, configParser } = ctx
     const [first, ...rest] = args
     if (ts.isStringLiteralLike(first)) {
         const rewriteStrategy = ttsclib.moduleSpecifierTransform({
@@ -482,7 +484,9 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
         }
         const f = parseJS(ts, opt.function, 'expression', ts.isArrowFunction, sourceFile.fileName)
         if (f.type !== 'ok')
-            throw new ConfigError('Unable to parse the function. It must be an ArrowFunction. Get: ' + opt.function)
+            throw new configParser.ConfigError(
+                'Unable to parse the function. It must be an ArrowFunction. Get: ' + opt.function,
+            )
         const customFunction =
             topLevelScopedHelperMap.get(sourceFile)?.get('__customImportHelper')?.[0] ||
             ts.createUniqueName('__customImportHelper')
@@ -522,115 +526,6 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
         return ts.createCall(ts.createToken(ts.SyntaxKind.ImportKeyword) as any, void 0, args)
     }
 }
-
-//#endregion
-// When generating JSON schema, don't forget to add a
-// "$ref": "#/definitions/PluginConfig",
-// at top level
-//#region Types
-/** #TopLevel */
-export interface PluginConfig {
-    /**
-     * Add '.js' extension for local module specifier
-     * @default .js
-     */
-    appendExtensionName?: string | boolean
-    /**
-     * Also append extension to http:// or https://
-     * @default false
-     */
-    appendExtensionNameForRemote?: boolean
-    /**
-     * @description
-     * `false`: disable the transform
-     * `BareModuleRewriteSimple.snowpack`: if you are using snowpack (https://github.com/pikapkg/snowpack)
-     * `BareModuleRewriteSimple.umd`: make your `import a from 'b'` to `const a = globalThis.b`
-     * `BareModuleRewriteSimple.unpkg`: try to transform imports path to https://unpkg.com/package@version/index.js?module
-     * `BareModuleRewriteSimple.pikacdn`: try to transform import path to https://cdn.pika.dev/package@version
-     * `{type: 'url', withVersion: string, noVersion: string }`: Provide your own rewrite rule. Two variables possible: $version$ and $packageName$
-     * `Record<string, BareModuleRewriteObject>`: string can be a string or a RegExp to match import path. If you're using the package "type", you should write it as "/^type$/"
-     * @example
-     * {
-     *    "my-pkg": "umd", // to globalThis.myPkg
-     *    "my-pkg2": "pikacdn", // to https://cdn.pika.dev/my-pkg2
-     *    "my-pkg3": "unpkg", // to https://unpkg.com/my-pkg3
-     *    "/my-pkg-(.+)/": { type: 'umd', target: 'getMyPkg("$1")' }, // for "my-pkg-12" to globalThis.getMyPkg("12")
-     * }
-     * @default umd
-     */
-    bareModuleRewrite?:
-        | false
-        | BareModuleRewriteSimple
-        | BareModuleRewriteURL
-        | { [key: string]: BareModuleRewriteObject }
-    /**
-     * Rewrite dynamic import
-     * @description
-     * `false`: Do not rewrite
-     * `'auto'`: try to optimise automatically
-     * `DynamicImportPathRewrite`: using a custom function to handle the import path (path: string, builtinImpl: (path) => Promise<any>): Promise<any>
-     * @default auto
-     */
-    dynamicImportPathRewrite?: false | 'auto' | DynamicImportPathRewriteCustom
-    /**
-     * Used in UMD.
-     * For what object will store the UMD variables
-     * @default globalThis
-     */
-    globalObject?: string
-    /**
-     * Used in snowpack. web_modules module path
-     * @default /web_modules/
-     * @deprecated
-     */
-    webModulePath?: string
-    /**
-     * Use import map to resolve paths. (Note: import map has the highest priority.)
-     */
-    importMap?:
-        | {
-              type: 'map'
-              mapPath: string
-              mapObject?: object
-              simulateRuntimeImportMapPosition: string
-              simulateRuntimeSourceRoot?: string
-          }
-        | { type: 'function'; function: (opt: ImportMapFunctionOpts) => string | null }
-    /**
-     * Specify where is the helper is.
-     *
-     * - "inline": All helpers will emitted in each file
-     * - "auto": Let the transform do it
-     * - string: A URL, will import helper from that place.
-     *
-     * @default auto
-     */
-    importHelpers?: 'inline' | 'auto' | string
-}
-export type ImportMapFunctionOpts = {
-    moduleSpecifier: string
-    sourceFilePath: string
-    currentWorkingDirectory: string
-    rootDir: string
-    config: PluginConfig
-}
-export type BareModuleRewriteObject = false | BareModuleRewriteSimple | BareModuleRewriteUMD | BareModuleRewriteURL
-export interface DynamicImportPathRewriteCustom {
-    type: 'custom'
-    /** e.g: "(path => path + '.js')" */
-    function: string
-}
-
-export type BareModuleRewriteUMD = {
-    type: 'umd'
-    target: string
-    globalObject?: string
-}
-export type BareModuleRewriteURL = {
-    type: 'url'
-    withVersion?: string
-    noVersion?: string
-}
 //#endregion
 //#region ts helper
 type LevelUp<T> = T extends string
@@ -647,6 +542,7 @@ type LevelUpArgs<T extends any[]> = {
 }
 type CastArray<T> = T extends any[] ? T : never
 type CastFunction<T> = T extends (...a: any[]) => any ? T : (...a: never[]) => any
+
 const topLevelScopedHelperMap = new WeakMap<
     SourceFile,
     Map<string | ((...args: any) => void), [Identifier, Statement]>
@@ -762,105 +658,3 @@ const dynamicImportFailedHelper = (args: Expression[]) => `function __dynamicImp
 const dynamicImportNativeString = `function __dynamicImportNative(path) {
     return import(path);
 };`
-function validateConfig(config: PluginConfig, options: CompilerOptions) {
-    type('appendExtensionName', ['string', 'boolean'])
-    type('appendExtensionNameForRemote', ['boolean'])
-    type('bareModuleRewrite', ['boolean', 'string', 'object'])
-    type('dynamicImportPathRewrite', ['boolean', 'string', 'object'])
-    type('globalObject', ['string'])
-    type('webModulePath', ['string'])
-    type('importHelpers', ['string'])
-    type('importMap', ['object'])
-
-    if (config.importMap && !options.rootDir) throw new ConfigError('When using importMap, rootDir must be set')
-
-    length('globalObject')
-    length('webModulePath')
-    length('importHelpers')
-
-    enumCheck('dynamicImportPathRewrite', ['auto'])
-    const enums = Object.keys(BareModuleRewriteSimpleEnumLocal) as BareModuleRewriteSimple[]
-    enumCheck('bareModuleRewrite', enums)
-
-    falseOnly('bareModuleRewrite')
-    falseOnly('dynamicImportPathRewrite')
-
-    const _x = typeof config
-    function type(name: keyof PluginConfig, _: typeof _x[], v: any = config[name], noUndefined = false) {
-        if (!noUndefined) _ = _.concat('undefined')
-        if (!_.includes(typeof v)) throw new ConfigError(`type of ${name} in the tsconfig is not correct`)
-        if (_.includes('object') && typeof v === null) throw new ConfigError(`${name} can't be null!`)
-    }
-    function length(name: keyof PluginConfig, v: any = config[name]) {
-        if (typeof v === 'string' && v.length === 0) throw new ConfigError(name + ' cannot be an empty string')
-    }
-    function enumCheck<T extends keyof PluginConfig>(name: T, enums: PluginConfig[T][], v: any = config[name]) {
-        if (typeof v === 'string' && !enums.includes(v as any))
-            throw new ConfigError(`When ${name} is a string, it must be the enum ${enums}, but found ${v}`)
-    }
-    function falseOnly(name: keyof PluginConfig, v: any = config[name]) {
-        if (typeof v === 'boolean' && v === true) throw new ConfigError(`When ${name} is a boolean, it must be false`)
-    }
-}
-export type NormalizedBareModuleRewrite =
-    | BareModuleRewriteURL
-    | BareModuleRewriteUMD
-    | { type: 'noop' }
-    | { type: 'simple'; enum: BareModuleRewriteSimple }
-    | { type: 'complex'; config: Map<string, NormalizedBareModuleRewrite> }
-export interface NormalizedPluginConfig extends Omit<PluginConfig, 'bareModuleRewrite'> {
-    bareModuleRewrite?: NormalizedBareModuleRewrite
-}
-function normalizedBareModuleRewrite(
-    conf: PluginConfig['bareModuleRewrite'] | BareModuleRewriteUMD,
-    top = true,
-): NormalizedBareModuleRewrite {
-    if (conf === undefined) return { type: 'simple', enum: 'umd' }
-    if (conf === false) return { type: 'noop' }
-
-    const enums = Object.keys(BareModuleRewriteSimpleEnumLocal) as BareModuleRewriteSimple[]
-    if (typeof conf === 'string') {
-        if (enums.includes(conf)) return { enum: conf, type: 'simple' }
-        throw new ConfigError('Unknown enums in bareModuleRewrite')
-    }
-
-    if ('type' in conf) {
-        const opt = conf as BareModuleRewriteUMD | BareModuleRewriteURL
-        if (opt.type === 'url') {
-            if (opt.noVersion === opt.withVersion && opt.noVersion === undefined) {
-                throw new ConfigError('At least set one of noVersion or withVersion')
-            }
-            return opt
-        }
-        if (opt.type === 'umd') {
-            if (top === true)
-                throw new ConfigError(
-                    'There is no meaning to use UMD detailed settings at top level of bareModuleRewrite',
-                )
-            return opt
-        }
-        throw new ConfigError('Unknown tagged union in bareModuleRewrite')
-    } else {
-        if (top === false) throw new ConfigError("NormalizedBareModuleRewrite can't be recursive in bareModuleRewrite")
-        const kv: Map<string, NormalizedBareModuleRewrite> = new Map()
-        for (const [k, v] of Object.entries(conf)) {
-            kv.set(k, normalizedBareModuleRewrite(v, false))
-        }
-        return { type: 'complex', config: kv }
-    }
-}
-export function normalizePluginConfig(config: PluginConfig): NormalizedPluginConfig {
-    if (config.bareModuleRewrite !== undefined)
-        return {
-            ...config,
-            bareModuleRewrite: normalizedBareModuleRewrite(config.bareModuleRewrite),
-        }
-    return { ...config, bareModuleRewrite: undefined }
-}
-enum BareModuleRewriteSimpleEnumLocal {
-    snowpack = 'snowpack',
-    umd = 'umd',
-    unpkg = 'unpkg',
-    pikacdn = 'pikacdn',
-}
-const BareModuleRewriteSimple: BareModuleRewriteSimpleEnum = BareModuleRewriteSimpleEnumLocal

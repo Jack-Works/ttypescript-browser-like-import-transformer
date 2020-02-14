@@ -1,19 +1,15 @@
 /**
  * In this file there some host helper functions that must run in node
  */
-import creatTransform, { ImportMapFunctionOpts } from './core'
+import creatTransform from './core'
 import * as ts from 'typescript'
-// import type {} from 'typescript'
 import * as ttsclib from './ttsclib'
+import * as configParser from './config-parser'
 import { queryWellknownUMD } from './well-known-umd'
 import { readFileSync } from 'fs'
 import { join, relative, posix } from 'path'
-export default creatTransform(ts, {
-    queryWellknownUMD,
-    ttsclib,
-    importMapResolve,
-    queryPackageVersion,
-})
+import { ImportMapFunctionOpts } from './plugin-config'
+export default creatTransform({ ts, queryWellknownUMD, ttsclib, importMapResolve, queryPackageVersion, configParser })
 
 function queryPackageVersion(path: string) {
     const [a, b] = path.split('/')
