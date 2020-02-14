@@ -582,7 +582,7 @@ function createTopLevelScopedHelper<F extends string | ((...args: any[]) => any)
     const returnValue = [uniqueName, (...args: any) => ts.createCall(uniqueName, void 0, args)] as const
     if (fnName in ttsclib && config.importHelpers !== 'inline') {
         const helperURL =
-            'https://unpkg.com/@magic-works/ttypescript-browser-like-import-transformer@$version$/es/ttsclib.js'
+            'https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@$version$/es/ttsclib.min.js'
         const url = config.importHelpers === 'auto' ? helperURL : config.importHelpers ?? helperURL
         // ? import { __helperName as uniqueName } from 'url'
         const importDeclaration = ts.createImportDeclaration(
