@@ -294,7 +294,7 @@ function importOrExportClauseToUMD(
                 undefined,
                 ts.createNamedImports(
                     node.elements.map<ImportSpecifier>(x => {
-                        const id = ts.createUniqueName(x.name.text)
+                        const id = ts.createFileLevelUniqueName(x.name.text)
                         ghostBindings.set(x, id)
                         return ts.createImportSpecifier(x.propertyName, id)
                     }),
@@ -317,7 +317,7 @@ function importOrExportClauseToUMD(
         return { statements, variableNames: ids }
         // New function since ts 3.8
     } else if (ts.isNamespaceExport?.(node)) {
-        const ghostBinding = ts.createUniqueName(node.name.text)
+        const ghostBinding = ts.createFileLevelUniqueName(node.name.text)
         const ghostImportDeclaration = ts.createImportDeclaration(
             undefined,
             undefined,
@@ -507,7 +507,7 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
             )
         const customFunction =
             topLevelScopedHelperMap.get(sourceFile)?.get('__customImportHelper')?.[0] ||
-            ts.createUniqueName('__customImportHelper')
+            ts.createFileLevelUniqueName('__customImportHelper')
         if (!topLevelScopedHelperMap.get(sourceFile)?.has('__customImportHelper')) {
             const decl = ts.createVariableStatement(
                 undefined,

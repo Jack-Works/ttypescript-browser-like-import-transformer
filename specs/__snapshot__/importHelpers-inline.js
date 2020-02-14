@@ -1,5 +1,5 @@
-const __customImportHelper_1 = (x, y) => y(x);
-__customImportHelper_1(x, __customDynamicImportHelper(__dynamicImportTransform, JSON.parse("{\"after\":true,\"importHelpers\":\"inline\",\"dynamicImportPathRewrite\":{\"type\":\"custom\",\"function\":\"(x, y) => y(x)\"}}"), __dynamicImportNative, __UMDBindCheck));
+const __customImportHelper = (x, y) => y(x);
+__customImportHelper(x, __customDynamicImportHelper(__dynamicImportTransform, JSON.parse("{\"after\":true,\"importHelpers\":\"inline\",\"dynamicImportPathRewrite\":{\"type\":\"custom\",\"function\":\"(x, y) => y(x)\"}}"), __dynamicImportNative, __UMDBindCheck));
 function __dynamicImportTransform(config, _path, dynamicImport, UMDBindCheck) {
     if (typeof _path !== "string")
         _path = String(_path);
