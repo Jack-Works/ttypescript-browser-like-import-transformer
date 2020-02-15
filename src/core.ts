@@ -494,11 +494,13 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
         ])
         const [dynamicImportNative] = createTopLevelScopedHelper(ctx, dynamicImportNativeString, [])
         const [umdBindCheck] = createTopLevelScopedHelper(ctx, ttsclib.__UMDBindCheck, [])
+        const [moduleSpecifierTransform] = createTopLevelScopedHelper(ctx, ttsclib.moduleSpecifierTransform, [])
+        const helperArgs = [stringifiedConfig, dynamicImportNative, umdBindCheck, moduleSpecifierTransform] as const
         if (opt === 'auto' || opt === undefined) {
             /**
-             * __dynamicImportTransform(config, path, dynamicImportNative, __UMDBindCheck)
+             * __dynamicImportTransform(path, config, dynamicImportNative, __UMDBindCheck, moduleSpecifierTransform)
              */
-            return [createDynamicImportTransform(stringifiedConfig, first, dynamicImportNative, umdBindCheck)]
+            return [createDynamicImportTransform(first, ...helperArgs)]
         }
         const f = parseJS(ts, opt.function, 'expression', ts.isArrowFunction, sourceFile.fileName)
         if (f.type !== 'ok')
@@ -530,12 +532,7 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
         return [
             ts.createCall(customFunction, undefined, [
                 first,
-                createCustomImportHelper(
-                    dynamicImportTransformIdentifier,
-                    stringifiedConfig,
-                    dynamicImportNative,
-                    umdBindCheck,
-                ),
+                createCustomImportHelper(dynamicImportTransformIdentifier, ...helperArgs),
             ]),
         ]
     }
@@ -576,10 +573,10 @@ function createTopLevelScopedHelper<F extends string | ((...args: any[]) => any)
     const parseResult = parseJS(ts, helper.toString(), 'statement', ts.isFunctionDeclaration)
     if (parseResult.type !== 'ok') throw new Error('helper must be a function declaration, found ' + parseResult.error)
     const parsedFunction = parseResult.value
-    // ? if the function name is in the ttsclib, return a import declaration
     const fnName = parsedFunction.name!.text
     const uniqueName = ts.createFileLevelUniqueName(fnName)
     const returnValue = [uniqueName, (...args: any) => ts.createCall(uniqueName, void 0, args)] as const
+    // ? if the function name is in the ttsclib, return a import declaration
     if (fnName in ttsclib && config.importHelpers !== 'inline') {
         const helperURL =
             'https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@$version$/es/ttsclib.min.js'
@@ -607,9 +604,9 @@ function createTopLevelScopedHelper<F extends string | ((...args: any[]) => any)
     const f = ts.updateFunctionDeclaration(
         parsedFunction,
         void 0,
-        void 0,
+        parsedFunction.modifiers,
         parsedFunction.asteriskToken,
-        ts.createFileLevelUniqueName(parsedFunction.name!.text),
+        uniqueName,
         void 0,
         parsedFunction.parameters,
         void 0,
