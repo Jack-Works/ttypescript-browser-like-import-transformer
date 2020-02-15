@@ -376,7 +376,10 @@ function importOrExportClauseToUMD(
                             elements.map(x => ts.createBindingElement(undefined, x.propertyName, x.name, undefined)),
                         ),
                         undefined,
-                        createCheckedUMDAccess(x => x, ...elements.map(x => ts.createLiteral(x.name.text))),
+                        createCheckedUMDAccess(
+                            x => x,
+                            ...elements.map(x => ts.createLiteral(x.propertyName?.text ?? x.name.text)),
+                        ),
                     ),
                 ],
                 ts.NodeFlags.Const,
