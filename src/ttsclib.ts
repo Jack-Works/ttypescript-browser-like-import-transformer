@@ -80,14 +80,15 @@ export function __esModuleInterop(mod: object) {
  * @param dynamicImport dynamic importer
  */
 export function __dynamicImportTransform(
-    config: NormalizedPluginConfig,
     _path: unknown,
+    config: NormalizedPluginConfig,
     dynamicImport: (path: string) => Promise<unknown>,
     UMDBindCheck: typeof __UMDBindCheck,
-) {
+    _moduleSpecifierTransform: typeof moduleSpecifierTransform,
+): Promise<unknown> {
     if (typeof _path !== 'string') _path = String(_path)
     const path = _path as string
-    const result = moduleSpecifierTransform({
+    const result = _moduleSpecifierTransform({
         config,
         path,
         queryWellknownUMD: () => void 0,
@@ -125,9 +126,9 @@ export function __customDynamicImportHelper(
     c: NormalizedPluginConfig,
     d: (x: string) => Promise<unknown>,
     u: typeof __UMDBindCheck,
+    m: typeof moduleSpecifierTransform,
 ) {
-    return (p: string) => _(c, p, d, u)
-    // ((_, a, c, d) => (b => __dynamicImportTransform(a, b, c, d)))(__dynamicImportTransform, config, dynamicImport, umdBindCheck)
+    return (p: string) => _(p, c, d, u, m)
 }
 //#region Internal code
 type ModuleSpecifierTransformResult =
@@ -147,7 +148,6 @@ type ModuleSpecifierTransformResult =
     | BareModuleRewriteUMD
 /**
  * This function will also be included in the runtime for dynamic transform.
- * So the typescript runtime is optional.
  * @internal
  */
 export function moduleSpecifierTransform(
@@ -156,12 +156,14 @@ export function moduleSpecifierTransform(
             parseRegExp: (string: string) => RegExp | null
         } & Pick<CustomTransformationContext<any>, 'config' | 'path' | 'queryWellknownUMD' | 'queryPackageVersion'>
     >,
-    opt: NormalizedBareModuleRewrite = context.config.bareModuleRewrite || { type: 'simple', enum: 'umd' },
+    opt?: NormalizedBareModuleRewrite,
 ): ModuleSpecifierTransformResult {
+    const { queryWellknownUMD } = context
     const packageNameRegExp = /\$packageName\$/g
     const versionRegExp = /\$version\$/g
     const umdNameRegExp = /\$umdName\$/g
-    enum Diag {
+    const subpathRegExp = /\$subpath\$/g
+    const enum Diag {
         TransformToUMDFailed = 392859,
         TransformToUMDFailedCustom,
         QueryPackageVersionFailed,
@@ -173,105 +175,122 @@ export function moduleSpecifierTransform(
             'Failed to transform the path {0} to UMD import declaration. After applying the rule {1}, the result is an empty string.',
     }
     const noop = { type: 'noop' } as const
-    if (opt.type === 'noop') return noop
+    return self(context, opt)
+    /** Can't use the name moduleSpecifierTransform to do recursive, the name might be changed in the inline mode */
+    function self(
+        ...[context, opt = context.config.bareModuleRewrite || { type: 'simple', enum: 'umd' }]: Parameters<
+            typeof moduleSpecifierTransform
+        >
+    ): ModuleSpecifierTransformResult {
+        const { path, config, parseRegExp, queryPackageVersion } = context
+        if (opt.type === 'noop') return noop
 
-    const { path, config, queryWellknownUMD, parseRegExp, queryPackageVersion } = context
-    if (isBrowserCompatibleModuleSpecifier(path)) {
-        if (path === '.') return noop
-        if (config.appendExtensionName === false) return noop
-        if (config.appendExtensionNameForRemote !== true && isHTTPModuleSpecifier(path)) return noop
-        const nextPath = appendExtensionName(
-            path,
-            config.appendExtensionName === true ? '.js' : config.appendExtensionName ?? '.js',
-        )
-        return { type: 'rewrite', nextPath: nextPath }
-    }
-    switch (opt.type) {
-        case 'simple': {
-            const e = opt.enum
-            switch (e) {
-                case 'snowpack':
-                    return { nextPath: `${config.webModulePath ?? '/web_modules/'}${path}.js`, type: 'rewrite' }
-                case 'pikacdn':
-                case 'unpkg': {
-                    const version = queryPackageVersion(path)
+        if (isBrowserCompatibleModuleSpecifier(path)) {
+            if (path === '.') return noop
+            if (config.appendExtensionName === false) return noop
+            if (config.appendExtensionNameForRemote !== true && isHTTPModuleSpecifier(path)) return noop
+            const nextPath = appendExtensionName(
+                path,
+                config.appendExtensionName === true ? '.js' : config.appendExtensionName ?? '.js',
+            )
+            return { type: 'rewrite', nextPath: nextPath }
+        }
+        const { sub, nspkg } = resolveNS(path)
+        switch (opt.type) {
+            case 'simple': {
+                const e = opt.enum
+                switch (e) {
+                    case 'snowpack':
+                        return { nextPath: `${config.webModulePath ?? '/web_modules/'}${path}.js`, type: 'rewrite' }
+                    case 'pikacdn':
+                    case 'unpkg': {
+                        const a = 'https://cdn.pika.dev/$packageName$@$version$$subpath$'
+                        const b = 'https://cdn.pika.dev/$packageName$$subpath$'
+                        const c = 'https://unpkg.com/$packageName$@$version$$subpath$?module'
+                        const d = 'https://unpkg.com/$packageName$$subpath$?module'
+                        const isPika = e === 'pikacdn'
+                        return self(context, { type: 'url', noVersion: isPika ? b : d, withVersion: isPika ? a : c })
+                    }
+                    case 'umd':
+                        const target = importPathToUMDName(path)
+                        const { globalObject } = config
+                        if (!target) return error(Diag.TransformToUMDFailed, path, '')
+                        // TODO: Collect some common CDN path maybe?
+                        const nextOpt: BareModuleRewriteUMD = {
+                            type: 'umd',
+                            target,
+                            globalObject,
+                            umdImportPath: void 0,
+                        }
+                        return self(context, nextOpt)
+                    default:
+                        return unreachable('simple type')
+                }
+            }
+            case 'umd': {
+                const target = importPathToUMDName(path)
+                if (!target) return error(Diag.TransformToUMDFailed, path, '')
+                const [{ globalObject }, { umdImportPath }] = [config, opt]
+                return { type: 'umd', target, globalObject, umdImportPath }
+            }
+            case 'url': {
+                const { noVersion, withVersion } = opt
+                const version = queryPackageVersion(path)
+                let string: string | undefined = void 0
+                if (version && withVersion) string = withVersion.replace(versionRegExp, version)
+                if ((version && !withVersion && noVersion) || (!version && noVersion)) string = noVersion
+                if (string)
                     return {
                         type: 'rewrite',
-                        nextPath: (e === 'pikacdn' ? 'https://cdn.pika.dev/%1@%2' : 'https://unpkg.com/%1@%2/?module')
-                            .replace('%1', path)
-                            .replace('%2', version || 'latest'),
+                        nextPath: string
+                            .replace(packageNameRegExp, nspkg)
+                            .replace(subpathRegExp, sub === undefined ? '' : '/' + sub),
                     }
-                }
-                case 'umd':
-                    const target = importPathToUMDName(path)
-                    const { globalObject } = config
-                    if (!target) return error(Diag.TransformToUMDFailed, path, '')
-                    // TODO: Collect some common CDN path maybe?
-                    const nextOpt: BareModuleRewriteUMD = { type: 'umd', target, globalObject, umdImportPath: void 0 }
-                    return moduleSpecifierTransform(context, nextOpt)
-                default:
-                    return unreachable('simple type')
+                return unreachable('url case')
             }
-        }
-        case 'umd': {
-            const target = importPathToUMDName(path)
-            if (!target) return error(Diag.TransformToUMDFailed, path, '')
-            const [{ globalObject }, { umdImportPath }] = [config, opt]
-            return { type: 'umd', target, globalObject, umdImportPath }
-        }
-        case 'url': {
-            const [ns, _pkg] = path.split('/')
-            const pkg = ns.startsWith('@') ? `${ns}/${_pkg}` : ns
+            case 'complex': {
+                for (const [rule, ruleValue] of opt.config) {
+                    let regexp: RegExp | null | undefined = undefined
+                    if (rule.startsWith('/')) {
+                        regexp = parseRegExp(rule)
+                        if (!regexp) console.error('Might be an invalid regexp:', rule)
+                    }
+                    const matching = (regexp && path.match(regexp)) || rule === path
+                    if (!matching) continue
 
-            const { noVersion, withVersion } = opt
-            const version = queryPackageVersion(path)
-            let string: string | undefined = void 0
-            if (version && withVersion) string = withVersion.replace(versionRegExp, version)
-            if ((version && !withVersion && noVersion) || (!version && noVersion)) string = noVersion
-            if (string) return { type: 'rewrite', nextPath: string.replace(packageNameRegExp, pkg) }
-            return unreachable('url case')
-        }
-        case 'complex': {
-            for (const [rule, ruleValue] of opt.config) {
-                let regexp: RegExp | null | undefined = undefined
-                if (rule.startsWith('/')) {
-                    regexp = parseRegExp(rule)
-                    if (!regexp) console.error('Might be an invalid regexp:', rule)
+                    if (ruleValue.type !== 'umd') return self(context, ruleValue)
+
+                    const target = rule === path ? ruleValue.target : path.replace(regexp!, ruleValue.target)
+                    if (!target) return error(Diag.TransformToUMDFailedCustom, path, rule)
+
+                    const umdName = importPathToUMDName(path)
+                    const version = queryPackageVersion(path)
+                    const { globalObject = config.globalObject, umdImportPath } = ruleValue
+                    if (!umdName && (target.match(umdNameRegExp) || umdImportPath?.match(umdNameRegExp)))
+                        return error(Diag.TransformToUMDFailed, path, rule)
+                    if (!version && (target.match(versionRegExp) || umdImportPath?.match(versionRegExp)))
+                        return error(Diag.QueryPackageVersionFailed, path, rule)
+                    const [nextTarget, nextUMDImportPath] = [target, umdImportPath || ''].map(x =>
+                        x
+                            .replace(packageNameRegExp, path)
+                            .replace(umdNameRegExp, umdName!)
+                            .replace(versionRegExp, version!),
+                    )
+                    return { type: 'umd', target: nextTarget, globalObject, umdImportPath: nextUMDImportPath }
                 }
-                const matching = (regexp && path.match(regexp)) || rule === path
-                if (!matching) continue
-
-                if (ruleValue.type !== 'umd') return moduleSpecifierTransform(context, ruleValue)
-
-                const target = rule === path ? ruleValue.target : path.replace(regexp!, ruleValue.target)
-                if (!target) return error(Diag.TransformToUMDFailedCustom, path, rule)
-
-                const umdName = importPathToUMDName(path)
-                const version = queryPackageVersion(path)
-                const { globalObject = config.globalObject, umdImportPath } = ruleValue
-                if (!umdName && (target.match(umdNameRegExp) || umdImportPath?.match(umdNameRegExp)))
-                    return error(Diag.TransformToUMDFailed, path, rule)
-                if (!version && (target.match(versionRegExp) || umdImportPath?.match(versionRegExp)))
-                    return error(Diag.QueryPackageVersionFailed, path, rule)
-                const [nextTarget, nextUMDImportPath] = [target, umdImportPath || ''].map(x =>
-                    x
-                        .replace(packageNameRegExp, path)
-                        .replace(umdNameRegExp, umdName!)
-                        .replace(versionRegExp, version!),
-                )
-                return { type: 'umd', target: nextTarget, globalObject, umdImportPath: nextUMDImportPath }
+                return noop
             }
-            return noop
+            default:
+                return unreachable(' opt switch')
         }
-        default:
-            return unreachable(' opt switch')
     }
     function error(type: Diag, arg0: string, arg1: string): ModuleSpecifierTransformResult {
         return {
             type: 'error',
             message: message[type].replace('{0}', arg0).replace('{1}', arg1),
             code: type,
-            key: Diag[type],
+            // was Diag[type]
+            key: type.toString(),
         }
     }
     function unreachable(str: string): never {
@@ -291,19 +310,38 @@ export function moduleSpecifierTransform(
         if (path.endsWith(expectedExt)) return path
         return path + expectedExt
     }
+    /** Parse '@namespace/package/folder' into ns, pkg, sub */
+    function resolveNS(path: string): { ns?: string; pkg: string; sub?: string; nspkg: string } {
+        const [a, b, ...c] = path.split('/')
+        if (b === undefined) return { nspkg: a, pkg: a }
+        if (a.startsWith('@')) return { ns: a, pkg: b, sub: c.join('/'), nspkg: a + '/' + b }
+        return { pkg: a, sub: [b, ...c].join('/'), nspkg: a }
+    }
     function importPathToUMDName(path: string) {
         const predefined = queryWellknownUMD(path)
         if (predefined) return predefined
-        const reg = path.match(/[a-zA-Z0-9_]+/g)
+        const { pkg, sub } = resolveNS(path)
+        const pkgVar = toCase(pkg)
+        const subVar = sub?.split('/').reduce((prev, curr) => {
+            if (prev === null) return null
+            const cased = toCase(curr)
+            if (!cased) return null
+            return [prev, cased].join('.')
+        }, '' as string | null)
+        if (!pkgVar) return null
+        if (sub?.length) return subVar ? pkgVar + subVar : null
+        return pkgVar
+    }
+    function toCase(s: string) {
+        const reg = s.match(/[a-zA-Z0-9_]+/g)
         if (!reg) return null
         const x = [...reg].join(' ')
-        if (x.length)
-            return x
-                .replace(/(?:^\w|[A-Z]|\b\w)/g, (letter, index) =>
-                    index == 0 ? letter.toLowerCase() : letter.toUpperCase(),
-                )
-                .replace(/\s+/g, '')
-        return null
+        if (!x.length) return null
+        return x
+            .replace(/(?:^\w|[A-Z]|\b\w)/g, (letter, index) =>
+                index == 0 ? letter.toLowerCase() : letter.toUpperCase(),
+            )
+            .replace(/\s+/g, '')
     }
 }
 //#endregion

@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.4.1](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/compare/v1.4.0...v1.4.1) (2020-02-15)
+
+
+### Bug Fixes
+
+* checked wrong import alias close [#7](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/issues/7) ([a0b30e7](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/commit/a0b30e708f81a799dfe42b76b86acb7d24036014))
+* subfolder handling close [#6](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/issues/6) ([7871a93](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/commit/7871a93caf3ffb67963b6f790aa77b0bfbf90797))
+
 ## [1.4.0](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/compare/v1.3.0...v1.4.0) (2020-02-14)
 
 
