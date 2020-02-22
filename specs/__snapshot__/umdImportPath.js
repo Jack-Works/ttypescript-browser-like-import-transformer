@@ -1,4 +1,4 @@
-import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@1.4.0/es/ttsclib.min.js";
+import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@1.4.1/es/ttsclib.min.js";
 const React = __UMDBindCheck(globalThis.react2, ["default"], "react2", "globalThis.react2", false).default;
 const { a: b } = __UMDBindCheck(globalThis.react4, ["a"], "react4", "globalThis.react4", false);
 import "https://unpkg.com/react1";
