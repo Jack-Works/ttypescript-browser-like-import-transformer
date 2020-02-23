@@ -73,6 +73,10 @@ import "./polyfill.js";
 
 ## Use cases
 
+### Use with classic UMD dependencies
+
+The default config of this transformer is "UMD" mode. All bare imports will be translated to a "UMD import". (e.g. `import React from "react"` becomes `const React = globalThis.React`). Then add a regular script tag to load React UMD.
+
 ### Use with Webpack
 
 Here is [a template repo](https://github.com/Jack-Works/ttsc-browser-import-template) to help you use this transformer with Webpack. In this repo, all node style import is imported in [a single file](https://github.com/Jack-Works/ttsc-browser-import-template/blob/master/dependencies.js) and packed by Webpack. Rest of the source code never get handled by Webpack but emitted by [ttypescript](https://github.com/cevek/ttypescript) (a enhanced typescript cli that allows you to specify transformer programmatically).
@@ -99,7 +103,7 @@ See the **TTypeScript Support** in the [Importing Packages by Name](https://www.
 
 ### Use with CDN
 
-[Pika CDN](https://www.pika.dev/cdn) and [unpkg](https://unpkg.com/#query-params) are two CDNs that friendly to ES Module dependencies.
+[Pika CDN](https://www.pika.dev/cdn) and [unpkg](https://unpkg.com/#query-params) are two CDNs that friendly to ES Module dependencies. This transformer also supports CDN import. (e.g. Before `import _ from 'lodash-es'` After `import _ from 'https://cdn.pika.dev/lodash-es'`)
 
 ```jsonc
 /* tsconfig.json */
