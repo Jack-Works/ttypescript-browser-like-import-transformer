@@ -12,9 +12,28 @@ Rewrite dynamic import with a custom function
 export interface DynamicImportPathRewriteCustom 
 ```
 
+## Remarks
+
+The function in the `function` should have the signature of:
+
+```ts
+(path: string, defaultImpl: (path: string) => Promise<unknown>) => Promise<unknown>
+
+```
+where the `defaultImpl` is the transformer's default runtime helper.
+
+The function must be an ArrowFunctionExpression on the syntax level.
+
 ## Example
 
-{ type: 'custom', function: (path, defaultImpl) =<!-- -->&gt; defaultImpl('std:' + path) }
+
+```js
+{
+     type: 'custom',
+     function: "(path, defaultImpl) => defaultImpl('std:' + path)"
+}
+
+```
 
 ## Properties
 

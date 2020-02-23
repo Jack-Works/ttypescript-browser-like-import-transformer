@@ -1,4 +1,10 @@
-import { PluginConfigs, BareModuleRewriteSimple, BareModuleRewriteUMD, BareModuleRewriteURL } from './plugin-config'
+import {
+    PluginConfigs,
+    BareModuleRewriteSimple,
+    BareModuleRewriteUMD,
+    BareModuleRewriteURL,
+    BareModuleRewriteObject,
+} from './plugin-config'
 import { CompilerOptions } from 'typescript'
 
 /** All ConfigError should go though this class
@@ -22,7 +28,7 @@ export function validateConfig(config: PluginConfigs, options: CompilerOptions) 
 
     enumCheck('dynamicImportPathRewrite', ['auto'])
     const enums = Object.keys(BareModuleRewriteSimpleEnumLocal) as BareModuleRewriteSimple[]
-    enumCheck('bareModuleRewrite', enums)
+    enumCheck('bareModuleRewrite', enums as any)
 
     falseOnly('bareModuleRewrite')
     falseOnly('dynamicImportPathRewrite')
@@ -46,7 +52,7 @@ export function validateConfig(config: PluginConfigs, options: CompilerOptions) 
 }
 
 function normalizedBareModuleRewrite(
-    conf: PluginConfigs['bareModuleRewrite'] | BareModuleRewriteUMD,
+    conf: BareModuleRewriteObject | Record<string, BareModuleRewriteObject>,
     top = true,
 ): NormalizedBareModuleRewrite {
     if (conf === undefined) return { type: 'simple', enum: 'umd' }

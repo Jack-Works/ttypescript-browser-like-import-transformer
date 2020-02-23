@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-function: (opt: _ImportMapFunctionOpts) => string | null
+function: (opt: ImportMapFunctionOpts) => string | null
 ```

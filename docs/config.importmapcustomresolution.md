@@ -15,6 +15,6 @@ export interface ImportMapCustomResolution
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [function](./config.importmapcustomresolution.function.md) | <code>(opt: _ImportMapFunctionOpts) =&gt; string &#124; null</code> |  |
+|  [function](./config.importmapcustomresolution.function.md) | <code>(opt: ImportMapFunctionOpts) =&gt; string &#124; null</code> |  |
 |  [type](./config.importmapcustomresolution.type.md) | <code>'function'</code> |  |
 

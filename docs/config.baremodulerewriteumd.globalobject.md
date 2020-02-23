@@ -4,13 +4,10 @@
 
 ## BareModuleRewriteUMD.globalObject property
 
+When using UMD import, this option indicates what global object will be used to find the UMD variables.
+
 <b>Signature:</b>
 
 ```typescript
 globalObject?: string
 ```
-
-## Remarks
-
-define the globalObject
-

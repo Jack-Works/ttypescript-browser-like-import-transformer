@@ -14,5 +14,9 @@ dynamicImportPathRewrite?: false | 'auto' | DynamicImportPathRewriteCustom
 
 ## Remarks
 
-`false`<!-- -->: Do not rewrite `'auto'`<!-- -->: try to optimise automatically `DynamicImportPathRewrite`<!-- -->: using a custom function to handle the import path (path: string, builtinImpl: (path) =<!-- -->&gt; Promise<any>): Promise<any>
+- `false`<!-- -->: Do not rewrite
+
+- `'auto'`<!-- -->: try to optimise automatically
+
+- [DynamicImportPathRewriteCustom](./config.dynamicimportpathrewritecustom.md)<!-- -->: using a custom function to handle the import path
 

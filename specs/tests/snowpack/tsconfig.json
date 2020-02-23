@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "plugins": [
+            {
+                // @magic-works/ttypescript-browser-like-import-transformer
+                "transform": "../../../cjs/node.js",
+                "after": true,
+                "importMap": {
+                    "type": "path",
+                    "mapPath": "./web_modules/import-map.json",
+                    "simulateRuntimeImportMapPosition": "/web_modules/",
+                    "simulateRuntimeSourceRoot": "/dist/"
+                }
+            }
+        ],
+        "target": "ESNext",
+        "module": "ESNext",
+        "outDir": "./dist",
+        "rootDir": "./src",
+        "moduleResolution": "node"
+    }
+}

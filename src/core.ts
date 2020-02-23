@@ -26,7 +26,7 @@ import {
     Program,
     PropertyAccessExpression,
 } from 'typescript'
-import { PluginConfigs, _ImportMapFunctionOpts } from './plugin-config'
+import { PluginConfigs, ImportMapFunctionOpts } from './plugin-config'
 import { NormalizedPluginConfig } from './config-parser'
 type ts = typeof import('typescript')
 
@@ -41,7 +41,7 @@ export interface CustomTransformationContext<T extends Node> {
     context: TransformationContext
     node: T
     queryWellknownUMD: (path: string) => string | undefined
-    importMapResolve: (opt: _ImportMapFunctionOpts) => string | null
+    importMapResolve: (opt: ImportMapFunctionOpts) => string | null
     queryPackageVersion: (pkg: string) => string | null
     configParser: typeof import('./config-parser')
     ttsclib: typeof import('./ttsclib')
@@ -75,12 +75,14 @@ export default function createTransformer(
                         },
                         apply(t, _, [ctx, opt]: Parameters<typeof import('./ttsclib').moduleSpecifierTransform>) {
                             if (!configRaw.importMap) return core.ttsclib.moduleSpecifierTransform(ctx, opt)
+                            const comp = context.getCompilerOptions()
                             const result = importMapResolve({
                                 config: configRaw,
                                 sourceFilePath: sourceFile.fileName,
-                                currentWorkingDirectory: _program.getCurrentDirectory(),
                                 moduleSpecifier: ctx.path,
-                                rootDir: context.getCompilerOptions().rootDir!,
+                                rootDir: comp.rootDir!,
+                                tsconfigPath: (comp.configFilePath as string) || _program.getCurrentDirectory(),
+                                // project: comp.project as string,
                             })
                             if (result) return { type: 'rewrite', nextPath: result }
                             return core.ttsclib.moduleSpecifierTransform(ctx, opt)

@@ -1,0 +1,5 @@
+{
+  "imports": {
+    "lodash-es": "./lodash-es.js?rev=806d1b9f78"
+  }
+}

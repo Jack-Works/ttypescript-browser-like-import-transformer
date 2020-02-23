@@ -1,36 +1,41 @@
-# ttypescript-browser-like-import-transformer
+# Remedy of node style import in browser
 
-A custom transformer that can be used with ttypescript to transform ts imports to browser style imports
+<p align="center">
+  <a href="https://www.npmjs.com/package/@magic-works/ttypescript-browser-like-import-transformer">
+    <img alt="npm version" src="https://img.shields.io/npm/v/@magic-works/ttypescript-browser-like-import-transformer.svg?style=flat-square"></a>
+</p>
 
-Treat your import like:
+Jump to [Install](#install), [Use cases](#use-cases), [Motivation](#motivation)
 
-Before
+## Intro
 
-```ts
-import React from 'react'
-import * as AsyncCall from 'async-call-rpc'
-import isarray from 'isarray'
+This typescript transformer helps you to emit a browser compatible ESModule output. In general, it do two things:
+
+1. Add a ".js" after the local import
+1. Transform the node style dependencies (e.g. `import React from "react"`) to
+    1. A global variable access (`const React = globalThis.React`)
+    1. A CDN (`import _ from "https://cdn.pika.dev/lodash-es@4.17.15"`)
+    1. Another CDN (`import _ from "https://unpkg.com/lodash-es@4.17.15?module"`)
+    1. [Snowpack](https://www.snowpack.dev/) style import (`import _ from "/web_modules/lodash-es.js"`)
+    1. **\[🧪Experimental\]** Read import rule from [Import Map](https://github.com/WICG/import-maps)
+
+### Input
+
+```js
+import './polyfill'
+import * as React from 'react'
 ```
 
-After
+### Output
 
-```ts
-const React = __bindCheck(__esModuleCheck(globalThis.React), ['default'], 'react', 'globalThis.React').default
-import * as AsyncCall from 'https://unpkg.com/async-call-rpc@latest/?module'
-import isarray from '/web_modules/isarray.js'
+<!-- prettier-ignore -->
+```js
+import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@1.4.1/es/ttsclib.min.js";
+const React = __UMDBindCheck(globalThis.React, [], "react", "globalThis.React", false);
+import "./polyfill.js";
 ```
 
-## Abstract
-
-This is a [ttypescript](https://github.com/cevek/ttypescript) transformer to transform your `import` and `export` declarations into the form that browser can run directly. Including rewrite to another path or redirect to a global UMD variable.
-
-## Motivation
-
-Nowadays most of codes in our codebase are ESModules. You can emit browser executable JS files by `tsc` directly but you have to add the annoying `.js` extension to the end. (Related: [PR: New --emitExtension and --noImplicitExtensionName compiler options](https://github.com/microsoft/TypeScript/pull/35148))
-
-On the other hand, it is hard to run ES Module codes with Node style dependencies, there're some solutions to this including [Snowpack](https://www.snowpack.dev/) but Snowpack also have it's limits.
-
-# Usage
+## Install
 
 1. Install `typescript` and `ttypescript`, and this transformer into your project if you don't already have them.
 
@@ -66,374 +71,18 @@ On the other hand, it is hard to run ES Module codes with Node style dependencie
     ttsc --project tsconfig.json
     ```
 
-## Options
+## Use cases
 
-There're some options you can use to modify the behavior of this transformer.
+### Use with Webpack
 
-### `appendExtensionName`?: string | boolean
+Here is [a template repo](https://github.com/Jack-Works/ttsc-browser-import-template) to help you use this transformer with Webpack. In this repo, all node style import is imported in [a single file](https://github.com/Jack-Works/ttsc-browser-import-template/blob/master/dependencies.js) and packed by Webpack. Rest of the source code never get handled by Webpack but emitted by [ttypescript](https://github.com/cevek/ttypescript) (a enhanced typescript cli that allows you to specify transformer programmatically).
 
-Add '.js' extension for local module specifier
+### Use with Snowpack
 
--   `false`: disable this feature
--   `true`: equals to '.js'
--   string: will append the given file extension (e.g. `".mjs"`)
-
-**Default value**: `".js"`
-
-```ts
-// before
-import x from './file'
-// after
-import x from './file.js'
-```
-
-### `appendExtensionNameForRemote`?: boolean
-
-Also do append extension name for remote (http/https://) import.
-
-**Default value**: false
-
-```ts
-// before
-import 'https://polyfill.io/'
-// after (with appendExtensionNameForRemote: true)
-// yes it's a bug
-import 'https://polyfill.io/.js'
-```
-
-### `bareModuleRewrite`?: false | BareModuleRewriteSimple | BareModuleRewriteURL | Record<string, BareModuleRewriteObject>
-
-This is the most powerful part of this transformer. You can specify the transform rule of bare imports (like `import 'React'`) to the form that browser can recognize.
-
--   `false`: disable the transform
--   `'snowpack'`: If you are using snowpack (https://github.com/pikapkg/snowpack)
--   `'umd'`: Try to get imports from a global object.
--   `'unpkg'`: Try to transform to https://unpkg.com/package@latest/index.js?module
--   `'pikacdn'`: Try to transform to https://cdn.pika.dev/package
--   `BareModuleRewriteURL`: See BareModuleRewriteURL below
--   `Record<string, BareModuleRewriteObject>`: See "advance options" below
-
-```ts
-type BareModuleRewriteURL = {
-    type: 'url'
-    // https://my-cdn.dev/$packageName$@$version$
-    withVersion?: string
-    // https://my-cdn.dev/$packageName$?latest
-    noVersion?: string
-}
-```
-
-**Default value**: `"umd"`
-
-#### Advance options
-
-`bareModuleRewrite` accepts a `Record<string, BareModuleRewriteObject>` as it's parameter.
-
-```ts
-{ [matchingRules: key]: BareModuleRewriteObject }
-```
-
-You can use two kinds of matching rule to matching your import paths.
-
-##### Matching rules:
-
--   Full match: use normal string to do a full match. (`"react"` will only match "react")
--   RegExp match: use JavaScript RegExp to match dependencies. (`"/^@material-ui\/(.+)/g"` will match all packages started with `@material-ui`)
-
-#### BareModuleRewriteObject
-
-```ts
-type BareModuleRewriteObject = false | BareModuleRewriteURL | BareModuleRewriteSimple | BareModuleRewriteUMD
-type BareModuleRewriteUMD = {
-    // Rewrite as UMD
-    type: 'umd'
-    // Rewrite target
-    target: string
-    // globalObject, default to "globalThis"
-    globalObject?: string
-}
-```
-
-#### Examples
-
-##### `bareModuleRewrite: false`
-
-```ts
-// before
-import x from 'react'
-// after
-import x from 'react'
-```
-
-##### `bareModuleRewrite: "snowpack"`
-
-```ts
-// before
-import x from 'react'
-// after
-import x from '/web_modules/react.js'
-```
-
-##### `bareModuleRewrite: "unpkg"`
-
-```ts
-// before
-import x from 'react'
-// after
-import x from 'https://unpkg.com/react@latest/?module'
-```
-
-##### `bareModuleRewrite: "pikacdn"`
-
-```ts
-// before
-import x from 'react'
-// after
-import x from 'https://cdn.pika.dev/react'
-```
-
-##### `bareModuleRewrite: { type: 'url', withVersion: 'std:$packageName$@$version$', noVersion: 'std:$packageName$' }`
-
-```ts
-// before
-import x from '@material-ui/core'
-import i from '@material-ui/icons'
-import y from 'lodash'
-import z from 'lodash-es'
-import w from 'typescript'
-
-// after
-import x from 'std:@material-ui/core'
-import i from 'std:@material-ui/icons'
-import y from 'std:lodash@4.17.15'
-import z from 'std:lodash-es'
-import w from 'std:typescript@3.8.0-dev.20200208'
-```
-
-##### `bareModuleRewrite: "umd"`
-
-```ts
-// before
-import x from 'react'
-import { useState } from 'react'
-import * as React from 'react'
-/* TypeScript 3.8 supported */
-export * as React from 'react'
-export { useState } from 'react'
-// ---------------------------------------
-// after
-const x = __bindCheck(globalThis.React, ["default"], "react", "globalThis.React").default;
-const { useState } = __bindCheck(globalThis.React, ["useState"], "react", "globalThis.React");
-const React = __bindCheck(globalThis.React, [], "react", "globalThis.React");
-const React_1 = __bindCheck(globalThis.React, [], "react", "globalThis.React");
-export { React_1 as React };
-const { useState_1 } = __bindCheck(globalThis.React, ["useState"], "react", "globalThis.React");
-export { useState_1 as useState };
-```
-
-##### `bareModuleRewrite: Record<string, BareModuleRewriteObject>`
-
-```js
-{
-    bareModuleRewrite: {
-        react: "umd",
-        "lodash-es": "pikacdn",
-        "async-call-rpc": "unpkg",
-        "std:fs": false,
-        "isarray": "snowpack",
-        // === /^@material-ui\/(.+)/g
-        "/^@material-ui\\/(.+)/g": {
-            type: "umd",
-            target: "MaterialUI.$1",
-            globalObject: "window"
-        },
-        "/(.+)/g": "snowpack"
-    }
-}
-```
-
-```ts
-// before with { esModuleInterop: true }
-import React from 'react'
-import lodash from 'lodash-es'
-import * as AsyncCall from 'async-call-rpc'
-import fs from 'std:fs'
-import isarray from 'isarray'
-import * as MUI from '@material-ui/core'
-import * as MUILab from '@material-ui/labs'
-import 'other-polyfill'
-// ------------------------------
-// after
-const React = __bindCheck(__esModuleCheck(globalThis.React), ['default'], 'react', 'globalThis.React').default
-const MUI = __bindCheck(window.MaterialUI.core, [], '@material-ui/core', 'window.MaterialUI.core')
-const MUILab = __bindCheck(window.MaterialUI.labs, [], '@material-ui/labs', 'window.MaterialUI.labs')
-import lodash from 'https://cdn.pika.dev/lodash-es'
-import * as AsyncCall from 'https://unpkg.com/async-call-rpc@latest/?module'
-import fs from 'std:fs'
-import isarray from '/web_modules/isarray.js'
-import '/web_modules/other-polyfill.js'
-```
-
-### `dynamicImportPathRewrite`?: false | 'auto' | DynamicImportPathRewriteCustom
-
--   `false`: Disable the _dynamic_ dynamic import rewrite (still rewrite for dynamic import that static analyzable like `import("react")`)
--   `"auto"`: let the transformer do it for you.
--   `DynamicImportPathRewriteCustom`: Provide a function your self.
-
-**Default value**: `"auto"`
-
-#### type `DynamicImportPathRewriteCustom`
-
-```typescript
-type DynamicImportPathRewriteCustom = {
-    type: 'custom'
-    // The string must be a arrow function
-    // e.g.: x => Promise.reject
-    function: string
-}
-```
-
-#### `{ dynamicImportPathRewrite: false }`
-
-```ts
-// before
-import('react')
-import('react' + x)
-// after
-import('react')
-import('react' + x)
-```
-
-#### `{ dynamicImportPathRewrite: "auto" }`
-
-```ts
-// before
-import('react')
-import('react' + x)
-
-// after
-// Or import("/web_modules/react.js") etc, based on your config.
-Promise.resolve(globalThis.react)
-__dynamicImportHelper('react' + x)
-```
-
-#### `{ dynamicImportPathRewrite: { type: "custom", function: "(path, defaultImpl) => defaultImpl(path).then(mod => new Proxy(mod, {}))" } }`
-
-The function in the `function` should have the signature of: `(path: string, defaultImpl: (path: string) => Promise<unknown>) => Promise<unknown>` where the `defaultImpl` is the transformer's default runtime helper.
-
-The function must be an ArrowFunctionExpression on the syntax level.
-
-```ts
-// before
-import('react' + x)
-
-// after
-const __customImportHelper_1 = (path, defaultImpl) => defaultImpl(path).then(mod => new Proxy(mod, {}))
-__customImportHelper_1('react' + x, __dynamicImportHelper)
-```
-
-### `globalObject`?: string
-
-Choose what globalObject to use when transform as UMD import. You may want to use `"window"`, `"self"` or `"global"` as your global object.
-
-**Default value**: `"globalThis"`
-
-`{ globalObject: "window" }`
-
-```ts
-// before
-import('a')
-
-// after
-Promise.resolve(window.a)
-```
-
-### `webModulePath`?: string
-
-Choose what `webModulePath` to use when transform as snowpack import. See document of [snowpack](https://www.snowpack.dev/).
-
-**Default value**: `"/web_modules/"`
-
-`{ webModulePath: "https://cdn.example.com/web_modules/", bareModuleRewrite: "snowpack" }`
-
-```ts
-// before
-import('a')
-
-// after
-import('https://cdn.example.com/web_modules/a.js')
-```
-
-### `importHelpers`?: string
-
-Choose where to inject the helpers needed to do the transform.
-
--   `"auto"`: Use the transformer default
--   `"inline"`: All the import helpers will be injected in the file
--   `string`: A URL, will used as the target of the import path.
-
-**Default value**: `"auto"`
-
-#### `{ importHelpers: "auto" }`
-
-```ts
-// before
-import(x)
-
-// after
-import { __dynamicImportTransform } from 'https://unpkg.com/@magic-works/ttypescript-browser-like-import-transformer@1.1.0/es/ttsclib.js'
-import { __UMDBindCheck } from 'https://unpkg.com/@magic-works/ttypescript-browser-like-import-transformer@1.1.0/es/ttsclib.js'
-__dynamicImportTransform(JSON.parse('{"after":true,"importHelpers":"auto"}'), x, __dynamicImportNative, __UMDBindCheck)
-function __dynamicImportNative(path) {
-    return import(path)
-}
-```
-
-#### `{ importHelpers: "https://cdn.example.com/ttsc-$version$.js" }`
-
-```ts
-// before
-import(x)
-
-// after
-import { __dynamicImportTransform } from 'https://cdn.example.com/ttsc-1.2.0.js'
-import { __UMDBindCheck } from 'https://cdn.example.com/ttsc-1.2.0.js'
-__dynamicImportTransform(JSON.parse('{"after":true,"importHelpers":"auto"}'), x, __dynamicImportNative, __UMDBindCheck)
-function __dynamicImportNative(path) {
-    return import(path)
-}
-```
-
-### `importMap`?: object
-
-**Experimental** may have many bugs on transforming with importMap.
-
-```ts
-type importMap = {
-    type: 'map'
-    mapPath: string
-    mapObject?: object
-    simulateRuntimeImportMapPosition: string
-    simulateRuntimeSourceRoot?: string
-}
-```
-
-#### Example
-
-If you're using snowpack, try
-
-Folder:
-
-```shell
-/web_modules/ # generated by snowpack
-/src/ # your source code
-/dist/ # your output
-tsconfig.json # tsconfig at here
-```
-
-You must set `rootDir` when using importMap.
+See the **TTypeScript Support** in the [Importing Packages by Name](https://www.snowpack.dev/#importing-packages-by-name) section.
 
 ```jsonc
+/* tsconfig.json */
 {
     "compilerOptions": {
         "module": "es2015",
@@ -441,16 +90,65 @@ You must set `rootDir` when using importMap.
             {
                 "transform": "@magic-works/ttypescript-browser-like-import-transformer",
                 "after": true,
-                "importMap": {
-                    "type": "path",
-                    "mapPath": "./web_modules/import-map.json",
-                    "simulateRuntimeImportMapPosition": "/web_modules/",
-                    "simulateRuntimeSourceRoot": "/dist/"
-                }
+                "bareModuleRewrite": "snowpack"
             }
-        ],
-        "rootDir": "./src/",
-        "outDir": "./dist/"
+        ]
     }
 }
+```
+
+### Use with CDN
+
+[Pika CDN](https://www.pika.dev/cdn) and [unpkg](https://unpkg.com/#query-params) are two CDNs that friendly to ES Module dependencies.
+
+```jsonc
+/* tsconfig.json */
+{
+    "compilerOptions": {
+        "module": "es2015",
+        "plugins": [
+            {
+                "transform": "@magic-works/ttypescript-browser-like-import-transformer",
+                "after": true,
+                "bareModuleRewrite": "pikacdn" // or "unpkg"
+            }
+        ]
+    }
+}
+```
+
+## Motivation
+
+Nowadays most of codes in our codebase are ESModules. You can emit browser executable JS files by `tsc` directly but you have to add the annoying `.js` extension to the end. (Related: [PR: New --emitExtension and --noImplicitExtensionName compiler options](https://github.com/microsoft/TypeScript/pull/35148))
+
+On the other hand, it is hard to run ES Module codes with Node style dependencies, there're some solutions to this including [Snowpack](https://www.snowpack.dev/) but Snowpack also have it's limits.
+
+## Options
+
+See [Options](./docs/config.pluginconfigs.md)
+
+## Use programmatically
+
+If you are using Node.js, import `@magic-works/ttypescript-browser-like-import-transformer/cjs/node.js`, it will export a `ts.TransformerFactory<SourceFile>`.
+
+If you are in other environment or you want to modify the behavior of the transformer, use `./es/core.js` and provide related I/O operations to create a `ts.TransformerFactory<SourceFile>`.
+
+Once you get the `ts.TransformerFactory<SourceFile>`, you can use it like
+
+```ts
+const result = ts.transpileModule(source, {
+    compilerOptions,
+    transformers: {
+        after: [
+            transformer.default(
+                // TODO: remove this dependency. Only `program.getCurrentDirectory()` is used currently
+                program,
+                {
+                    after: true,
+                    // config here
+                },
+            ),
+        ],
+    },
+})
 ```

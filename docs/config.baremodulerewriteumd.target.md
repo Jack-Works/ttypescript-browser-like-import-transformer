@@ -4,13 +4,15 @@
 
 ## BareModuleRewriteUMD.target property
 
+Rewrite the matching import statement to specified global variable
+
 <b>Signature:</b>
 
 ```typescript
 target: string
 ```
 
-## Remarks
+## Example
 
-rewrite the matching import statement to specified global variable
+"mylib.$1"
 

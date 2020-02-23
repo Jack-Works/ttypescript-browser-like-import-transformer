@@ -1,11 +1,7 @@
 const { execSync } = require('child_process')
 const { readFileSync, writeFileSync } = require('fs')
 
-try {
-    execSync('yarn api-extractor run')
-} catch (e) {
-    console.log(e)
-}
+execSync('yarn api-extractor run')
 const file = require('./temp/config.api.json')
 function touch(o = file) {
     switch (typeof o) {

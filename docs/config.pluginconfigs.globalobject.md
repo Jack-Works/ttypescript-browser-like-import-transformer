@@ -11,3 +11,8 @@ When using UMD import, this option indicates what global object will be used to 
 ```typescript
 globalObject?: string
 ```
+
+## Example
+
+- "globalThis" in all modern ES platforms. - "window" or "self" in browsers. - "global" in NodeJS.
+

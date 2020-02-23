@@ -14,5 +14,9 @@ importHelpers?: 'inline' | 'auto' | string
 
 ## Remarks
 
-- "inline": All helpers will emitted in each file - "auto": Let the transform do it - string: A URL, will import helper from that place.
+- "inline": All the import helpers will be injected in the file
+
+- "auto": Use the transformer default
+
+- string: A URL, will import helper from that place.
 

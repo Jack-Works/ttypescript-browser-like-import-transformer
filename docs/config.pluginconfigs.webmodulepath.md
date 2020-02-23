@@ -16,3 +16,8 @@ Used in snowpack. web\_modules module path
 ```typescript
 webModulePath?: string
 ```
+
+## Remarks
+
+Choose what `webModulePath` to use when transform as snowpack import. See document of \[snowpack\](https://www.snowpack.dev/).
+

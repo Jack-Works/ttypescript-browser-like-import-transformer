@@ -14,14 +14,44 @@ export interface BareModuleRewriteUMD
 
 ## Example
 
-{ type: 'umd', target: 'mylib', globalObject: 'window' }
+
+```json
+{ "type": "umd", target: "mylib", globalObject: "window" }
+
+```
+
+```js
+/// { bareModuleRewrite: { "/@material-ui\\/(.+)/": {type: "umd", target: "MaterialUI.$1"}, "lodash": "umd", "jquery": "pikacdn", "lodash-es": "unpkg", "/.+/": "snowpack" } }
+
+import x from '@material-ui/core'
+import i from '@material-ui/icons'
+import y from 'lodash'
+import z from 'lodash-es'
+import w from 'other'
+console.log(x, y, z, w, i)
+
+```
+Output:
+
+```js
+// CompilerOptions: {"module":"ESNext"}
+// PluginConfig: {"bareModuleRewrite":{"/@material-ui\\/(.+)/":{"type":"umd","target":"MaterialUI.$1"},"lodash":"umd","jquery":"pikacdn","lodash-es":"unpkg","/.+/":"snowpack"}}
+import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@1.4.1/es/ttsclib.min.js";
+const x = __UMDBindCheck(globalThis.MaterialUI.core, ["default"], "@material-ui/core", "globalThis.MaterialUI.core", false).default;
+const i = __UMDBindCheck(globalThis.MaterialUI.icons, ["default"], "@material-ui/icons", "globalThis.MaterialUI.icons", false).default;
+const y = __UMDBindCheck(globalThis.lodash, ["default"], "lodash", "globalThis.lodash", false).default;
+import z from "https://unpkg.com/lodash-es?module";
+import w from "/web_modules/other.js";
+console.log(x, y, z, w, i);
+
+```
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [globalObject](./config.baremodulerewriteumd.globalobject.md) | <code>string</code> |  |
-|  [target](./config.baremodulerewriteumd.target.md) | <code>string</code> |  |
+|  [globalObject](./config.baremodulerewriteumd.globalobject.md) | <code>string</code> | When using UMD import, this option indicates what global object will be used to find the UMD variables. |
+|  [target](./config.baremodulerewriteumd.target.md) | <code>string</code> | Rewrite the matching import statement to specified global variable |
 |  [type](./config.baremodulerewriteumd.type.md) | <code>'umd'</code> |  |
 |  [umdImportPath](./config.baremodulerewriteumd.umdimportpath.md) | <code>string</code> | should be a URL. Will use a <code>import 'umdImportPath'</code> to load the UMD then deconstruct from it. |
 

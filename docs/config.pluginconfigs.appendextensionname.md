@@ -12,6 +12,14 @@ Add '.js' extension for local import path.
 appendExtensionName?: string | boolean
 ```
 
+## Remarks
+
+- `false`<!-- -->: disable the transform
+
+- `true`<!-- -->: same as ".js"
+
+- a string: set your extension name like ".mjs", ".js" or ".ejs"
+
 ## Example
 
 Source code:
