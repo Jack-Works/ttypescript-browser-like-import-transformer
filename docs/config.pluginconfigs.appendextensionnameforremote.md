@@ -11,3 +11,33 @@ Also append extension '.js' to http:// or https:// URLs.
 ```typescript
 appendExtensionNameForRemote?: boolean
 ```
+
+## Example
+
+Source code:
+
+```js
+import './local-file'
+import '/local-file'
+import 'http://remote/file'
+
+```
+Outputs:
+
+```js
+// CompilerOptions: {"module":"ESNext"}
+// PluginConfig: {"appendExtensionNameForRemote":false}
+import "./local-file.js";
+import "/local-file.js";
+import 'http://remote/file';
+
+```
+
+```js
+// CompilerOptions: {"module":"ESNext"}
+// PluginConfig: {"appendExtensionNameForRemote":true}
+import "./local-file.js";
+import "/local-file.js";
+import "http://remote/file.js";
+
+```

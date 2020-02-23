@@ -15,19 +15,19 @@ function touch(o = file) {
         case 'string':
             o = o.replace(/\@magic-works\/ttypescript-browser-like-import-transformer/g, 'config')
             o = o.replace(
-                /\!out\((.+)\)/g,
+                /\!out\((.+?)\)/g,
                 (_, file) => `
 
 \`\`\`js
-${readFileSync('./specs/__snapshot__/' + file, 'utf-8').replace(/\n$/, '')}
+${readFileSync('./specs/__snapshot__/' + file, 'utf-8').replace(/\n+$/g, '')}
 \`\`\``,
             )
             o = o.replace(
-                /\!src\((.+)\)/g,
+                /\!src\((.+?)\)/g,
                 (_, file) => `
 
 \`\`\`js
-${readFileSync('./specs/tests/' + file, 'utf-8').replace(/\n$/, '')}
+${readFileSync('./specs/tests/' + file, 'utf-8').replace(/\n+$/g, '')}
 \`\`\``,
             )
             return o

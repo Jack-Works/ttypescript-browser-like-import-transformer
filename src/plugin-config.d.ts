@@ -9,19 +9,21 @@ export interface PluginConfigs {
      * @example
      * Source code:
      * !src(appendExtensionName-default.ts)
-     *
      * Outputs:
-     *
      * !out(appendExtensionName-false.js)
-     *
      * !out(appendExtensionName-true.js)
-     *
      * !out(appendExtensionName-string.js)
      */
     appendExtensionName?: string | boolean
     /**
      * Also append extension '.js' to http:// or https:// URLs.
      * @defaultValue false
+     * @example
+     * Source code:
+     * !src(appendExtensionName-default.ts)
+     * Outputs:
+     * !out(appendExtensionNameForRemote-false.js)
+     * !out(appendExtensionNameForRemote-true.js)
      */
     appendExtensionNameForRemote?: boolean
     /**

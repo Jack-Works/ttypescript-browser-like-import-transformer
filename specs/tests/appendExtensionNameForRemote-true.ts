@@ -1,2 +1,2 @@
 /// {appendExtensionNameForRemote: true}
-//@ default.ts
+//@ appendExtensionName-default.ts
