@@ -1,2 +1,2 @@
 /// { bareModuleRewrite: 'snowpack' }
-//@ default.ts
+//@ bareModuleRewrite-default.ts

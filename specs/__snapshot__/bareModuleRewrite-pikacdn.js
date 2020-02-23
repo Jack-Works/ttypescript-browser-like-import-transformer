@@ -1,48 +1,14 @@
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {"bareModuleRewrite":"pikacdn"}
-import { __dynamicImportTransform as __dynamicImportTransform } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@1.4.1/es/ttsclib.min.js";
-import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@1.4.1/es/ttsclib.min.js";
-import { moduleSpecifierTransform as moduleSpecifierTransform } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@1.4.1/es/ttsclib.min.js";
-console.log('Should run after all imports', a, b, c, d, e, a1, b1, c1, d1, e1, a2, b2, c2, d2, e2);
+console.log('Should run after all imports', a, b, c2, d, e, c2);
 // Node style import
 import a from "https://cdn.pika.dev/a";
-import b, { c, d } from "https://cdn.pika.dev/b";
+import b, { c as c2, d } from "https://cdn.pika.dev/b";
 import * as e from "https://cdn.pika.dev/c";
 import "https://cdn.pika.dev/d";
-// relative import without ext name
-import a1 from "./a.js";
-import b1, { c1, d1 } from "./b.js";
-import * as e1 from "/c.js";
-import "./d.js";
-// browser style import
-import a2 from 'http://example.com/';
-import b2, { c2, d2 } from 'https://example.com';
-import * as e2 from 'http://example.com/';
-import 'http://example.com/';
+const c = 1;
 const x = 1;
 export { x };
 // Node style export
 export { c, d } from "https://cdn.pika.dev/b";
 export * as e from "https://cdn.pika.dev/c";
-// relative import without ext name
-export { c1, d1 } from "./b.js";
-export * as e1 from "./c.js";
-// browser style import
-export { c2, d2 } from 'http://example.com/';
-export * as e2 from 'http://example.com/';
-// Static dynamic import
-import("https://cdn.pika.dev/a");
-import("./a.js");
-import('https://example.com');
-// dynamic dynamic import
-const y = '';
-__dynamicImportTransform(y, JSON.parse("{\"after\":true,\"bareModuleRewrite\":{\"enum\":\"pikacdn\",\"type\":\"simple\"}}"), __dynamicImportNative, __UMDBindCheck, moduleSpecifierTransform);
-// invalid dynamic import (invalid currently)
-__dynamicImport2Ary("@magic-works/ttypescript-browser-like-import-transformer: Transform rule for this dependencies found, but this dynamic import has more than 1 argument, transformer don't know how to transform that and keep it untouched.", y, 'second argument');
-function __dynamicImportNative(path) {
-    return import(path);
-}
-function __dynamicImport2Ary(reason, ...args) {
-    console.warn(reason, ...args);
-    return import(args[0], args[1]);
-}

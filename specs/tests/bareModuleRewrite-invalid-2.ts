@@ -1,2 +1,2 @@
 /// { bareModuleRewrite: {key: "unknown"} }
-//@ default.ts
+//@ bareModuleRewrite-default.ts

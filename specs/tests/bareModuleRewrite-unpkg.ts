@@ -1,2 +1,2 @@
 /// { bareModuleRewrite: 'unpkg' }
-//@ default.ts
+//@ bareModuleRewrite-default.ts

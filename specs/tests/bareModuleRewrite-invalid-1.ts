@@ -1,2 +1,2 @@
 /// { bareModuleRewrite: "unknown" }
-//@ default.ts
+//@ bareModuleRewrite-default.ts

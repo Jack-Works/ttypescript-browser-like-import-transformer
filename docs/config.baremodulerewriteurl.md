@@ -14,7 +14,52 @@ export interface BareModuleRewriteURL
 
 ## Example
 
-{ type: 'url', withVersion: 'https://cdn.example.com/$packageName$/v$version$' noVersion: 'https://cdn.example.com/$packageName$/latest' }
+
+```json
+{
+    "type": "url",
+    "withVersion": "https://cdn.example.com/$packageName$/v$version$""
+    "noVersion": "https://cdn.example.com/$packageName$/latest"
+}
+
+```
+Source code:
+
+```js
+console.log('Should run after all imports', a, b, c2, d, e, c2)
+// Node style import
+import a from 'a'
+import b, { c as c2, d } from 'b'
+import * as e from 'c'
+import 'd'
+
+const c = 1
+const x = 1
+export { x }
+// Node style export
+export { c, d } from 'b'
+export * as e from 'c'
+
+```
+Output:
+
+```js
+// CompilerOptions: {"module":"ESNext"}
+// PluginConfig: {"bareModuleRewrite":{"type":"url","withVersion":"std:$packageName$@$version$","noVersion":"std:$packageName$"}}
+console.log('Should run after all imports', a, b, c2, d, e, c2);
+// Node style import
+import a from "std:a";
+import b, { c as c2, d } from "std:b";
+import * as e from "std:c";
+import "std:d";
+const c = 1;
+const x = 1;
+export { x };
+// Node style export
+export { c, d } from "std:b";
+export * as e from "std:c";
+
+```
 
 ## Properties
 

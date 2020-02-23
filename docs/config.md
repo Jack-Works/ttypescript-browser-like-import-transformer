@@ -19,6 +19,6 @@
 
 |  Type Alias | Description |
 |  --- | --- |
-|  [BareModuleRewriteObject](./config.baremodulerewriteobject.md) |  |
+|  [BareModuleRewriteObject](./config.baremodulerewriteobject.md) | Rewrite the module by complex rules. |
 |  [BareModuleRewriteSimple](./config.baremodulerewritesimple.md) | Predefined rewrite rules<!-- -->snowpack: Rewrite to snowpack (/web\_modules) |
 

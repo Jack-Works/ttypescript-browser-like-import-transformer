@@ -4,8 +4,204 @@
 
 ## BareModuleRewriteObject type
 
+Rewrite the module by complex rules.
+
 <b>Signature:</b>
 
 ```typescript
 export type BareModuleRewriteObject = false | BareModuleRewriteSimple | BareModuleRewriteUMD | BareModuleRewriteURL
 ```
+
+## Remarks
+
+- `false`<!-- -->: disable the transform
+
+- [BareModuleRewriteURL](./config.baremodulerewriteurl.md)<!-- -->: Rewrite to another URL
+
+- [BareModuleRewriteUMD](./config.baremodulerewriteumd.md)<!-- -->: Rewrite to a UMD variable access.
+
+- `Record<string, `[BareModuleRewriteObject](./config.baremodulerewriteobject.md)`>`<!-- -->: string can be a string or a RegExp to match import path. If you're using the package "type", you should write it as "/^type$/"
+
+- Enum [BareModuleRewriteSimple](./config.baremodulerewritesimple.md)<!-- -->:
+
+- - `"snowpack"`<!-- -->: if you are using [snowpack](https://github.com/pikapkg/snowpack)
+
+- - `"umd"`<!-- -->: make your `import a from 'b'` to `const a = globalThis.b`
+
+- - `"unpkg"`<!-- -->: try to transform imports path to "https://unpkg.com/package<!-- -->@<!-- -->version/index.js?module"
+
+- - `"pikacdn"`<!-- -->: try to transform import path to "https://cdn.pika.dev/package<!-- -->@<!-- -->version"
+
+## Example
+
+Example for `Record<string, `[BareModuleRewriteObject](./config.baremodulerewriteobject.md)`>`
+
+```jsonc
+{
+   "my-pkg": "umd", // to globalThis.myPkg
+   "my-pkg2": "pikacdn", // to https://cdn.pika.dev/my-pkg2
+   "my-pkg3": "unpkg", // to https://unpkg.com/my-pkg3
+   "/my-pkg-(.+)/": {
+       type: 'umd',
+       target: 'getMyPkg("$1")'
+   }, // for "my-pkg-12" to globalThis.getMyPkg("12")
+}
+
+```
+Source code:
+
+```js
+console.log('Should run after all imports', a, b, c2, d, e, c2)
+// Node style import
+import a from 'a'
+import b, { c as c2, d } from 'b'
+import * as e from 'c'
+import 'd'
+
+const c = 1
+const x = 1
+export { x }
+// Node style export
+export { c, d } from 'b'
+export * as e from 'c'
+
+```
+Outputs:
+
+```js
+// CompilerOptions: {"module":"ESNext"}
+// PluginConfig: {"bareModuleRewrite":false}
+console.log('Should run after all imports', a, b, c2, d, e, c2);
+// Node style import
+import a from 'a';
+import b, { c as c2, d } from 'b';
+import * as e from 'c';
+import 'd';
+const c = 1;
+const x = 1;
+export { x };
+// Node style export
+export { c, d } from 'b';
+export * as e from 'c';
+
+```
+
+```js
+// CompilerOptions: {"module":"ESNext"}
+// PluginConfig: {"bareModuleRewrite":"umd"}
+import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@1.4.1/es/ttsclib.min.js";
+const a = __UMDBindCheck(globalThis.a, ["default"], "a", "globalThis.a", false).default;
+const b = __UMDBindCheck(globalThis.b, ["default"], "b", "globalThis.b", false).default;
+const { c: c2, d } = __UMDBindCheck(globalThis.b, ["c", "d"], "b", "globalThis.b", false);
+const e = __UMDBindCheck(globalThis.c, [], "c", "globalThis.c", false);
+const { c_1, d_1 } = __UMDBindCheck(globalThis.b, ["c", "d"], "b", "globalThis.b", false);
+export { c_1 as c, d_1 as d };
+const e_1 = __UMDBindCheck(globalThis.c, [], "c", "globalThis.c", false);
+export { e_1 as e };
+console.log('Should run after all imports', a, b, c2, d, e, c2);
+"import \"d\" is eliminated because it expected to have no side effects in UMD transform.";
+const c = 1;
+const x = 1;
+export { x };
+
+```
+
+```js
+// CompilerOptions: {"module":"ESNext"}
+// PluginConfig: {"bareModuleRewrite":"pikacdn"}
+console.log('Should run after all imports', a, b, c2, d, e, c2);
+// Node style import
+import a from "https://cdn.pika.dev/a";
+import b, { c as c2, d } from "https://cdn.pika.dev/b";
+import * as e from "https://cdn.pika.dev/c";
+import "https://cdn.pika.dev/d";
+const c = 1;
+const x = 1;
+export { x };
+// Node style export
+export { c, d } from "https://cdn.pika.dev/b";
+export * as e from "https://cdn.pika.dev/c";
+
+```
+
+```js
+// CompilerOptions: {"module":"ESNext"}
+// PluginConfig: {"bareModuleRewrite":"snowpack"}
+console.log('Should run after all imports', a, b, c2, d, e, c2);
+// Node style import
+import a from "/web_modules/a.js";
+import b, { c as c2, d } from "/web_modules/b.js";
+import * as e from "/web_modules/c.js";
+import "/web_modules/d.js";
+const c = 1;
+const x = 1;
+export { x };
+// Node style export
+export { c, d } from "/web_modules/b.js";
+export * as e from "/web_modules/c.js";
+
+```
+
+```js
+// CompilerOptions: {"module":"ESNext"}
+// PluginConfig: {"bareModuleRewrite":"unpkg"}
+console.log('Should run after all imports', a, b, c2, d, e, c2);
+// Node style import
+import a from "https://unpkg.com/a?module";
+import b, { c as c2, d } from "https://unpkg.com/b?module";
+import * as e from "https://unpkg.com/c?module";
+import "https://unpkg.com/d?module";
+const c = 1;
+const x = 1;
+export { x };
+// Node style export
+export { c, d } from "https://unpkg.com/b?module";
+export * as e from "https://unpkg.com/c?module";
+
+```
+
+```js
+// CompilerOptions: {"module":"ESNext"}
+// PluginConfig: {"bareModuleRewrite":{"type":"url","withVersion":"std:$packageName$@$version$","noVersion":"std:$packageName$"}}
+console.log('Should run after all imports', a, b, c2, d, e, c2);
+// Node style import
+import a from "std:a";
+import b, { c as c2, d } from "std:b";
+import * as e from "std:c";
+import "std:d";
+const c = 1;
+const x = 1;
+export { x };
+// Node style export
+export { c, d } from "std:b";
+export * as e from "std:c";
+
+```
+Complex example:
+
+```js
+/// { bareModuleRewrite: { "/@material-ui\\/(.+)/": {type: "umd", target: "MaterialUI.$1"}, "lodash": "umd", "jquery": "pikacdn", "lodash-es": "unpkg", "/.+/": "snowpack" } }
+
+import x from '@material-ui/core'
+import i from '@material-ui/icons'
+import y from 'lodash'
+import z from 'lodash-es'
+import w from 'other'
+console.log(x, y, z, w, i)
+
+```
+Output:
+
+```js
+// CompilerOptions: {"module":"ESNext"}
+// PluginConfig: {"bareModuleRewrite":{"/@material-ui\\/(.+)/":{"type":"umd","target":"MaterialUI.$1"},"lodash":"umd","jquery":"pikacdn","lodash-es":"unpkg","/.+/":"snowpack"}}
+import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@1.4.1/es/ttsclib.min.js";
+const x = __UMDBindCheck(globalThis.MaterialUI.core, ["default"], "@material-ui/core", "globalThis.MaterialUI.core", false).default;
+const i = __UMDBindCheck(globalThis.MaterialUI.icons, ["default"], "@material-ui/icons", "globalThis.MaterialUI.icons", false).default;
+const y = __UMDBindCheck(globalThis.lodash, ["default"], "lodash", "globalThis.lodash", false).default;
+import z from "https://unpkg.com/lodash-es?module";
+import w from "/web_modules/other.js";
+console.log(x, y, z, w, i);
+
+```
+

@@ -29,29 +29,9 @@ export interface PluginConfigs {
     /**
      * The transformation rule. Specify how this transformer will handle your imports.
      * @remarks
-     * `false`: disable the transform
-     *
-     * `BareModuleRewriteSimple.snowpack`: if you are using snowpack (https://github.com/pikapkg/snowpack)
-     *
-     * `BareModuleRewriteSimple.umd`: make your `import a from 'b'` to `const a = globalThis.b`
-     *
-     * `BareModuleRewriteSimple.unpkg`: try to transform imports path to https://unpkg.com/package@version/index.js?module
-     *
-     * `BareModuleRewriteSimple.pikacdn`: try to transform import path to https://cdn.pika.dev/package@version
-     *
-     * `{type: 'url', withVersion: string, noVersion: string }`: Provide your own rewrite rule. Two variables possible: $version$ and $packageName$
-     *
-     * `Record<string, BareModuleRewriteObject>`: string can be a string or a RegExp to match import path. If you're using the package "type", you should write it as "/^type$/"
-     * @example
-     * {
-     *    "my-pkg": "umd", // to globalThis.myPkg
-     *    "my-pkg2": "pikacdn", // to https://cdn.pika.dev/my-pkg2
-     *    "my-pkg3": "unpkg", // to https://unpkg.com/my-pkg3
-     *    "/my-pkg-(.+)/": { type: 'umd', target: 'getMyPkg("$1")' }, // for "my-pkg-12" to globalThis.getMyPkg("12")
-     * }
-     * @defaultValue umd
+     * See {@link BareModuleRewriteObject}
      */
-    bareModuleRewrite?: false | BareModuleRewriteSimple | BareModuleRewriteURL | Record<string, BareModuleRewriteObject>
+    bareModuleRewrite?: Exclude<BareModuleRewriteObject, BareModuleRewriteUMD>
     /**
      * Config how to rewrite dynamic import.
      * @remarks
@@ -147,11 +127,19 @@ export interface BareModuleRewriteUMD {
 /**
  * Rewrite module to another URL
  * @public
- * @example {
- * type: 'url',
- * withVersion: 'https://cdn.example.com/$packageName$/v$version$'
- * noVersion: 'https://cdn.example.com/$packageName$/latest'
+ * @example
+ * ```json
+ * {
+ *     "type": "url",
+ *     "withVersion": "https://cdn.example.com/$packageName$/v$version$""
+ *     "noVersion": "https://cdn.example.com/$packageName$/latest"
  * }
+ * ```
+ *
+ * Source code:
+ * !src(bareModuleRewrite-default.ts)
+ * Output:
+ * !out(bareModuleRewrite-url.js)
  */
 export interface BareModuleRewriteURL {
     type: 'url'
@@ -164,6 +152,57 @@ export interface BareModuleRewriteURL {
      */
     noVersion?: string
 }
+/**
+ * Rewrite the module by complex rules.
+ * @remarks
+ * - `false`: disable the transform
+ *
+ * - {@link BareModuleRewriteURL}: Rewrite to another URL
+ *
+ * - {@link BareModuleRewriteUMD}: Rewrite to a UMD variable access.
+ *
+ * - `Record<string, `{@link BareModuleRewriteObject}`>`: string can be a string or a RegExp to match import path. If you're using the package "type", you should write it as "/^type$/"
+ *
+ * - Enum {@link BareModuleRewriteSimple}:
+ *
+ * - - `"snowpack"`: if you are using {@link https://github.com/pikapkg/snowpack | snowpack}
+ *
+ * - - `"umd"`: make your `import a from 'b'` to `const a = globalThis.b`
+ *
+ * - - `"unpkg"`: try to transform imports path to "https://unpkg.com/package\@version/index.js?module"
+ *
+ * - - `"pikacdn"`: try to transform import path to "https://cdn.pika.dev/package\@version"
+ *
+ * @example
+ * Example for `Record<string, `{@link BareModuleRewriteObject}`>`
+ * ```jsonc
+ * {
+ *    "my-pkg": "umd", // to globalThis.myPkg
+ *    "my-pkg2": "pikacdn", // to https://cdn.pika.dev/my-pkg2
+ *    "my-pkg3": "unpkg", // to https://unpkg.com/my-pkg3
+ *    "/my-pkg-(.+)/": {
+ *        type: 'umd',
+ *        target: 'getMyPkg("$1")'
+ *    }, // for "my-pkg-12" to globalThis.getMyPkg("12")
+ * }
+ * ```
+ *
+ * Source code:
+ * !src(bareModuleRewrite-default.ts)
+ * Outputs:
+ * !out(bareModuleRewrite-false.js)
+ * !out(bareModuleRewrite-umd.js)
+ * !out(bareModuleRewrite-pikacdn.js)
+ * !out(bareModuleRewrite-snowpack.js)
+ * !out(bareModuleRewrite-unpkg.js)
+ * !out(bareModuleRewrite-url.js)
+ *
+ * Complex example:
+ * !src(bareModuleRewrite-complex.ts)
+ * Output:
+ * !out(bareModuleRewrite-complex.js)
+ * @defaultValue umd
+ */
 export type BareModuleRewriteObject = false | BareModuleRewriteSimple | BareModuleRewriteUMD | BareModuleRewriteURL
 /**
  * Rewrite dynamic import with a custom function

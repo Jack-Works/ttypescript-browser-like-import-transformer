@@ -1,7 +1,13 @@
 /// {dynamicImportPathRewrite: undefined}
 
+// Static dynamic import
 import('a')
 import('./a')
-const x = ''
-import(x)
-import(x, 'y')
+import('https://example.com')
+
+// dynamic dynamic import
+const y = ''
+import(y)
+
+// invalid dynamic import (invalid currently)
+import(y, 'second argument')

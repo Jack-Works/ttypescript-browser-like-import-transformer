@@ -1,2 +1,2 @@
-/// { bareModuleRewrite: false }
+/// { bareModuleRewrite: "umd" }
 //@ bareModuleRewrite-default.ts
