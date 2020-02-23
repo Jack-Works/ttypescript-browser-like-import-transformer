@@ -1,4 +1,4 @@
-# Remedy of node style import in browser
+<h2 align="center">Emit a ES Module Web project by only <sup>t</sup>typescript</h2>
 
 <p align="center">
   <a href="https://www.npmjs.com/package/@magic-works/ttypescript-browser-like-import-transformer">
