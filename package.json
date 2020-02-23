@@ -12,15 +12,18 @@
         "start:cjs": "tsc -w -p src",
         "start:es": "tsc -w -p src --module ESNext --outDir ./es",
         "build:cjs": "tsc -p src",
-        "build:es": "tsc -p src --module ESNext --outDir ./es"
+        "build:es": "tsc -p src --module ESNext --outDir ./es",
+        "doc": "node ./build-doc.js"
     },
     "dependencies": {},
     "devDependencies": {
+        "@microsoft/api-documenter": "^7.7.12",
+        "@microsoft/api-extractor": "^7.7.8",
+        "@types/node": "latest",
         "standard-version": "latest",
         "ts-node": "latest",
         "ttypescript": "latest",
-        "typescript": "next",
-        "@types/node": "latest"
+        "typescript": "next"
     },
     "peerDependencies": {
         "ts-node": "^8.0.2",

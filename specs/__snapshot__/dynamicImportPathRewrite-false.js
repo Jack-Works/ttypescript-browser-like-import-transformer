@@ -1,3 +1,5 @@
+// CompilerOptions: {"module":"ESNext"}
+// PluginConfig: {"dynamicImportPathRewrite":false}
 Promise.resolve(globalThis.a);
 import("./a.js");
 const x = '';

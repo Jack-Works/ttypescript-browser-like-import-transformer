@@ -1,3 +1,5 @@
+// CompilerOptions: {"module":"ESNext"}
+// PluginConfig: {"importHelpers":"/polyfill/ttsc-helper.js","dynamicImportPathRewrite":{"type":"custom","function":"(x, y) => y(x)"}}
 import { __dynamicImportTransform as __dynamicImportTransform } from "/polyfill/ttsc-helper.js";
 import { __UMDBindCheck as __UMDBindCheck } from "/polyfill/ttsc-helper.js";
 import { moduleSpecifierTransform as moduleSpecifierTransform } from "/polyfill/ttsc-helper.js";

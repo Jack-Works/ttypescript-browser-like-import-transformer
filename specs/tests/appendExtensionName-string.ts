@@ -1,2 +1,2 @@
 /// {appendExtensionName: ".ts"}
-//@ default.ts
+//@ appendExtensionName-default.ts

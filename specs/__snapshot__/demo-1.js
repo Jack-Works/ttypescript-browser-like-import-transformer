@@ -1,3 +1,5 @@
+// CompilerOptions: {"module":"ESNext"}
+// PluginConfig: {"bareModuleRewrite":"umd"}
 import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@1.4.1/es/ttsclib.min.js";
 const x = __UMDBindCheck(globalThis.React, ["default"], "react", "globalThis.React", false).default;
 const { useState } = __UMDBindCheck(globalThis.React, ["useState"], "react", "globalThis.React", false);

@@ -1,3 +1,5 @@
+// CompilerOptions: {"module":"ESNext"}
+// PluginConfig: {"bareModuleRewrite":{"type":"url","withVersion":"std:$packageName$@$version$","noVersion":"std:$packageName$"}}
 import x from "std:@material-ui/core";
 import i from "std:@material-ui/icons";
 import y from "std:lodash@4.17.15";

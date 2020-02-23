@@ -1,16 +1,32 @@
-export interface PluginConfigNotParsed {
+/**
+ * Config of this transformer
+ * @public
+ */
+export interface PluginConfigs {
     /**
-     * Add '.js' extension for local module specifier
-     * @default .js
+     * Add '.js' extension for local import path.
+     * @defaultValue .js
+     * @example
+     * Source code:
+     * !src(appendExtensionName-default.ts)
+     *
+     * Outputs:
+     *
+     * !out(appendExtensionName-false.js)
+     *
+     * !out(appendExtensionName-true.js)
+     *
+     * !out(appendExtensionName-string.js)
      */
     appendExtensionName?: string | boolean
     /**
-     * Also append extension to http:// or https://
-     * @default false
+     * Also append extension '.js' to http:// or https:// URLs.
+     * @defaultValue false
      */
     appendExtensionNameForRemote?: boolean
     /**
-     * @description
+     * The transformation rule. Specify how this transformer will handle your imports.
+     * @remarks
      * `false`: disable the transform
      *
      * `BareModuleRewriteSimple.snowpack`: if you are using snowpack (https://github.com/pikapkg/snowpack)
@@ -31,56 +47,59 @@ export interface PluginConfigNotParsed {
      *    "my-pkg3": "unpkg", // to https://unpkg.com/my-pkg3
      *    "/my-pkg-(.+)/": { type: 'umd', target: 'getMyPkg("$1")' }, // for "my-pkg-12" to globalThis.getMyPkg("12")
      * }
-     * @default umd
+     * @defaultValue umd
      */
-    bareModuleRewrite?:
-        | false
-        | BareModuleRewriteSimple
-        | BareModuleRewriteURL
-        | { [key: string]: BareModuleRewriteObject }
+    bareModuleRewrite?: false | BareModuleRewriteSimple | BareModuleRewriteURL | Record<string, BareModuleRewriteObject>
     /**
-     * Rewrite dynamic import
-     * @description
+     * Config how to rewrite dynamic import.
+     * @remarks
      * `false`: Do not rewrite
      * `'auto'`: try to optimise automatically
      * `DynamicImportPathRewrite`: using a custom function to handle the import path (path: string, builtinImpl: (path) => Promise<any>): Promise<any>
-     * @default auto
+     * @defaultValue auto
      */
     dynamicImportPathRewrite?: false | 'auto' | DynamicImportPathRewriteCustom
     /**
-     * Used in UMD.
-     * For what object will store the UMD variables
-     * @default globalThis
+     * When using UMD import, this option indicates what global object will be used to find the UMD variables.
+     * @defaultValue globalThis
      */
     globalObject?: string
     /**
      * Used in snowpack. web_modules module path
-     * @default /web_modules/
-     * @deprecated
+     * @defaultValue /web_modules/
+     * @deprecated Should try the new importMap support
      */
     webModulePath?: string
     /**
-     * Use import map to resolve paths. (Note: import map has the highest priority.)
+     * Use import map as the transform rules. (This has the highest priority.)
+     * @defaultValue undefined
      */
     importMap?: ImportMapResolution | ImportMapCustomResolution
     /**
-     * Specify where is the helper is.
+     * Import emit helpers (e.g. `\__UMDBindCheck`, `\__dynamicImportTransform`, etc..)
+     * from ttsclib (a local file in this package).
+     *
+     * @remarks
      *
      * - "inline": All helpers will emitted in each file
      * - "auto": Let the transform do it
      * - string: A URL, will import helper from that place.
      *
-     * @default auto
+     * @defaultValue auto
      */
     importHelpers?: 'inline' | 'auto' | string
 }
-
-interface ImportMapCustomResolution {
+/**
+ * @public
+ */
+export interface ImportMapCustomResolution {
     type: 'function'
-    function: (opt: ImportMapFunctionOpts) => string | null
+    function: (opt: _ImportMapFunctionOpts) => string | null
 }
-
-interface ImportMapResolution {
+/**
+ * @public
+ */
+export interface ImportMapResolution {
     type: 'map'
     mapPath: string
     mapObject?: object
@@ -98,22 +117,24 @@ interface ImportMapResolution {
  * unpkg: Rewrite to unpkg (a CDN)
  *
  * pikacdn: Rewrite to pikacdn (another CDN)
+ * @public
  */
 export type BareModuleRewriteSimple = 'snowpack' | 'umd' | 'unpkg' | 'pikacdn'
 /**
  * Rewrite module to a UMD access
  * @example { type: 'umd', target: 'mylib', globalObject: 'window' }
+ * @public
  */
 export interface BareModuleRewriteUMD {
     type: 'umd'
     /**
-     * @description
+     * @remarks
      * rewrite the matching import statement to specified global variable
      */
     target: string
     /**
-     * @description define the globalObject
-     * @default "globalThis"
+     * @remarks define the globalObject
+     * @defaultValue "globalThis"
      */
     globalObject?: string
     /**
@@ -123,6 +144,7 @@ export interface BareModuleRewriteUMD {
 }
 /**
  * Rewrite module to another URL
+ * @public
  * @example {
  * type: 'url',
  * withVersion: 'https://cdn.example.com/$packageName$/v$version$'
@@ -140,22 +162,26 @@ export interface BareModuleRewriteURL {
      */
     noVersion?: string
 }
-type BareModuleRewriteObject = false | BareModuleRewriteSimple | BareModuleRewriteUMD | BareModuleRewriteURL
+export type BareModuleRewriteObject = false | BareModuleRewriteSimple | BareModuleRewriteUMD | BareModuleRewriteURL
 /**
  * Rewrite dynamic import with a custom function
- * @example { type: 'custom', function: (path, defaultImpl) => defaultImpl('std:' + path) }
+ * @public
+ * @example \{ type: 'custom', function: (path, defaultImpl) => defaultImpl('std:' + path) }
  */
-interface DynamicImportPathRewriteCustom {
+export interface DynamicImportPathRewriteCustom {
     type: 'custom'
     /**
      * The function string. It must be an ArrowFunctionExpression.
      */
     function: string
 }
-export type ImportMapFunctionOpts = {
+/**
+ * @internal
+ */
+export type _ImportMapFunctionOpts = {
     moduleSpecifier: string
     sourceFilePath: string
     currentWorkingDirectory: string
     rootDir: string
-    config: PluginConfigNotParsed
+    config: PluginConfigs
 }

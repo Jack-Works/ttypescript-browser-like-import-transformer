@@ -62,24 +62,30 @@ async function worker(script: WorkerParam = workerData) {
             )
                 .replace(compilerOptionsRegExp, '')
                 .replace(pluginConfigRegExp, '')
+            const compilerOptions = {
+                ...sharedCompilerOptions.compilerOptions,
+                ...tryEval(additionalCompilerOptions[1]),
+            }
+            const pluginConfig = tryEval(inlineConfig[1])
             const result = ts.transpileModule(source, {
-                compilerOptions: {
-                    ...sharedCompilerOptions.compilerOptions,
-                    ...tryEval(additionalCompilerOptions[1]),
-                },
+                compilerOptions: compilerOptions,
                 transformers: {
                     after: [
                         transformer.default(
                             { getCurrentDirectory: cwd },
                             {
                                 after: true,
-                                ...tryEval(inlineConfig[1]),
+                                ...pluginConfig,
                             },
                         ),
                     ],
                 },
             })
-            outputText = result.outputText
+            delete compilerOptions.target
+            delete compilerOptions.moduleResolution
+            outputText = `// CompilerOptions: ${JSON.stringify(compilerOptions)}
+// PluginConfig: ${JSON.stringify(pluginConfig)}
+${result.outputText}`
             const diags = ts.formatDiagnostics(result.diagnostics || [], {
                 getCanonicalFileName: () => script.path,
                 getCurrentDirectory: () => '/tmp/',

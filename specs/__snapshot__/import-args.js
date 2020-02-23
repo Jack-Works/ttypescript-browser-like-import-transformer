@@ -1,3 +1,5 @@
+// CompilerOptions: {"module":"ESNext"}
+// PluginConfig: {}
 Promise.resolve((() => {
     throw new SyntaxError("@magic-works/ttypescript-browser-like-import-transformer: Invalid source text after transform: 0");
 })());

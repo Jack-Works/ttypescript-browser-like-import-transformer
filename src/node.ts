@@ -8,7 +8,7 @@ import * as configParser from './config-parser'
 import { queryWellknownUMD } from './well-known-umd'
 import { readFileSync } from 'fs'
 import { join, relative, posix } from 'path'
-import { ImportMapFunctionOpts } from './plugin-config'
+import { _ImportMapFunctionOpts } from './plugin-config'
 export default creatTransform({ ts, queryWellknownUMD, ttsclib, importMapResolve, queryPackageVersion, configParser })
 
 function queryPackageVersion(path: string) {
@@ -26,7 +26,7 @@ function queryPackageVersion(path: string) {
 /**
  * @experimental I don't know if it is working correctly...
  */
-function importMapResolve(opt: ImportMapFunctionOpts): string | null {
+function importMapResolve(opt: _ImportMapFunctionOpts): string | null {
     const { config, currentWorkingDirectory: cwd, moduleSpecifier, sourceFilePath, rootDir } = opt
     if (config.importMap === undefined) return null
     if (config.importMap.type === 'function') return config.importMap.function(opt)

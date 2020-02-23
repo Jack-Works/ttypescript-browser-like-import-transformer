@@ -1,2 +1,2 @@
 /// {appendExtensionName: {}}
-//@ default.ts
+//@ appendExtensionName-default.ts

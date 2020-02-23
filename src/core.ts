@@ -26,7 +26,7 @@ import {
     Program,
     PropertyAccessExpression,
 } from 'typescript'
-import { PluginConfigNotParsed, ImportMapFunctionOpts } from './plugin-config'
+import { PluginConfigs, _ImportMapFunctionOpts } from './plugin-config'
 import { NormalizedPluginConfig } from './config-parser'
 type ts = typeof import('typescript')
 
@@ -41,7 +41,7 @@ export interface CustomTransformationContext<T extends Node> {
     context: TransformationContext
     node: T
     queryWellknownUMD: (path: string) => string | undefined
-    importMapResolve: (opt: ImportMapFunctionOpts) => string | null
+    importMapResolve: (opt: _ImportMapFunctionOpts) => string | null
     queryPackageVersion: (pkg: string) => string | null
     configParser: typeof import('./config-parser')
     ttsclib: typeof import('./ttsclib')
@@ -60,7 +60,7 @@ export default function createTransformer(
 ) {
     const { ts, configParser, importMapResolve } = core
     // ? Can't rely on the ts.Program because don't want to create on during the test.
-    return function(_program: Pick<Program, 'getCurrentDirectory'>, configRaw: PluginConfigNotParsed) {
+    return function(_program: Pick<Program, 'getCurrentDirectory'>, configRaw: PluginConfigs) {
         return (context: TransformationContext) => {
             configParser.validateConfig(configRaw, context.getCompilerOptions())
             const config = configParser.normalizePluginConfig(configRaw)
