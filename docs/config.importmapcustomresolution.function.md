@@ -4,8 +4,15 @@
 
 ## ImportMapCustomResolution.function property
 
+The function that will resolve a path to another path.
+
 <b>Signature:</b>
 
 ```typescript
 function: (opt: ImportMapFunctionOpts) => string | null
 ```
+
+## Remarks
+
+Since it is a function, it can't be specified in the tsconfig by ttscript.
+

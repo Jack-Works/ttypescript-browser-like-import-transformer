@@ -82,6 +82,14 @@ export interface PluginConfigs {
      *
      * - {@link DynamicImportPathRewriteCustom}: using a custom function to handle the import path
      * @defaultValue auto
+     * @example
+     *
+     * Source:
+     * !src(dynamicImportPathRewrite-default.ts)
+     * Outputs:
+     * !out(dynamicImportPathRewrite-auto.js)
+     * !out(dynamicImportPathRewrite-custom-arrow.js)
+     * !out(dynamicImportPathRewrite-false.js)
      */
     dynamicImportPathRewrite?: false | 'auto' | DynamicImportPathRewriteCustom
     /**
@@ -89,8 +97,17 @@ export interface PluginConfigs {
      * @defaultValue globalThis
      * @example
      * - "globalThis" in all modern ES platforms.
+     *
      * - "window" or "self" in browsers.
+     *
      * - "global" in NodeJS.
+     *
+     * Source:
+     * !src(globalObject-default.ts)
+     * Outputs:
+     * !out(globalObject-undefined.js)
+     * !out(globalObject-string.js)
+     * !out(globalObject-window.js)
      */
     globalObject?: string
     /**
@@ -99,12 +116,19 @@ export interface PluginConfigs {
      * Choose what `webModulePath` to use when transform as snowpack import. See document of [snowpack](https://www.snowpack.dev/).
      * @defaultValue /web_modules/
      * @deprecated Should try the new importMap support
+     * @example
+     * Source:
+     * !src(default.ts)
+     * Outputs:
+     * !out(webModulePath-string.js)
+     * !out(webModulePath-undefined.js)
      */
     webModulePath?: string
     /**
      * Use import map as the transform rules. (This has the highest priority.)
      * @remarks
      * **Experimental** may have many bugs on transforming with importMap.
+     * See {@link ImportMapResolution} (static) or {@link ImportMapCustomResolution} (dynamic)
      * @defaultValue undefined
      * @example
      * If you're using snowpack, let's assume the folder is like
@@ -138,14 +162,30 @@ export interface PluginConfigs {
      * - string: A URL, will import helper from that place.
      *
      * @defaultValue auto
+     * @example
+     * Source:
+     * ```ts
+     * import(x)
+     * ```
+     * Output:
+     * !out(importHelpers-auto.js)
+     * !out(importHelpers-string.js)
+     * !out(importHelpers-inline.js)
      */
     importHelpers?: 'inline' | 'auto' | string
 }
 /**
  * @public
+ * @remarks
+ * See {@link ImportMapFunctionOpts}
  */
 export interface ImportMapCustomResolution {
     type: 'function'
+    /**
+     * The function that will resolve a path to another path.
+     * @remarks
+     * Since it is a function, it can't be specified in the tsconfig by ttscript.
+     */
     function: (opt: ImportMapFunctionOpts) => string | null
 }
 /**
@@ -153,9 +193,13 @@ export interface ImportMapCustomResolution {
  */
 export interface ImportMapResolution {
     type: 'map'
+    /** Path of the ImportMap */
     mapPath: string
+    /** The ImportMap */
     mapObject?: object
+    /** The runtime path of your ImportMap */
     simulateRuntimeImportMapPosition: string
+    /** The runtime path of your source root */
     simulateRuntimeSourceRoot?: string
 }
 

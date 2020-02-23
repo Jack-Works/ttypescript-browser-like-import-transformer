@@ -50,7 +50,7 @@ Example for `Record<string, `[BareModuleRewriteObject](./config.baremodulerewrit
 ```
 Source code:
 
-```js
+```ts
 console.log('Should run after all imports', a, b, c2, d, e, c2)
 // Node style import
 import a from 'a'
@@ -179,7 +179,7 @@ export * as e from "std:c";
 ```
 Complex example:
 
-```js
+```ts
 /// { bareModuleRewrite: { "/@material-ui\\/(.+)/": {type: "umd", target: "MaterialUI.$1"}, "lodash": "umd", "jquery": "pikacdn", "lodash-es": "unpkg", "/.+/": "snowpack" } }
 
 import x from '@material-ui/core'

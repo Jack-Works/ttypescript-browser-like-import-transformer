@@ -4,6 +4,8 @@
 
 ## ImportMapResolution.simulateRuntimeImportMapPosition property
 
+The runtime path of your ImportMap
+
 <b>Signature:</b>
 
 ```typescript

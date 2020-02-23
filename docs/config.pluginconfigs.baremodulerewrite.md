@@ -44,7 +44,7 @@ A complex example:
 
 ```
 
-```js
+```ts
 /// { bareModuleRewrite: { react: "umd", "lodash-es": "pikacdn", "async-call-rpc": "unpkg", "std:fs": false,"isarray": "snowpack", "/^@material-ui\\/(.+)/g": { type: "umd", target: "MaterialUI.$1", globalObject: "window" }, "/(.+)/g": "snowpack" } }
 //! { esModuleInterop: true }
 import React from 'react'
@@ -77,3 +77,4 @@ import "/web_modules/other-polyfill.js";
 console.log(React, lodash, AsyncCall, fs, isarray, MUI, MUILab);
 
 ```
+

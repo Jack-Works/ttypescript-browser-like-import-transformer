@@ -26,7 +26,7 @@ export type BareModuleRewriteSimple = 'snowpack' | 'umd' | 'unpkg' | 'pikacdn'
 
 Source code:
 
-```js
+```ts
 console.log('Should run after all imports', a, b, c2, d, e, c2)
 // Node style import
 import a from 'a'

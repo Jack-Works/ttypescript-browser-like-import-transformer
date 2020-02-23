@@ -16,7 +16,7 @@ appendExtensionNameForRemote?: boolean
 
 Source code:
 
-```js
+```ts
 import './local-file'
 import '/local-file'
 import 'http://remote/file'
@@ -41,3 +41,4 @@ import "/local-file.js";
 import "http://remote/file.js";
 
 ```
+

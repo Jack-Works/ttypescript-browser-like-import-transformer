@@ -3,10 +3,9 @@
 import { __dynamicImportTransform as __dynamicImportTransform } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@1.4.1/es/ttsclib.min.js";
 import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@1.4.1/es/ttsclib.min.js";
 import { moduleSpecifierTransform as moduleSpecifierTransform } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@1.4.1/es/ttsclib.min.js";
-const __customImportHelper = 
+const __customImportHelper = // Static dynamic import
 // Static dynamic import
-x // Static dynamic import
- => Promise.reject(x);
+x => Promise.reject(x);
 import { __customDynamicImportHelper as __customDynamicImportHelper } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@1.4.1/es/ttsclib.min.js";
 // Static dynamic import
 Promise.resolve(globalThis.a);
@@ -20,7 +19,7 @@ __dynamicImport2Ary("@magic-works/ttypescript-browser-like-import-transformer: T
 // Static dynamic import
 function __dynamicImportNative(path) {
     return import(path);
-}
+} //example.com')
 // Static dynamic import
 function __dynamicImport2Ary(reason, ...args) {
     console.warn(reason, ...args);

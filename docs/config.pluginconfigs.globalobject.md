@@ -14,5 +14,46 @@ globalObject?: string
 
 ## Example
 
-- "globalThis" in all modern ES platforms. - "window" or "self" in browsers. - "global" in NodeJS.
+- "globalThis" in all modern ES platforms.
+
+- "window" or "self" in browsers.
+
+- "global" in NodeJS.
+
+Source:
+
+```ts
+/// {}
+import R from 'react'
+console.log(R)
+
+```
+Outputs:
+
+```js
+// CompilerOptions: {"module":"ESNext"}
+// PluginConfig: {}
+import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@1.4.1/es/ttsclib.min.js";
+const R = __UMDBindCheck(globalThis.React, ["default"], "react", "globalThis.React", false).default;
+console.log(R);
+
+```
+
+```js
+// CompilerOptions: {"module":"ESNext"}
+// PluginConfig: {"globalObject":"global"}
+import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@1.4.1/es/ttsclib.min.js";
+const R = __UMDBindCheck(global.React, ["default"], "react", "global.React", false).default;
+console.log(R);
+
+```
+
+```js
+// CompilerOptions: {"module":"ESNext"}
+// PluginConfig: {"globalObject":"window"}
+import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@1.4.1/es/ttsclib.min.js";
+const R = __UMDBindCheck(window.React, ["default"], "react", "window.React", false).default;
+console.log(R);
+
+```
 

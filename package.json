@@ -8,7 +8,7 @@
     "license": "MIT",
     "scripts": {
         "release": "standard-version",
-        "test": "node ./cjs/run-tests.js",
+        "test": "node ./cjs/run-tests.js && npm run doc",
         "start:cjs": "tsc -w -p src",
         "start:es": "tsc -w -p src --module ESNext --outDir ./es",
         "build:cjs": "tsc -p src",

@@ -15,7 +15,7 @@ __dynamicImport2Ary("@magic-works/ttypescript-browser-like-import-transformer: T
 // Static dynamic import
 function __dynamicImportNative(path) {
     return import(path);
-}
+} //example.com')
 // Static dynamic import
 function __dynamicImport2Ary(reason, ...args) {
     console.warn(reason, ...args);

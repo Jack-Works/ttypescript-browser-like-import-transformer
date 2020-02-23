@@ -15,9 +15,9 @@ export interface ImportMapResolution
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [mapObject](./config.importmapresolution.mapobject.md) | <code>object</code> |  |
-|  [mapPath](./config.importmapresolution.mappath.md) | <code>string</code> |  |
-|  [simulateRuntimeImportMapPosition](./config.importmapresolution.simulateruntimeimportmapposition.md) | <code>string</code> |  |
-|  [simulateRuntimeSourceRoot](./config.importmapresolution.simulateruntimesourceroot.md) | <code>string</code> |  |
+|  [mapObject](./config.importmapresolution.mapobject.md) | <code>object</code> | The ImportMap |
+|  [mapPath](./config.importmapresolution.mappath.md) | <code>string</code> | Path of the ImportMap |
+|  [simulateRuntimeImportMapPosition](./config.importmapresolution.simulateruntimeimportmapposition.md) | <code>string</code> | The runtime path of your ImportMap |
+|  [simulateRuntimeSourceRoot](./config.importmapresolution.simulateruntimesourceroot.md) | <code>string</code> | The runtime path of your source root |
 |  [type](./config.importmapresolution.type.md) | <code>'map'</code> |  |
 

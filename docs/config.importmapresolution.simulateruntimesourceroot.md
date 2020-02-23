@@ -4,6 +4,8 @@
 
 ## ImportMapResolution.simulateRuntimeSourceRoot property
 
+The runtime path of your source root
+
 <b>Signature:</b>
 
 ```typescript

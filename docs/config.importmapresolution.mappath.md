@@ -4,6 +4,8 @@
 
 ## ImportMapResolution.mapPath property
 
+Path of the ImportMap
+
 <b>Signature:</b>
 
 ```typescript

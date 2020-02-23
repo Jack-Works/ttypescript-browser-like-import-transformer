@@ -10,22 +10,8 @@ function touch(o = file) {
             return o
         case 'string':
             o = o.replace(/\@magic-works\/ttypescript-browser-like-import-transformer/g, 'config')
-            o = o.replace(
-                /\!out\((.+?)\)/g,
-                (_, file) => `
-
-\`\`\`js
-${readFileSync('./specs/__snapshot__/' + file, 'utf-8').replace(/\n+$/g, '')}
-\`\`\``,
-            )
-            o = o.replace(
-                /\!src\((.+?)\)/g,
-                (_, file) => `
-
-\`\`\`js
-${readFileSync('./specs/tests/' + file, 'utf-8').replace(/\n+$/g, '')}
-\`\`\``,
-            )
+            o = replace(o, /\!out\((.+?)\)/g, file => readFileSync('./specs/__snapshot__/' + file, 'utf-8'))
+            o = replace(o, /\!src\((.+?)\)/g, file => readFileSync('./specs/tests/' + file, 'utf-8'))
             return o
         case 'object':
             if (o === null) return o
@@ -34,6 +20,19 @@ ${readFileSync('./specs/tests/' + file, 'utf-8').replace(/\n+$/g, '')}
         default:
             throw 'Unreachable case'
     }
+}
+function replace(str, regex, getFile) {
+    return str.replace(regex, (_, file) =>
+        `
+
+\`\`\`${file.replace(/^.+\./, '')}
+${getFile(file).replace(/\n+$/, '')}
+\`\`\`
+`
+            .split('\n')
+            .map((x, i) => (i === 0 ? x : ' * ' + x))
+            .join('\n'),
+    )
 }
 writeFileSync('./temp/config.api.json', JSON.stringify(touch(file)))
 execSync('yarn api-documenter markdown --input temp --output-folder docs')

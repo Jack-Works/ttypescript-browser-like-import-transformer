@@ -14,7 +14,7 @@ importMap?: ImportMapResolution | ImportMapCustomResolution
 
 ## Remarks
 
-\*\*Experimental\*\* may have many bugs on transforming with importMap.
+\*\*Experimental\*\* may have many bugs on transforming with importMap. See [ImportMapResolution](./config.importmapresolution.md) (static) or [ImportMapCustomResolution](./config.importmapcustomresolution.md) (dynamic)
 
 ## Example
 
@@ -31,11 +31,11 @@ tsconfig.json # tsconfig at here
 ```
 You must set `rootDir` when using importMap.
 
-```js
-
+```json
+{
     "compilerOptions": {
         "plugins": [
-            
+            {
                 // @magic-works/ttypescript-browser-like-import-transformer
                 "transform": "../../../cjs/node.js",
                 "after": true,
@@ -44,21 +44,21 @@ You must set `rootDir` when using importMap.
                     "mapPath": "./web_modules/import-map.json",
                     "simulateRuntimeImportMapPosition": "/web_modules/",
                     "simulateRuntimeSourceRoot": "/dist/"
-                
-            
+                }
+            }
         ],
         "target": "ESNext",
         "module": "ESNext",
         "outDir": "./dist",
         "rootDir": "./src",
         "moduleResolution": "node"
-    
-
+    }
+}
 
 ```
 Source:
 
-```js
+```ts
 import * as _ from 'lodash-es'
 console.log(_)
 
@@ -70,3 +70,4 @@ import * as _ from "/web_modules/lodash-es.js?rev=806d1b9f78";
 console.log(_);
 
 ```
+

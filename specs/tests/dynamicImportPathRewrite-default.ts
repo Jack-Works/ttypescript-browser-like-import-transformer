@@ -1,5 +1,3 @@
-/// {dynamicImportPathRewrite: undefined}
-
 // Static dynamic import
 import('a')
 import('./a')

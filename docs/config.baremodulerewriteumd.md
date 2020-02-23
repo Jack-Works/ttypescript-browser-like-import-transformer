@@ -20,7 +20,7 @@ export interface BareModuleRewriteUMD
 
 ```
 
-```js
+```ts
 /// { bareModuleRewrite: { "/@material-ui\\/(.+)/": {type: "umd", target: "MaterialUI.$1"}, "lodash": "umd", "jquery": "pikacdn", "lodash-es": "unpkg", "/.+/": "snowpack" } }
 
 import x from '@material-ui/core'

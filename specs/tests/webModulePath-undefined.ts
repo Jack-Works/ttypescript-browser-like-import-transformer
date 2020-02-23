@@ -1,2 +1,2 @@
-/// { bareModuleRewrite: 'snowpack', webModulePath: undefined }
+/// { bareModuleRewrite: 'snowpack' }
 //@ default.ts

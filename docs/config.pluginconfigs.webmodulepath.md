@@ -21,3 +21,111 @@ webModulePath?: string
 
 Choose what `webModulePath` to use when transform as snowpack import. See document of \[snowpack\](https://www.snowpack.dev/).
 
+## Example
+
+Source:
+
+```ts
+/// {}
+console.log('Should run after all imports', a, b, c, d, e, a1, b1, c1, d1, e1, a2, b2, c2, d2, e2)
+// Node style import
+import a from 'a'
+import b, { c, d } from 'b'
+import * as e from 'c'
+import 'd'
+
+// relative import without ext name
+import a1 from './a'
+import b1, { c1, d1 } from './b'
+import * as e1 from '/c'
+import './d'
+
+// browser style import
+import a2 from 'http://example.com/'
+import b2, { c2, d2 } from 'https://example.com'
+import * as e2 from 'http://example.com/'
+import 'http://example.com/'
+
+const x = 1
+export { x }
+// Node style export
+export { c, d } from 'b'
+export * as e from 'c'
+
+// relative import without ext name
+export { c1, d1 } from './b'
+export * as e1 from './c'
+
+// browser style import
+export { c2, d2 } from 'http://example.com/'
+export * as e2 from 'http://example.com/'
+
+```
+Outputs:
+
+```js
+// CompilerOptions: {"module":"ESNext"}
+// PluginConfig: {"bareModuleRewrite":"snowpack","webModulePath":"https://cdn.example.com/web_modules/"}
+console.log('Should run after all imports', a, b, c, d, e, a1, b1, c1, d1, e1, a2, b2, c2, d2, e2);
+// Node style import
+import a from "https://cdn.example.com/web_modules/a.js";
+import b, { c, d } from "https://cdn.example.com/web_modules/b.js";
+import * as e from "https://cdn.example.com/web_modules/c.js";
+import "https://cdn.example.com/web_modules/d.js";
+// relative import without ext name
+import a1 from "./a.js";
+import b1, { c1, d1 } from "./b.js";
+import * as e1 from "/c.js";
+import "./d.js";
+// browser style import
+import a2 from 'http://example.com/';
+import b2, { c2, d2 } from 'https://example.com';
+import * as e2 from 'http://example.com/';
+import 'http://example.com/';
+const x = 1;
+export { x };
+// Node style export
+export { c, d } from "https://cdn.example.com/web_modules/b.js";
+export * as e from "https://cdn.example.com/web_modules/c.js";
+// relative import without ext name
+export { c1, d1 } from "./b.js";
+export * as e1 from "./c.js";
+// browser style import
+export { c2, d2 } from 'http://example.com/';
+export * as e2 from 'http://example.com/';
+
+```
+
+```js
+// CompilerOptions: {"module":"ESNext"}
+// PluginConfig: {"bareModuleRewrite":"snowpack"}
+console.log('Should run after all imports', a, b, c, d, e, a1, b1, c1, d1, e1, a2, b2, c2, d2, e2);
+// Node style import
+import a from "/web_modules/a.js";
+import b, { c, d } from "/web_modules/b.js";
+import * as e from "/web_modules/c.js";
+import "/web_modules/d.js";
+// relative import without ext name
+import a1 from "./a.js";
+import b1, { c1, d1 } from "./b.js";
+import * as e1 from "/c.js";
+import "./d.js";
+// browser style import
+import a2 from 'http://example.com/';
+import b2, { c2, d2 } from 'https://example.com';
+import * as e2 from 'http://example.com/';
+import 'http://example.com/';
+const x = 1;
+export { x };
+// Node style export
+export { c, d } from "/web_modules/b.js";
+export * as e from "/web_modules/c.js";
+// relative import without ext name
+export { c1, d1 } from "./b.js";
+export * as e1 from "./c.js";
+// browser style import
+export { c2, d2 } from 'http://example.com/';
+export * as e2 from 'http://example.com/';
+
+```
+
