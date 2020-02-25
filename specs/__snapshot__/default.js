@@ -1,6 +1,5 @@
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {}
-import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@1.4.1/es/ttsclib.min.js";
 const a = __UMDBindCheck(globalThis.a, ["default"], "a", "globalThis.a", false).default;
 const b = __UMDBindCheck(globalThis.b, ["default"], "b", "globalThis.b", false).default;
 const { c, d } = __UMDBindCheck(globalThis.b, ["c", "d"], "b", "globalThis.b", false);
@@ -29,3 +28,4 @@ export * as e1 from "./c.js";
 // browser style import
 export { c2, d2 } from 'http://example.com/';
 export * as e2 from 'http://example.com/';
+import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@1.4.1/es/ttsclib.min.js";

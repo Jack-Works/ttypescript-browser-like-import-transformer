@@ -89,7 +89,6 @@ export * as e from 'c';
 ```js
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {"bareModuleRewrite":"umd"}
-import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@1.4.1/es/ttsclib.min.js";
 const a = __UMDBindCheck(globalThis.a, ["default"], "a", "globalThis.a", false).default;
 const b = __UMDBindCheck(globalThis.b, ["default"], "b", "globalThis.b", false).default;
 const { c: c2, d } = __UMDBindCheck(globalThis.b, ["c", "d"], "b", "globalThis.b", false);
@@ -103,6 +102,7 @@ console.log('Should run after all imports', a, b, c2, d, e, c2);
 const c = 1;
 const x = 1;
 export { x };
+import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@1.4.1/es/ttsclib.min.js";
 
 ```
 
@@ -195,13 +195,13 @@ Output:
 ```js
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {"bareModuleRewrite":{"/@material-ui\\/(.+)/":{"type":"umd","target":"MaterialUI.$1"},"lodash":"umd","jquery":"pikacdn","lodash-es":"unpkg","/.+/":"snowpack"}}
-import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@1.4.1/es/ttsclib.min.js";
 const x = __UMDBindCheck(globalThis.MaterialUI.core, ["default"], "@material-ui/core", "globalThis.MaterialUI.core", false).default;
 const i = __UMDBindCheck(globalThis.MaterialUI.icons, ["default"], "@material-ui/icons", "globalThis.MaterialUI.icons", false).default;
 const y = __UMDBindCheck(globalThis.lodash, ["default"], "lodash", "globalThis.lodash", false).default;
 import z from "https://unpkg.com/lodash-es?module";
 import w from "/web_modules/other.js";
 console.log(x, y, z, w, i);
+import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@1.4.1/es/ttsclib.min.js";
 
 ```
 

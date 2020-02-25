@@ -25,6 +25,7 @@ import {
     BooleanLiteral,
     Program,
     PropertyAccessExpression,
+    NamedImports,
 } from 'typescript'
 import { PluginConfigs, ImportMapFunctionOpts } from './plugin-config'
 import { NormalizedPluginConfig } from './config-parser'
@@ -93,8 +94,15 @@ export default function createTransformer(
                 let visitedSourceFile = ts.visitEachChild(sourceFile, visitor, context)
                 // ? hoistedHelper and hoistedUMDImport will be added ^ in the visitor
                 const hoistedHelper = Array.from(topLevelScopedHelperMap.get(sourceFile)?.values() || []).map(x => x[1])
-                const languageHoistableDeclarations = hoistedHelper.filter(ts.isFunctionDeclaration)
-                const languageNotHoistableDeclarations = hoistedHelper.filter(x => !ts.isFunctionDeclaration(x))
+                const ttscHelper = ttsclibImportMap.get(sourceFile)
+                if (ttscHelper) hoistedHelper.push(ttscHelper[0])
+                function isLanguageHoistable(node: Statement): boolean {
+                    if (ts.isFunctionDeclaration(node)) return true
+                    if (ts.isImportDeclaration(node)) return true
+                    return false
+                }
+                const languageHoistableDeclarations = hoistedHelper.filter(isLanguageHoistable)
+                const languageNotHoistableDeclarations = hoistedHelper.filter(x => !isLanguageHoistable(x))
                 const hoistedUMDImport = Array.from(hoistUMDImportDeclaration.get(sourceFile)?.values() || [])
                 visitedSourceFile = ts.updateSourceFileNode(
                     visitedSourceFile,
@@ -118,9 +126,10 @@ export default function createTransformer(
                     visitedSourceFile.hasNoDefaultLib,
                     visitedSourceFile.libReferenceDirectives,
                 )
-                // ? In incremental compiling, this Map might cause duplicated statements
-                hoistUMDImportDeclaration.get(sourceFile)?.clear()
-                topLevelScopedHelperMap.get(sourceFile)?.clear()
+                // ? In incremental compiling, this Map might cause duplicated statements, WeakMap doesn't help
+                hoistUMDImportDeclaration.delete(sourceFile)
+                topLevelScopedHelperMap.delete(sourceFile)
+                ttsclibImportMap.delete(sourceFile)
                 return visitedSourceFile
 
                 function visitor(node: Node): VisitResult<Node> {
@@ -200,7 +209,7 @@ function createThrowExpression(...[ts, type, message]: Parameters<typeof createT
  *
  * ES Import is hoisted to the top of the file so these declarations should do also.
  */
-const hoistUMDImportDeclaration = new WeakMap<SourceFile, Set<Statement>>()
+const hoistUMDImportDeclaration = new Map<SourceFile, Set<Statement>>()
 function updateImportExportDeclaration(
     context: Context<ImportDeclaration | ExportDeclaration>,
     opt = context.config.bareModuleRewrite,
@@ -566,10 +575,8 @@ type LevelUpArgs<T extends any[]> = {
 type CastArray<T> = T extends any[] ? T : never
 type CastFunction<T> = T extends (...a: any[]) => any ? T : (...a: never[]) => any
 
-const topLevelScopedHelperMap = new WeakMap<
-    SourceFile,
-    Map<string | ((...args: any) => void), [Identifier, Statement]>
->()
+const topLevelScopedHelperMap = new Map<SourceFile, Map<string | ((...args: any) => void), [Identifier, Statement]>>()
+const ttsclibImportMap = new Map<SourceFile, [ImportDeclaration, Set<Identifier>]>()
 function createTopLevelScopedHelper<F extends string | ((...args: any[]) => any)>(
     context: Pick<Context<any>, 'ts' | 'sourceFile' | 'config' | 'ttsclib' | 'queryPackageVersion'>,
     helper: F | string,
@@ -589,24 +596,42 @@ function createTopLevelScopedHelper<F extends string | ((...args: any[]) => any)
         const helperURL =
             'https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@$version$/es/ttsclib.min.js'
         const url = config.importHelpers === 'auto' ? helperURL : config.importHelpers ?? helperURL
-        // ? import { __helperName as uniqueName } from 'url'
-        const importDeclaration = ts.createImportDeclaration(
-            void 0,
-            void 0,
-            ts.createImportClause(
+        let [importDec, idSet] = ttsclibImportMap.get(sourceFile) || [
+            ts.createImportDeclaration(
                 void 0,
-                ts.createNamedImports([ts.createImportSpecifier(uniqueName, ts.createIdentifier(fnName))]),
-            ),
-            ts.createLiteral(
-                url.replace(
-                    '$version$',
-                    queryPackageVersion('@magic-works/ttypescript-browser-like-import-transformer') || 'latest',
+                void 0,
+                ts.createImportClause(void 0, ts.createNamedImports([])),
+                ts.createLiteral(
+                    url.replace(
+                        '$version$',
+                        queryPackageVersion('@magic-works/ttypescript-browser-like-import-transformer') || 'latest',
+                    ),
                 ),
             ),
+            new Set([]),
+        ]
+        // ? import { __helperName as uniqueName } from 'url'
+        const importBind = ts.createImportSpecifier(uniqueName, ts.createIdentifier(fnName))
+        const importClause = importDec.importClause!
+        const importBindings = importClause.namedBindings! as NamedImports
+        if (importBindings.elements.find(x => x.name.text === fnName)) {
+            const uniqueName = [...idSet.values()].find(x => x.text === fnName)!
+            return [uniqueName, (...args: any) => ts.createCall(uniqueName, void 0, args)] as const
+        }
+        importDec = ts.updateImportDeclaration(
+            importDec,
+            void 0,
+            void 0,
+            ts.updateImportClause(
+                importClause,
+                void 0,
+                ts.updateNamedImports(importBindings, [...importBindings.elements, importBind]),
+                false,
+            ),
+            importDec.moduleSpecifier,
         )
-        writeSourceFileMeta(sourceFile, topLevelScopedHelperMap, new Map(), x =>
-            x.set(helper, [uniqueName, importDeclaration]),
-        )
+        idSet.add(uniqueName)
+        ttsclibImportMap.set(sourceFile, [importDec, idSet])
         return returnValue
     }
     const f = ts.updateFunctionDeclaration(
