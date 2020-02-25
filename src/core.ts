@@ -118,6 +118,9 @@ export default function createTransformer(
                     visitedSourceFile.hasNoDefaultLib,
                     visitedSourceFile.libReferenceDirectives,
                 )
+                // ? In incremental compiling, this Map might cause duplicated statements
+                hoistUMDImportDeclaration.get(sourceFile)?.clear()
+                topLevelScopedHelperMap.get(sourceFile)?.clear()
                 return visitedSourceFile
 
                 function visitor(node: Node): VisitResult<Node> {
