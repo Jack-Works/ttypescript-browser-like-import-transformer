@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+        "plugins": [
+            {
+                // @magic-works/ttypescript-browser-like-import-transformer
+                "transform": "../../../cjs/node.js",
+                "after": true,
+                "bareModuleRewrite": {
+                    "/(.+)/": {
+                        "type": "umd",
+                        "target": "dependencies",
+                        "treeshake": {
+                            "out": "./deps.js"
+                        }
+                    }
+                }
+            }
+        ],
+        "target": "ESNext",
+        "module": "ESNext",
+        "outDir": "./dist",
+        "rootDir": "./src",
+        "moduleResolution": "node"
+    }
+}

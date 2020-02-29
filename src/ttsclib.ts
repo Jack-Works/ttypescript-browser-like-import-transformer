@@ -94,6 +94,8 @@ export function __dynamicImportTransform(
         queryWellknownUMD: () => void 0,
         parseRegExp: () => (console.warn('RegExp rule is not supported in runtime yet'), null),
         queryPackageVersion: () => null,
+        getCompilerOptions: () => ({}),
+        accessingImports: new Set('*'),
     })
     const header = `ttypescript-browser-like-import-transformer: Runtime transform error:`
     switch (result.type) {
@@ -154,7 +156,11 @@ export function moduleSpecifierTransform(
     context: Readonly<
         {
             parseRegExp: (string: string) => RegExp | null
-        } & Pick<CustomTransformationContext<any>, 'config' | 'path' | 'queryWellknownUMD' | 'queryPackageVersion'>
+            accessingImports: Set<string>
+        } & Pick<
+            CustomTransformationContext<any>,
+            'config' | 'path' | 'queryWellknownUMD' | 'queryPackageVersion' | 'treeshakeProvider' | 'getCompilerOptions'
+        >
     >,
     opt?: NormalizedBareModuleRewrite,
 ): ModuleSpecifierTransformResult {
@@ -228,10 +234,21 @@ export function moduleSpecifierTransform(
                 }
             }
             case 'umd': {
-                const target = importPathToUMDName(path)
-                if (!target) return error(Diag.TransformToUMDFailed, path, '')
                 const [{ globalObject }, { umdImportPath }] = [config, opt]
-                return { type: 'umd', target, globalObject, umdImportPath }
+                if (opt.treeshake && context.treeshakeProvider) {
+                    context.treeshakeProvider(
+                        path,
+                        context.accessingImports,
+                        opt.treeshake,
+                        context.getCompilerOptions(),
+                    )
+                    return { type: 'umd', target: path, globalObject: opt.target, umdImportPath }
+                } else {
+                    if (opt.treeshake) console.error('Tree shaking is not available at runtime.')
+                    const target = importPathToUMDName(path)
+                    if (!target) return error(Diag.TransformToUMDFailed, path, '')
+                    return { type: 'umd', target, globalObject, umdImportPath }
+                }
             }
             case 'url': {
                 const { noVersion, withVersion } = opt
@@ -259,6 +276,7 @@ export function moduleSpecifierTransform(
                     if (!matching) continue
 
                     if (ruleValue.type !== 'umd') return self(context, ruleValue)
+                    if (ruleValue.type === 'umd' && ruleValue.treeshake) return self(context, ruleValue)
 
                     const target = rule === path ? ruleValue.target : path.replace(regexp!, ruleValue.target)
                     if (!target) return error(Diag.TransformToUMDFailedCustom, path, rule)
@@ -294,7 +312,6 @@ export function moduleSpecifierTransform(
         }
     }
     function unreachable(str: string): never {
-        debugger
         throw new Error('Unreachable case at ' + str)
     }
     function isBrowserCompatibleModuleSpecifier(path: string) {

@@ -7,7 +7,7 @@ function __dynamicImportTransform(_path, config, dynamicImport, UMDBindCheck, _m
         _path = String(_path);
     const path = _path;
     const result = _moduleSpecifierTransform({
-        config, path, queryWellknownUMD: () => void 0, parseRegExp: () => (console.warn("RegExp rule is not supported in runtime yet"), null), queryPackageVersion: () => null,
+        config, path, queryWellknownUMD: () => void 0, parseRegExp: () => (console.warn("RegExp rule is not supported in runtime yet"), null), queryPackageVersion: () => null, getCompilerOptions: () => ({}), accessingImports: new Set("*"),
     });
     const header = `ttypescript-browser-like-import-transformer: Runtime transform error:`;
     switch (result.type) {
@@ -83,11 +83,19 @@ function __dynamicImportTransform(_path, config, dynamicImport, UMDBindCheck, _m
                     }
                 }
                 case "umd": {
-                    const target = importPathToUMDName(path);
-                    if (!target)
-                        return error(392859, path, "");
                     const [{ globalObject }, { umdImportPath }] = [config, opt];
-                    return { type: "umd", target, globalObject, umdImportPath };
+                    if (opt.treeshake && context.treeshakeProvider) {
+                        context.treeshakeProvider(path, context.accessingImports, opt.treeshake, context.getCompilerOptions());
+                        return { type: "umd", target: path, globalObject: opt.target, umdImportPath };
+                    }
+                    else {
+                        if (opt.treeshake)
+                            console.error("Tree shaking is not available at runtime.");
+                        const target = importPathToUMDName(path);
+                        if (!target)
+                            return error(392859, path, "");
+                        return { type: "umd", target, globalObject, umdImportPath };
+                    }
                 }
                 case "url": {
                     const { noVersion, withVersion } = opt;
@@ -116,6 +124,8 @@ function __dynamicImportTransform(_path, config, dynamicImport, UMDBindCheck, _m
                             continue;
                         if (ruleValue.type !== "umd")
                             return self(context, ruleValue);
+                        if (ruleValue.type === "umd" && ruleValue.treeshake)
+                            return self(context, ruleValue);
                         const target = rule === path ? ruleValue.target : path.replace(regexp, ruleValue.target);
                         if (!target)
                             return error(392860, path, rule);
@@ -140,7 +150,6 @@ function __dynamicImportTransform(_path, config, dynamicImport, UMDBindCheck, _m
             };
         }
         function unreachable(str) {
-            debugger;
             throw new Error("Unreachable case at " + str);
         }
         function isBrowserCompatibleModuleSpecifier(path) {
@@ -274,11 +283,19 @@ function moduleSpecifierTransform(context, opt) {
                 }
             }
             case "umd": {
-                const target = importPathToUMDName(path);
-                if (!target)
-                    return error(392859, path, "");
                 const [{ globalObject }, { umdImportPath }] = [config, opt];
-                return { type: "umd", target, globalObject, umdImportPath };
+                if (opt.treeshake && context.treeshakeProvider) {
+                    context.treeshakeProvider(path, context.accessingImports, opt.treeshake, context.getCompilerOptions());
+                    return { type: "umd", target: path, globalObject: opt.target, umdImportPath };
+                }
+                else {
+                    if (opt.treeshake)
+                        console.error("Tree shaking is not available at runtime.");
+                    const target = importPathToUMDName(path);
+                    if (!target)
+                        return error(392859, path, "");
+                    return { type: "umd", target, globalObject, umdImportPath };
+                }
             }
             case "url": {
                 const { noVersion, withVersion } = opt;
@@ -307,6 +324,8 @@ function moduleSpecifierTransform(context, opt) {
                         continue;
                     if (ruleValue.type !== "umd")
                         return self(context, ruleValue);
+                    if (ruleValue.type === "umd" && ruleValue.treeshake)
+                        return self(context, ruleValue);
                     const target = rule === path ? ruleValue.target : path.replace(regexp, ruleValue.target);
                     if (!target)
                         return error(392860, path, rule);
@@ -331,7 +350,6 @@ function moduleSpecifierTransform(context, opt) {
         };
     }
     function unreachable(str) {
-        debugger;
         throw new Error("Unreachable case at " + str);
     }
     function isBrowserCompatibleModuleSpecifier(path) {

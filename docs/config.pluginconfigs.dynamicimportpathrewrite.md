@@ -44,7 +44,7 @@ Outputs:
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {"dynamicImportPathRewrite":"auto"}
 // Static dynamic import
-Promise.resolve(globalThis.a);
+Promise.resolve(globalThis["a"]);
 import("./a.js");
 import('https://example.com');
 // dynamic dynamic import
@@ -61,7 +61,7 @@ function __dynamicImport2Ary(reason, ...args) {
     console.warn(reason, ...args);
     return import(args[0], args[1]);
 }
-import { __dynamicImportTransform as __dynamicImportTransform, __UMDBindCheck as __UMDBindCheck, moduleSpecifierTransform as moduleSpecifierTransform } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@1.4.1/es/ttsclib.min.js";
+import { __dynamicImportTransform as __dynamicImportTransform, __UMDBindCheck as __UMDBindCheck, moduleSpecifierTransform as moduleSpecifierTransform } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@1.5.0/es/ttsclib.min.js";
 
 ```
 
@@ -72,7 +72,7 @@ const __customImportHelper = // Static dynamic import
 // Static dynamic import
 x => Promise.reject(x);
 // Static dynamic import
-Promise.resolve(globalThis.a);
+Promise.resolve(globalThis["a"]);
 import("./a.js");
 import('https://example.com');
 // dynamic dynamic import
@@ -89,7 +89,7 @@ function __dynamicImport2Ary(reason, ...args) {
     console.warn(reason, ...args);
     return import(args[0], args[1]);
 }
-import { __dynamicImportTransform as __dynamicImportTransform, __UMDBindCheck as __UMDBindCheck, moduleSpecifierTransform as moduleSpecifierTransform, __customDynamicImportHelper as __customDynamicImportHelper } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@1.4.1/es/ttsclib.min.js";
+import { __dynamicImportTransform as __dynamicImportTransform, __UMDBindCheck as __UMDBindCheck, moduleSpecifierTransform as moduleSpecifierTransform, __customDynamicImportHelper as __customDynamicImportHelper } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@1.5.0/es/ttsclib.min.js";
 
 ```
 
@@ -97,7 +97,7 @@ import { __dynamicImportTransform as __dynamicImportTransform, __UMDBindCheck as
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {"dynamicImportPathRewrite":false}
 // Static dynamic import
-Promise.resolve(globalThis.a);
+Promise.resolve(globalThis["a"]);
 import("./a.js");
 import('https://example.com');
 // dynamic dynamic import

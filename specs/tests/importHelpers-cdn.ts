@@ -1,0 +1,3 @@
+/// { importHelpers: "cdn" }
+
+import(x)

@@ -6,10 +6,79 @@ import * as ts from 'typescript'
 import * as ttsclib from './ttsclib'
 import * as configParser from './config-parser'
 import { queryWellknownUMD } from './well-known-umd'
-import { readFileSync } from 'fs'
+import { readFileSync, writeFileSync } from 'fs'
 import { join, relative, posix } from 'path'
-import { ImportMapFunctionOpts } from './plugin-config'
-export default creatTransform({ ts, queryWellknownUMD, ttsclib, importMapResolve, queryPackageVersion, configParser })
+import { ImportMapFunctionOpts, BareModuleRewriteUMD } from './plugin-config'
+export default creatTransform({
+    ts,
+    queryWellknownUMD,
+    ttsclib,
+    importMapResolve,
+    queryPackageVersion,
+    configParser,
+    treeshakeProvider,
+})
+
+const treeshakeMap = new Map<
+    /** Output file */ string,
+    Map</** Dependency path */ string, /** Used import/exports */ Set<string>>
+>()
+function treeshakeProvider(
+    dependency: string,
+    accessImports: Set<string>,
+    config: NonNullable<BareModuleRewriteUMD['treeshake']>,
+    opts: ts.CompilerOptions,
+) {
+    const tsconfigPath = opts.configFilePath as string
+    const targetFilePath = join(tsconfigPath, '../', config.out)
+    if (!treeshakeMap.has(targetFilePath)) treeshakeMap.set(targetFilePath, new Map())
+    const fileMap = treeshakeMap.get(targetFilePath)!
+    if (!fileMap.has(dependency)) fileMap.set(dependency, new Set())
+    const usedImports = fileMap.get(dependency)!
+
+    accessImports.forEach(x => usedImports.add(x))
+
+    {
+        const end = ';\n'
+        let count = 0
+        function uniqueName() {
+            count++
+            return '_' + count
+        }
+        let file = `const _ = new Map()` + end
+        for (const [importPath, bindings] of fileMap) {
+            const path = JSON.stringify(importPath)
+            if (bindings.has('*')) {
+                const uniq = uniqueName()
+                file += `import * as ${uniq} from ${path}` + end
+                file += `_.set(${path}, ${uniq})` + end
+                continue
+            }
+            if (bindings.has('!')) file += `import ${path}` + end
+            const binds = Array.from(bindings)
+                .filter(x => x !== '!')
+                .map<[string, string]>(x => {
+                    const uniq = uniqueName()
+                    return [x, uniq]
+                })
+            if (binds.length === 0) continue
+            file += `import { ${binds.map(x => x.join(' as ')).join(', ')} } from ${path}` + end
+            file += `_.set(${path}, { ${binds.map(x => x.join(': ')).join(', ')} })` + end
+        }
+        file += `export default (${createGetter.toString()})()` + end
+        writeFileSync(targetFilePath, file)
+
+        // The following code is run in runtime. Don't use it.
+        const _: Map<string, object> = new Map()
+        function createGetter() {
+            return new Proxy(_, {
+                get(target, key: string) {
+                    return target.get(key)
+                },
+            })
+        }
+    }
+}
 
 function queryPackageVersion(path: string) {
     const [a, b] = path.split('/')

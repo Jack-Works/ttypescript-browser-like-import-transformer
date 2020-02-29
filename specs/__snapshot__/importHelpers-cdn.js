@@ -1,6 +1,6 @@
 // CompilerOptions: {"module":"ESNext"}
-// PluginConfig: {"importHelpers":"auto"}
-__dynamicImportTransform(x, JSON.parse("{\"after\":true,\"importHelpers\":\"auto\"}"), __dynamicImportNative, __UMDBindCheck, moduleSpecifierTransform);
+// PluginConfig: {"importHelpers":"cdn"}
+__dynamicImportTransform(x, JSON.parse("{\"after\":true,\"importHelpers\":\"cdn\"}"), __dynamicImportNative, __UMDBindCheck, moduleSpecifierTransform);
 function __dynamicImportNative(path) {
     return import(path);
 }

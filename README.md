@@ -145,8 +145,7 @@ const result = ts.transpileModule(source, {
     transformers: {
         after: [
             transformer.default(
-                // TODO: remove this dependency. Only `program.getCurrentDirectory()` is used currently
-                program,
+                {}, // Should be a Program but not used today.
                 {
                     after: true,
                     // config here

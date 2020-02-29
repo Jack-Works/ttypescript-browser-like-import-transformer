@@ -1,0 +1,3 @@
+/// { importHelpers: "node" }
+
+import(x)

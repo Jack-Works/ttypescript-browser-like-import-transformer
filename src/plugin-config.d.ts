@@ -157,6 +157,10 @@ export interface PluginConfigs {
      *
      * - "inline": All the import helpers will be injected in the file
      *
+     * - "cdn": import it from jsdelivr
+     *
+     * - "node": import it as a bare import (from `@magic-works/...`)
+     *
      * - "auto": Use the transformer default
      *
      * - string: A URL, will import helper from that place.
@@ -170,9 +174,28 @@ export interface PluginConfigs {
      * Output:
      * !out(importHelpers-auto.js)
      * !out(importHelpers-string.js)
+     * !out(importHelpers-cdn.js)
+     * !out(importHelpers-node.js)
      * !out(importHelpers-inline.js)
      */
-    importHelpers?: 'inline' | 'auto' | string
+    importHelpers?: 'inline' | 'auto' | 'cdn' | 'node' | string
+    /**
+     * Use property access syntax to access UMD variable
+     * @defaultValue true
+     * @remarks
+     * By turning this off, this transformer will emit dangerous code.
+     * This might be useful in some cases: e.g.
+     * you want a limited code generation (before: import "a('b')", out: globalThis.a('b')).
+     *
+     * After opening this option, the code above will become `globalThis["a('b')"]`
+     * which is safe.
+     * @example
+     * !src(safeAccess-default.ts)
+     * !out(safeAccess-default.js)
+     * !out(safeAccess-true.js)
+     * !out(safeAccess-false.js)
+     */
+    safeAccess?: string
 }
 /**
  * @public
@@ -237,6 +260,15 @@ export type BareModuleRewriteSimple = 'snowpack' | 'umd' | 'unpkg' | 'pikacdn'
  * !src(bareModuleRewrite-complex.ts)
  * Output:
  * !out(bareModuleRewrite-complex.js)
+ *
+ * This option also support treeshake.
+ * !src(treeshake-test/tsconfig.json)
+ * !src(treeshake-test/src/index.ts)
+ *
+ * Output:
+ * !out(treeshake-test/index.js)
+ * Extra file: (Therefore you can feed this file to Webpack / Rollup and get treeshaked.)
+ * !src(treeshake-test/deps.js)
  * @public
  */
 export interface BareModuleRewriteUMD {
@@ -254,6 +286,9 @@ export interface BareModuleRewriteUMD {
      * should be a URL. Will use a `import 'umdImportPath'` to load the UMD then deconstruct from it.
      */
     umdImportPath?: string
+    treeshake?: {
+        out: string
+    }
 }
 /**
  * Rewrite module to another URL
