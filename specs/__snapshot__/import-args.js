@@ -1,8 +1,6 @@
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {}
-Promise.resolve((() => {
-    throw new SyntaxError("@magic-works/ttypescript-browser-like-import-transformer: Invalid source text after transform: 0");
-})());
+Promise.resolve(globalThis["0"]);
 __dynamicImport2Ary("@magic-works/ttypescript-browser-like-import-transformer: Transform rule for this dependencies found, but this dynamic import has more than 1 argument, transformer don't know how to transform that and keep it untouched.", '0', 1);
 __dynamicImport3Ary("@magic-works/ttypescript-browser-like-import-transformer: Transform rule for this dependencies found, but this dynamic import has more than 1 argument, transformer don't know how to transform that and keep it untouched.", '0', 1, 2);
 __dynamicImport4Ary("@magic-works/ttypescript-browser-like-import-transformer: Transform rule for this dependencies found, but this dynamic import has more than 1 argument, transformer don't know how to transform that and keep it untouched.", '0', 1, 2, 3);

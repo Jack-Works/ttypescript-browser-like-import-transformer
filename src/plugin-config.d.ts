@@ -260,6 +260,15 @@ export type BareModuleRewriteSimple = 'snowpack' | 'umd' | 'unpkg' | 'pikacdn'
  * !src(bareModuleRewrite-complex.ts)
  * Output:
  * !out(bareModuleRewrite-complex.js)
+ *
+ * This option also support treeshake.
+ * !src(treeshake-test/tsconfig.json)
+ * !src(treeshake-test/src/index.ts)
+ *
+ * Output:
+ * !out(treeshake-test/index.js)
+ * Extra file: (Therefore you can feed this file to Webpack / Rollup and get treeshaked.)
+ * !src(treeshake-test/deps.js)
  * @public
  */
 export interface BareModuleRewriteUMD {
@@ -277,6 +286,9 @@ export interface BareModuleRewriteUMD {
      * should be a URL. Will use a `import 'umdImportPath'` to load the UMD then deconstruct from it.
      */
     umdImportPath?: string
+    treeshake?: {
+        out: string
+    }
 }
 /**
  * Rewrite module to another URL

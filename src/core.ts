@@ -26,8 +26,9 @@ import {
     Program,
     PropertyAccessExpression,
     NamedImports,
+    CompilerOptions,
 } from 'typescript'
-import { PluginConfigs, ImportMapFunctionOpts } from './plugin-config'
+import { PluginConfigs, ImportMapFunctionOpts, BareModuleRewriteUMD } from './plugin-config'
 import { NormalizedPluginConfig } from './config-parser'
 type ts = typeof import('typescript')
 
@@ -44,6 +45,13 @@ export interface CustomTransformationContext<T extends Node> {
     queryWellknownUMD: (path: string) => string | undefined
     importMapResolve: (opt: ImportMapFunctionOpts) => string | null
     queryPackageVersion: (pkg: string) => string | null
+    getCompilerOptions: () => CompilerOptions
+    treeshakeProvider?: (
+        pkg: string,
+        accessedImports: Set<string>,
+        cfg: NonNullable<BareModuleRewriteUMD['treeshake']>,
+        compilerOptions: CompilerOptions,
+    ) => void
     configParser: typeof import('./config-parser')
     ttsclib: typeof import('./ttsclib')
 }
@@ -56,12 +64,18 @@ const _with = <T extends Node>(ctx: Context<any>, node: T) => ({ ...ctx, node } 
 export default function createTransformer(
     core: Pick<
         Context<any>,
-        'queryWellknownUMD' | 'ttsclib' | 'queryPackageVersion' | 'importMapResolve' | 'configParser' | 'ts'
+        | 'queryWellknownUMD'
+        | 'ttsclib'
+        | 'queryPackageVersion'
+        | 'importMapResolve'
+        | 'configParser'
+        | 'ts'
+        | 'treeshakeProvider'
     >,
 ) {
     const { ts, configParser, importMapResolve } = core
-    // ? Can't rely on the ts.Program because don't want to create on during the test.
-    return function(_program: Pick<Program, 'getCurrentDirectory'>, configRaw: PluginConfigs) {
+    // ? Don't rely on the ts.Program because don't want to create on during the test.
+    return function(_program: Partial<Pick<Program, 'getCurrentDirectory'>>, configRaw: PluginConfigs) {
         return (context: TransformationContext) => {
             configParser.validateConfig(configRaw, context.getCompilerOptions())
             const config = configParser.normalizePluginConfig(configRaw)
@@ -82,7 +96,7 @@ export default function createTransformer(
                                 sourceFilePath: sourceFile.fileName,
                                 moduleSpecifier: ctx.path,
                                 rootDir: comp.rootDir!,
-                                tsconfigPath: (comp.configFilePath as string) || _program.getCurrentDirectory(),
+                                tsconfigPath: (comp.configFilePath as string) || _program.getCurrentDirectory?.()!,
                                 // project: comp.project as string,
                             })
                             if (result) return { type: 'rewrite', nextPath: result }
@@ -134,7 +148,17 @@ export default function createTransformer(
 
                 function visitor(node: Node): VisitResult<Node> {
                     const dynamicImportArgs = isDynamicImport(ts, node)
-                    const shared = { config, configRaw, ts, context, node, sourceFile, ...core, ttsclib } as const
+                    const shared = {
+                        config,
+                        configRaw,
+                        ts,
+                        context,
+                        node,
+                        sourceFile,
+                        ...core,
+                        ttsclib,
+                        getCompilerOptions: () => context.getCompilerOptions(),
+                    } as const
                     if (
                         (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) &&
                         node.moduleSpecifier &&
@@ -174,6 +198,35 @@ function parseRegExp(this: ts, s: string) {
     } catch {
         return null
     }
+}
+/**
+ * Special return value:
+ * '*' means a namespace import
+ * '!' means a import with no import clause
+ */
+function getImportedItems(ts: ts, node: ImportDeclaration | ExportDeclaration): Set<string> {
+    const result = new Set<string>()
+    if (ts.isImportDeclaration(node)) {
+        if (!node.importClause) return new Set('!')
+
+        const clause = node.importClause
+        if (clause.name) result.add('default')
+        if (clause.namedBindings) {
+            const b = clause.namedBindings
+            if (ts.isNamespaceImport(b)) result.add('*')
+            else if (ts.isNamedImports(b)) {
+                b.elements.forEach(x => result.add(x.name.text))
+            }
+        }
+    } else {
+        if (!node.exportClause) return new Set('*')
+        const clause = node.exportClause
+        if (ts.isNamedExports(clause)) {
+            clause.elements.forEach(x => result.add(x.name.text))
+        }
+        if (ts?.isNamespaceExport(clause)) result.add('*')
+    }
+    return result
 }
 const runtimeMessageHeader = '@magic-works/ttypescript-browser-like-import-transformer: '
 function createThrowStatement(ts: ts, type: 'TypeError' | 'SyntaxError', message: string): Statement {
@@ -215,7 +268,14 @@ function updateImportExportDeclaration(
     opt = context.config.bareModuleRewrite,
 ): Statement[] {
     const { node, sourceFile, ts, ttsclib } = context
-    const rewriteStrategy = ttsclib.moduleSpecifierTransform({ ...context, parseRegExp: parseRegExp.bind(ts) }, opt)
+    const rewriteStrategy = ttsclib.moduleSpecifierTransform(
+        {
+            ...context,
+            parseRegExp: parseRegExp.bind(ts),
+            accessingImports: getImportedItems(ts, node),
+        },
+        opt,
+    )
     switch (rewriteStrategy.type) {
         case 'error':
             return [createThrowStatement(ts, 'SyntaxError', rewriteStrategy.message)]
@@ -429,16 +489,17 @@ function getUMDExpressionForModule(
     const umdAccess = safeAccess
         ? ts.createElementAccess(globalIdentifier, ts.createLiteral(umdName))
         : ts.createPropertyAccess(globalIdentifier, umdName)
-    const isSyntaxError =
-        parseJS(
-            ts,
-            `${globalObject}.${umdName}`,
-            'expression',
-            function(node): node is CallExpression | PropertyAccessExpression {
-                return ts.isCallExpression(node) || ts.isPropertyAccessExpression(node)
-            },
-            sourceFile.fileName,
-        ).type === 'syntax error'
+    const isSyntaxError = safeAccess
+        ? false
+        : parseJS(
+              ts,
+              `${globalObject}.${umdName}`,
+              'expression',
+              function(node): node is CallExpression | PropertyAccessExpression {
+                  return ts.isCallExpression(node) || ts.isPropertyAccessExpression(node)
+              },
+              sourceFile.fileName,
+          ).type === 'syntax error'
     if (isSyntaxError)
         return [
             createThrowExpression(ts, 'SyntaxError', 'Invalid source text after transform: ' + umdName),
@@ -457,6 +518,7 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
             ...ctx,
             path: first.text,
             parseRegExp: parseRegExp.bind(ts),
+            accessingImports: new Set('*'),
         })
         switch (rewriteStrategy.type) {
             case 'error':

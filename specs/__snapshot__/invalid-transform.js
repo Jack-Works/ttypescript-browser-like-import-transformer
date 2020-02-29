@@ -1,5 +1,5 @@
 // CompilerOptions: {"module":"ESNext"}
-// PluginConfig: {}
+// PluginConfig: {"safeAccess":false}
 const x = __UMDBindCheck((() => {
     throw new SyntaxError("@magic-works/ttypescript-browser-like-import-transformer: Invalid source text after transform: 0123");
 })(), ["default"], "0123", "globalThis.0123", false).default;
