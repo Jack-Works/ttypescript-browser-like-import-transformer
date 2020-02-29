@@ -44,7 +44,7 @@ Outputs:
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {"dynamicImportPathRewrite":"auto"}
 // Static dynamic import
-Promise.resolve(globalThis.a);
+Promise.resolve(globalThis["a"]);
 import("./a.js");
 import('https://example.com');
 // dynamic dynamic import
@@ -72,7 +72,7 @@ const __customImportHelper = // Static dynamic import
 // Static dynamic import
 x => Promise.reject(x);
 // Static dynamic import
-Promise.resolve(globalThis.a);
+Promise.resolve(globalThis["a"]);
 import("./a.js");
 import('https://example.com');
 // dynamic dynamic import
@@ -97,7 +97,7 @@ import { __dynamicImportTransform as __dynamicImportTransform, __UMDBindCheck as
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {"dynamicImportPathRewrite":false}
 // Static dynamic import
-Promise.resolve(globalThis.a);
+Promise.resolve(globalThis["a"]);
 import("./a.js");
 import('https://example.com');
 // dynamic dynamic import

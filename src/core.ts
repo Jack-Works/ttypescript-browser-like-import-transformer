@@ -418,11 +418,17 @@ function importOrExportClauseToUMD(
 function getUMDExpressionForModule(
     umdName: string,
     globalObject: NormalizedPluginConfig['globalObject'],
-    ctx: Pick<Context<any>, 'context' | 'sourceFile' | 'ts'>,
+    ctx: Pick<Context<any>, 'context' | 'sourceFile' | 'ts' | 'config'>,
 ): [Expression, string] {
-    const { ts, sourceFile } = ctx
+    const {
+        ts,
+        sourceFile,
+        config: { safeAccess = true },
+    } = ctx
     const globalIdentifier = ts.createIdentifier(globalObject === undefined ? 'globalThis' : globalObject)
-    const umdAccess = ts.createPropertyAccess(globalIdentifier, umdName)
+    const umdAccess = safeAccess
+        ? ts.createElementAccess(globalIdentifier, ts.createLiteral(umdName))
+        : ts.createPropertyAccess(globalIdentifier, umdName)
     const isSyntaxError =
         parseJS(
             ts,

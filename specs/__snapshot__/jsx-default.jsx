@@ -1,6 +1,6 @@
 // CompilerOptions: {"module":"ESNext","esModuleInterop":true,"jsx":"React"}
 // PluginConfig: {}
-const React = __UMDBindCheck(__esModuleInterop(globalThis.React), ["default"], "react", "globalThis.React", true).default;
+const React = __UMDBindCheck(__esModuleInterop(globalThis["React"]), ["default"], "react", "globalThis.React", true).default;
 export default function App() {
     return React.createElement("h1", null, "Hello world!");
 }

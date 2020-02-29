@@ -1,5 +1,5 @@
-const React = __UMDBindCheck(__esModuleInterop(globalThis.React), ["default"], "react", "globalThis.React", true).default;
-const { useState } = __UMDBindCheck(globalThis.React, ["useState"], "react", "globalThis.React", true);
+const React = __UMDBindCheck(__esModuleInterop(globalThis["React"]), ["default"], "react", "globalThis.React", true).default;
+const { useState } = __UMDBindCheck(globalThis["React"], ["useState"], "react", "globalThis.React", true);
 import { Comp } from "./comp.js";
 export function App() {
     const [s, sS] = useState('');

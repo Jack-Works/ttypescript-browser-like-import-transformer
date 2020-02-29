@@ -33,7 +33,7 @@ Outputs:
 ```js
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {}
-const R = __UMDBindCheck(globalThis.React, ["default"], "react", "globalThis.React", false).default;
+const R = __UMDBindCheck(globalThis["React"], ["default"], "react", "globalThis.React", false).default;
 console.log(R);
 import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@1.5.0/es/ttsclib.min.js";
 
@@ -42,7 +42,7 @@ import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@
 ```js
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {"globalObject":"global"}
-const R = __UMDBindCheck(global.React, ["default"], "react", "global.React", false).default;
+const R = __UMDBindCheck(global["React"], ["default"], "react", "global.React", false).default;
 console.log(R);
 import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@1.5.0/es/ttsclib.min.js";
 
@@ -51,7 +51,7 @@ import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@
 ```js
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {"globalObject":"window"}
-const R = __UMDBindCheck(window.React, ["default"], "react", "window.React", false).default;
+const R = __UMDBindCheck(window["React"], ["default"], "react", "window.React", false).default;
 console.log(R);
 import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@1.5.0/es/ttsclib.min.js";
 

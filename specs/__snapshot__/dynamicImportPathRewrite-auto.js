@@ -1,7 +1,7 @@
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {"dynamicImportPathRewrite":"auto"}
 // Static dynamic import
-Promise.resolve(globalThis.a);
+Promise.resolve(globalThis["a"]);
 import("./a.js");
 import('https://example.com');
 // dynamic dynamic import

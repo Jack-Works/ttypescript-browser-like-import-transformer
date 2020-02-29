@@ -179,6 +179,23 @@ export interface PluginConfigs {
      * !out(importHelpers-inline.js)
      */
     importHelpers?: 'inline' | 'auto' | 'cdn' | 'node' | string
+    /**
+     * Use property access syntax to access UMD variable
+     * @defaultValue true
+     * @remarks
+     * By turning this off, this transformer will emit dangerous code.
+     * This might be useful in some cases: e.g.
+     * you want a limited code generation (before: import "a('b')", out: globalThis.a('b')).
+     *
+     * After opening this option, the code above will become `globalThis["a('b')"]`
+     * which is safe.
+     * @example
+     * !src(safeAccess-default.ts)
+     * !out(safeAccess-default.js)
+     * !out(safeAccess-true.js)
+     * !out(safeAccess-false.js)
+     */
+    safeAccess?: string
 }
 /**
  * @public
