@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.0.0](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/compare/v1.4.1...v2.0.0) (2020-02-29)
+
+
+### ⚠ BREAKING CHANGES
+
+* add safeAccess (close #12)
+
+### Features
+
+* add node style helper, close [#13](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/issues/13) ([66e1e89](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/commit/66e1e89a8428a41f5cfdaa5b2b612d3a8d176dbe))
+* add safeAccess (close [#12](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/issues/12)) ([7fa46c5](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/commit/7fa46c5f61b0544e386e9419e682169e834fac29))
+* merge ttsc import decs, close [#10](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/issues/10) ([1d7e4aa](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/commit/1d7e4aa8616f5d278af90215292a9c95ebdf0970))
+* support tree shaking close [#14](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/issues/14) ([7a0033e](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/commit/7a0033ee69b1d0e3cc6cf545069551f07fee1650))
+
+
+### Bug Fixes
+
+* a possible bug in tsc watch mode ([0712548](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/commit/071254855e204029155d583080cbce6c71373cef))
+* import map path wrong ([0eb55f7](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/commit/0eb55f736332e587d47e57b954bdd6bc64cffc47))
+
 ## [1.5.0](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/compare/v1.4.1...v1.5.0) (2020-02-25)
 
 
