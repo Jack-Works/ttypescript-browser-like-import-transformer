@@ -592,10 +592,19 @@ function createTopLevelScopedHelper<F extends string | ((...args: any[]) => any)
     const uniqueName = ts.createFileLevelUniqueName(fnName)
     const returnValue = [uniqueName, (...args: any) => ts.createCall(uniqueName, void 0, args)] as const
     // ? if the function name is in the ttsclib, return a import declaration
-    if (fnName in ttsclib && config.importHelpers !== 'inline') {
-        const helperURL =
+    const { importHelpers = 'auto' } = config
+    if (fnName in ttsclib && importHelpers !== 'inline') {
+        const cdn =
             'https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@$version$/es/ttsclib.min.js'
-        const url = config.importHelpers === 'auto' ? helperURL : config.importHelpers ?? helperURL
+        const node = `@magic-works/ttypescript-browser-like-import-transformer/cjs/ttsclib.js`
+        let url
+        if (importHelpers === 'auto' || importHelpers === 'cdn') {
+            url = cdn
+        } else if (importHelpers === 'node') {
+            url = node
+        } else {
+            url = importHelpers
+        }
         let [importDec, idSet] = ttsclibImportMap.get(sourceFile) || [
             ts.createImportDeclaration(
                 void 0,

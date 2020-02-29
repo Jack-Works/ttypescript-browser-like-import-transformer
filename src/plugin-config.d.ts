@@ -157,6 +157,10 @@ export interface PluginConfigs {
      *
      * - "inline": All the import helpers will be injected in the file
      *
+     * - "cdn": import it from jsdelivr
+     *
+     * - "node": import it as a bare import (from `@magic-works/...`)
+     *
      * - "auto": Use the transformer default
      *
      * - string: A URL, will import helper from that place.
@@ -170,9 +174,11 @@ export interface PluginConfigs {
      * Output:
      * !out(importHelpers-auto.js)
      * !out(importHelpers-string.js)
+     * !out(importHelpers-cdn.js)
+     * !out(importHelpers-node.js)
      * !out(importHelpers-inline.js)
      */
-    importHelpers?: 'inline' | 'auto' | string
+    importHelpers?: 'inline' | 'auto' | 'cdn' | 'node' | string
 }
 /**
  * @public

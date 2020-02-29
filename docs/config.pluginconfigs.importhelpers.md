@@ -9,12 +9,16 @@ Import emit helpers (e.g. `\__UMDBindCheck`<!-- -->, `\__dynamicImportTransform`
 <b>Signature:</b>
 
 ```typescript
-importHelpers?: 'inline' | 'auto' | string
+importHelpers?: 'inline' | 'auto' | 'cdn' | 'node' | string
 ```
 
 ## Remarks
 
 - "inline": All the import helpers will be injected in the file
+
+- "cdn": import it from jsdelivr
+
+- "node": import it as a bare import (from `@magic-works/...`<!-- -->)
 
 - "auto": Use the transformer default
 
@@ -50,6 +54,28 @@ function __dynamicImportNative(path) {
     return import(path);
 }
 import { __dynamicImportTransform as __dynamicImportTransform, __UMDBindCheck as __UMDBindCheck, moduleSpecifierTransform as moduleSpecifierTransform, __customDynamicImportHelper as __customDynamicImportHelper } from "/polyfill/ttsc-helper.js";
+
+```
+
+```js
+// CompilerOptions: {"module":"ESNext"}
+// PluginConfig: {"importHelpers":"cdn"}
+__dynamicImportTransform(x, JSON.parse("{\"after\":true,\"importHelpers\":\"cdn\"}"), __dynamicImportNative, __UMDBindCheck, moduleSpecifierTransform);
+function __dynamicImportNative(path) {
+    return import(path);
+}
+import { __dynamicImportTransform as __dynamicImportTransform, __UMDBindCheck as __UMDBindCheck, moduleSpecifierTransform as moduleSpecifierTransform } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@1.5.0/es/ttsclib.min.js";
+
+```
+
+```js
+// CompilerOptions: {"module":"ESNext"}
+// PluginConfig: {"importHelpers":"node"}
+__dynamicImportTransform(x, JSON.parse("{\"after\":true,\"importHelpers\":\"node\"}"), __dynamicImportNative, __UMDBindCheck, moduleSpecifierTransform);
+function __dynamicImportNative(path) {
+    return import(path);
+}
+import { __dynamicImportTransform as __dynamicImportTransform, __UMDBindCheck as __UMDBindCheck, moduleSpecifierTransform as moduleSpecifierTransform } from "@magic-works/ttypescript-browser-like-import-transformer/cjs/ttsclib.js";
 
 ```
 
