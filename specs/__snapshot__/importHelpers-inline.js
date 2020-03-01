@@ -112,7 +112,7 @@ function __dynamicImportTransform(_path, config, dynamicImport, UMDBindCheck, _m
                     return unreachable("url case");
                 }
                 case "complex": {
-                    for (const [rule, ruleValue] of opt.config) {
+                    for (const [rule, ruleValue] of Object.entries(opt.config)) {
                         let regexp = undefined;
                         if (rule.startsWith("/")) {
                             regexp = parseRegExp(rule);
@@ -312,7 +312,7 @@ function moduleSpecifierTransform(context, opt) {
                 return unreachable("url case");
             }
             case "complex": {
-                for (const [rule, ruleValue] of opt.config) {
+                for (const [rule, ruleValue] of Object.entries(opt.config)) {
                     let regexp = undefined;
                     if (rule.startsWith("/")) {
                         regexp = parseRegExp(rule);

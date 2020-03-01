@@ -266,7 +266,7 @@ export function moduleSpecifierTransform(
                 return unreachable('url case')
             }
             case 'complex': {
-                for (const [rule, ruleValue] of opt.config) {
+                for (const [rule, ruleValue] of Object.entries(opt.config)) {
                     let regexp: RegExp | null | undefined = undefined
                     if (rule.startsWith('/')) {
                         regexp = parseRegExp(rule)
