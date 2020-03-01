@@ -82,9 +82,9 @@ function normalizedBareModuleRewrite(
         throw new ConfigError('Unknown tagged union in bareModuleRewrite')
     } else {
         if (top === false) throw new ConfigError("NormalizedBareModuleRewrite can't be recursive in bareModuleRewrite")
-        const kv: Map<string, NormalizedBareModuleRewrite> = new Map()
+        const kv: Record<string, NormalizedBareModuleRewrite> = {}
         for (const [k, v] of Object.entries(conf)) {
-            kv.set(k, normalizedBareModuleRewrite(v, false))
+            Reflect.set(kv, k, normalizedBareModuleRewrite(v, false))
         }
         return { type: 'complex', config: kv }
     }
@@ -116,4 +116,5 @@ export type NormalizedBareModuleRewrite =
     | BareModuleRewriteUMD
     | { type: 'noop' }
     | { type: 'simple'; enum: BareModuleRewriteSimple }
-    | { type: 'complex'; config: Map<string, NormalizedBareModuleRewrite> }
+    // Can not use a Map here. Because the result will be stringified.
+    | { type: 'complex'; config: Record<string, NormalizedBareModuleRewrite> }
