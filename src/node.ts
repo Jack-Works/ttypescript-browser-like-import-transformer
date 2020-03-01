@@ -63,17 +63,29 @@ function treeshakeProvider(
                 })
             if (binds.length === 0) continue
             file += `import { ${binds.map(x => x.join(' as ')).join(', ')} } from ${path}` + end
-            file += `_.set(${path}, { ${binds.map(x => x.join(': ')).join(', ')} })` + end
+            file += `_.set(${path}, createESModuleInterop({ ${binds.map(x => x.join(': ')).join(', ')} }))` + end
         }
-        file += `export default (${createGetter.toString()})()` + end
+        file += `export default (${createExport.toString()})()` + end
+        file += createESModuleInterop.toString() + end
         writeFileSync(targetFilePath, file)
 
         // The following code is run in runtime. Don't use it.
         const _: Map<string, object> = new Map()
-        function createGetter() {
+        function createExport() {
             return new Proxy(_, {
                 get(target, key: string) {
                     return target.get(key)
+                },
+            })
+        }
+        function createESModuleInterop(x: any) {
+            if (typeof x !== 'object' || x === null) return { default: x, __esModule: true }
+            return new Proxy(x, {
+                get(target, key) {
+                    const v = target[key]
+                    if (v) return v
+                    if (key === '__esModule') return true
+                    return undefined
                 },
             })
         }
