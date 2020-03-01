@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.1](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/compare/v2.0.0...v2.0.1) (2020-03-01)
+
+
+### Bug Fixes
+
+* r.config is not iterable ([930255a](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/commit/930255ad5fc81a5227027d4d5586e13a8d76208f))
+
 ## [2.0.0](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/compare/v1.4.1...v2.0.0) (2020-02-29)
 
 
