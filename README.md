@@ -9,7 +9,7 @@ Jump to [Install](#install), [Use cases](#use-cases), [Motivation](#motivation)
 
 ## Intro
 
-This typescript transformer helps you to emit a browser compatible ESModule output. In general, it do two things:
+This typescript transformer helps you to emit a browser compatible ESModule output. In general, it does two things:
 
 1. Add a ".js" after the local import
 1. Transform the node style dependencies (e.g. `import React from "react"`) to
@@ -79,7 +79,7 @@ The default config of this transformer is "UMD" mode. All bare imports will be t
 
 ### Use with Webpack
 
-Here is [a template repo](https://github.com/Jack-Works/ttsc-browser-import-template) to help you use this transformer with Webpack. In this repo, all node style import is imported in [a single file](https://github.com/Jack-Works/ttsc-browser-import-template/blob/master/dependencies.js) and packed by Webpack. Rest of the source code never get handled by Webpack but emitted by [ttypescript](https://github.com/cevek/ttypescript) (a enhanced typescript cli that allows you to specify transformer programmatically).
+Here is [a template repo](https://github.com/Jack-Works/ttsc-browser-import-template) to help you use this transformer with Webpack. In this repo, all node style import is imported in [a single file](https://github.com/Jack-Works/ttsc-browser-import-template/blob/master/dependencies.js) and packed by Webpack. The rest of the source code never gets handled by Webpack but emitted by [ttypescript](https://github.com/cevek/ttypescript) (an enhanced typescript cli that allows you to specify transformer programmatically).
 
 ### Use with Snowpack
 
@@ -123,9 +123,9 @@ See the **TTypeScript Support** in the [Importing Packages by Name](https://www.
 
 ## Motivation
 
-Nowadays most of codes in our codebase are ESModules. You can emit browser executable JS files by `tsc` directly but you have to add the annoying `.js` extension to the end. (Related: [PR: New --emitExtension and --noImplicitExtensionName compiler options](https://github.com/microsoft/TypeScript/pull/35148))
+Nowadays most of the codes in our codebase are ESModules. You can emit browser executable JS files by `tsc` directly but you have to add the annoying `.js` extension to the end. (Related: [PR: New --emitExtension and --noImplicitExtensionName compiler options](https://github.com/microsoft/TypeScript/pull/35148))
 
-On the other hand, it is hard to run ES Module codes with Node style dependencies, there're some solutions to this including [Snowpack](https://www.snowpack.dev/) but Snowpack also have it's limits.
+On the other hand, it is hard to run ES Module codes with Node style dependencies, there're some solutions to this including [Snowpack](https://www.snowpack.dev/) but Snowpack also has its limits.
 
 ## Options
 
@@ -135,7 +135,7 @@ See [Options](./docs/config.pluginconfigs.md)
 
 If you are using Node.js, import `@magic-works/ttypescript-browser-like-import-transformer/cjs/node.js`, it will export a `ts.TransformerFactory<SourceFile>`.
 
-If you are in other environment or you want to modify the behavior of the transformer, use `./es/core.js` and provide related I/O operations to create a `ts.TransformerFactory<SourceFile>`.
+If you are in another environment or you want to modify the behavior of the transformer, use `./es/core.js` and provide related I/O operations to create a `ts.TransformerFactory<SourceFile>`.
 
 Once you get the `ts.TransformerFactory<SourceFile>`, you can use it like
 
