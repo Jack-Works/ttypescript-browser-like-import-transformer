@@ -5,7 +5,7 @@
     <img alt="npm version" src="https://img.shields.io/npm/v/@magic-works/ttypescript-browser-like-import-transformer.svg?style=flat-square"></a>
 </p>
 
-Jump to [Install](#install), [Use cases](#use-cases), [Motivation](#motivation)
+Jump to [Install](#install), [Use cases](#use-cases), [Motivation](#motivation), or [Documentation of options](https://jack-works.github.io/ttypescript-browser-like-import-transformer/config.pluginconfigs.html)
 
 ## Intro
 
@@ -129,7 +129,7 @@ On the other hand, it is hard to run ES Module codes with Node style dependencie
 
 ## Options
 
-See [Options](./docs/config.pluginconfigs.md)
+See [Options](https://jack-works.github.io/ttypescript-browser-like-import-transformer/config.pluginconfigs.html)
 
 ## Use programmatically
 
