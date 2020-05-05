@@ -17,11 +17,11 @@
     },
     "dependencies": {},
     "devDependencies": {
-        "@microsoft/api-documenter": "^7.7.12",
-        "@microsoft/api-extractor": "^7.7.8",
-        "@types/node": "latest",
+        "@microsoft/api-documenter": "^7.7.20",
+        "@microsoft/api-extractor": "^7.7.13",
+        "@types/node": "^13.13.4",
         "standard-version": "latest",
-        "ts-node": "latest",
+        "ts-node": "^8.10.1",
         "ttypescript": "latest",
         "typescript": "next"
     },
