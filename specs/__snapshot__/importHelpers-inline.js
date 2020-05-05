@@ -136,7 +136,7 @@ function __dynamicImportTransform(_path, config, dynamicImport, UMDBindCheck, _m
                             return error(392859, path, rule);
                         if (!version && (target.match(versionRegExp) || (umdImportPath === null || umdImportPath === void 0 ? void 0 : umdImportPath.match(versionRegExp))))
                             return error(392861, path, rule);
-                        const [nextTarget, nextUMDImportPath] = [target, umdImportPath || ""].map(x => x.replace(packageNameRegExp, path).replace(umdNameRegExp, umdName).replace(versionRegExp, version));
+                        const [nextTarget, nextUMDImportPath] = [target, umdImportPath || ""].map((x) => x.replace(packageNameRegExp, path).replace(umdNameRegExp, umdName).replace(versionRegExp, version));
                         return { type: "umd", target: nextTarget, globalObject, umdImportPath: nextUMDImportPath };
                     }
                     return noop;
@@ -336,7 +336,7 @@ function moduleSpecifierTransform(context, opt) {
                         return error(392859, path, rule);
                     if (!version && (target.match(versionRegExp) || (umdImportPath === null || umdImportPath === void 0 ? void 0 : umdImportPath.match(versionRegExp))))
                         return error(392861, path, rule);
-                    const [nextTarget, nextUMDImportPath] = [target, umdImportPath || ""].map(x => x.replace(packageNameRegExp, path).replace(umdNameRegExp, umdName).replace(versionRegExp, version));
+                    const [nextTarget, nextUMDImportPath] = [target, umdImportPath || ""].map((x) => x.replace(packageNameRegExp, path).replace(umdNameRegExp, umdName).replace(versionRegExp, version));
                     return { type: "umd", target: nextTarget, globalObject, umdImportPath: nextUMDImportPath };
                 }
                 return noop;

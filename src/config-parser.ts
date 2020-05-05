@@ -1,11 +1,11 @@
-import {
+import type {
     PluginConfigs,
     BareModuleRewriteSimple,
     BareModuleRewriteUMD,
     BareModuleRewriteURL,
     BareModuleRewriteObject,
 } from './plugin-config'
-import { CompilerOptions } from 'typescript'
+import type { CompilerOptions } from 'typescript'
 
 /** All ConfigError should go though this class
  * so the test framework can catch it instead of fail the whole test process */

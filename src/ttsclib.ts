@@ -5,9 +5,9 @@
  * and expected to run in any ES2020 compatible environment (with console.warn).
  */
 
-import { BareModuleRewriteUMD } from './plugin-config'
-import { CustomTransformationContext } from './core'
-import { NormalizedPluginConfig, NormalizedBareModuleRewrite } from './config-parser'
+import type { BareModuleRewriteUMD } from './plugin-config'
+import type { CustomTransformationContext } from './core'
+import type { NormalizedPluginConfig, NormalizedBareModuleRewrite } from './config-parser'
 
 /**
  * This function is a helper for UMD transform.
@@ -288,7 +288,7 @@ export function moduleSpecifierTransform(
                         return error(Diag.TransformToUMDFailed, path, rule)
                     if (!version && (target.match(versionRegExp) || umdImportPath?.match(versionRegExp)))
                         return error(Diag.QueryPackageVersionFailed, path, rule)
-                    const [nextTarget, nextUMDImportPath] = [target, umdImportPath || ''].map(x =>
+                    const [nextTarget, nextUMDImportPath] = [target, umdImportPath || ''].map((x) =>
                         x
                             .replace(packageNameRegExp, path)
                             .replace(umdNameRegExp, umdName!)

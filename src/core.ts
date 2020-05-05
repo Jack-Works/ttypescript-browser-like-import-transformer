@@ -1,4 +1,4 @@
-import {
+import type {
     TransformationContext,
     SourceFile,
     Node,
@@ -28,8 +28,8 @@ import {
     NamedImports,
     CompilerOptions,
 } from 'typescript'
-import { PluginConfigs, ImportMapFunctionOpts, BareModuleRewriteUMD } from './plugin-config'
-import { NormalizedPluginConfig } from './config-parser'
+import type { PluginConfigs, ImportMapFunctionOpts, BareModuleRewriteUMD } from './plugin-config'
+import type { NormalizedPluginConfig } from './config-parser'
 type ts = typeof import('typescript')
 
 export interface CustomTransformationContext<T extends Node> {
@@ -75,7 +75,7 @@ export default function createTransformer(
 ) {
     const { ts, configParser, importMapResolve } = core
     // ? Don't rely on the ts.Program because don't want to create on during the test.
-    return function(_program: Partial<Pick<Program, 'getCurrentDirectory'>>, configRaw: PluginConfigs) {
+    return function (_program: Partial<Pick<Program, 'getCurrentDirectory'>>, configRaw: PluginConfigs) {
         return (context: TransformationContext) => {
             configParser.validateConfig(configRaw, context.getCompilerOptions())
             const config = configParser.normalizePluginConfig(configRaw)
@@ -107,7 +107,9 @@ export default function createTransformer(
 
                 let visitedSourceFile = ts.visitEachChild(sourceFile, visitor, context)
                 // ? hoistedHelper and hoistedUMDImport will be added ^ in the visitor
-                const hoistedHelper = Array.from(topLevelScopedHelperMap.get(sourceFile)?.values() || []).map(x => x[1])
+                const hoistedHelper = Array.from(topLevelScopedHelperMap.get(sourceFile)?.values() || []).map(
+                    (x) => x[1],
+                )
                 const ttscHelper = ttsclibImportMap.get(sourceFile)
                 if (ttscHelper) hoistedHelper.push(ttscHelper[0])
                 function isLanguageHoistable(node: Statement): boolean {
@@ -116,7 +118,7 @@ export default function createTransformer(
                     return false
                 }
                 const languageHoistableDeclarations = hoistedHelper.filter(isLanguageHoistable)
-                const languageNotHoistableDeclarations = hoistedHelper.filter(x => !isLanguageHoistable(x))
+                const languageNotHoistableDeclarations = hoistedHelper.filter((x) => !isLanguageHoistable(x))
                 const hoistedUMDImport = Array.from(hoistUMDImportDeclaration.get(sourceFile)?.values() || [])
                 visitedSourceFile = ts.updateSourceFileNode(
                     visitedSourceFile,
@@ -151,7 +153,6 @@ export default function createTransformer(
                     const shared = {
                         config,
                         configRaw,
-                        ts,
                         context,
                         node,
                         sourceFile,
@@ -215,14 +216,14 @@ function getImportedItems(ts: ts, node: ImportDeclaration | ExportDeclaration): 
             const b = clause.namedBindings
             if (ts.isNamespaceImport(b)) result.add('*')
             else if (ts.isNamedImports(b)) {
-                b.elements.forEach(x => result.add(x.name.text))
+                b.elements.forEach((x) => result.add(x.name.text))
             }
         }
     } else {
         if (!node.exportClause) return new Set('*')
         const clause = node.exportClause
         if (ts.isNamedExports(clause)) {
-            clause.elements.forEach(x => result.add(x.name.text))
+            clause.elements.forEach((x) => result.add(x.name.text))
         }
         if (ts?.isNamespaceExport(clause)) result.add('*')
     }
@@ -314,8 +315,8 @@ function updateImportExportDeclaration(
                 return [ts.createExpressionStatement(ts.createLiteral(text))]
             }
             const { statements } = importOrExportClauseToUMD(nextPath, _with(context, clause), globalObject)
-            writeSourceFileMeta(sourceFile, hoistUMDImportDeclaration, new Set<Statement>(), _ => {
-                statements.forEach(x => _.add(x))
+            writeSourceFileMeta(sourceFile, hoistUMDImportDeclaration, new Set<Statement>(), (_) => {
+                statements.forEach((x) => _.add(x))
             })
             return [...umdImport, ...statements]
         }
@@ -355,7 +356,7 @@ function importOrExportClauseToUMD(
             statements.push(getNamespaceImport(nsImport))
         }
         if (namedImport) {
-            namedImport.elements.forEach(v => ids.push(v.name))
+            namedImport.elements.forEach((v) => ids.push(v.name))
             statements.push(transformNamedImportExport(namedImport))
         }
         return { variableNames: ids, statements: statements }
@@ -367,7 +368,7 @@ function importOrExportClauseToUMD(
             ts.createImportClause(
                 undefined,
                 ts.createNamedImports(
-                    node.elements.map<ImportSpecifier>(x => {
+                    node.elements.map<ImportSpecifier>((x) => {
                         const id = ts.createFileLevelUniqueName(x.name.text)
                         ghostBindings.set(x, id)
                         return ts.createImportSpecifier(x.propertyName, id)
@@ -416,7 +417,7 @@ function importOrExportClauseToUMD(
         // ? If the UMD binding is undefined, this will give a warning but success (with an empty module).
         return getAssignment(
             namedImport.name,
-            createCheckedUMDAccess(x => x),
+            createCheckedUMDAccess((x) => x),
         )
     }
     function getDefaultImport(defaultImport: Identifier) {
@@ -425,7 +426,7 @@ function importOrExportClauseToUMD(
             const [, createESModuleInteropCall] = createTopLevelScopedHelper(ctx, ttsclib.__esModuleInterop, [])
             umdAccess = createCheckedUMDAccess(createESModuleInteropCall, ts.createLiteral('default'))
         } else {
-            umdAccess = createCheckedUMDAccess(x => x, ts.createLiteral('default'))
+            umdAccess = createCheckedUMDAccess((x) => x, ts.createLiteral('default'))
         }
         // ? const defaultImportIdentifier = __importBindingCheck(value, name, path, mappedName)
         return getAssignment(defaultImport, ts.createPropertyAccess(umdAccess, 'default'))
@@ -447,12 +448,12 @@ function importOrExportClauseToUMD(
                 [
                     ts.createVariableDeclaration(
                         ts.createObjectBindingPattern(
-                            elements.map(x => ts.createBindingElement(undefined, x.propertyName, x.name, undefined)),
+                            elements.map((x) => ts.createBindingElement(undefined, x.propertyName, x.name, undefined)),
                         ),
                         undefined,
                         createCheckedUMDAccess(
-                            x => x,
-                            ...elements.map(x => ts.createLiteral(x.propertyName?.text ?? x.name.text)),
+                            (x) => x,
+                            ...elements.map((x) => ts.createLiteral(x.propertyName?.text ?? x.name.text)),
                         ),
                     ),
                 ],
@@ -495,7 +496,7 @@ function getUMDExpressionForModule(
               ts,
               `${globalObject}.${umdName}`,
               'expression',
-              function(node): node is CallExpression | PropertyAccessExpression {
+              function (node): node is CallExpression | PropertyAccessExpression {
                   return ts.isCallExpression(node) || ts.isPropertyAccessExpression(node)
               },
               sourceFile.fileName,
@@ -603,9 +604,14 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
                     ts.NodeFlags.Const,
                 ),
             )
-            writeSourceFileMeta(sourceFile, topLevelScopedHelperMap, new Map<string, [Identifier, Statement]>(), x => {
-                x.set('__customImportHelper', [customFunction, decl])
-            })
+            writeSourceFileMeta(
+                sourceFile,
+                topLevelScopedHelperMap,
+                new Map<string, [Identifier, Statement]>(),
+                (x) => {
+                    x.set('__customImportHelper', [customFunction, decl])
+                },
+            )
         }
         const [, createCustomImportHelper] = createTopLevelScopedHelper(ctx, ttsclib.__customDynamicImportHelper, [])
         /**
@@ -691,8 +697,8 @@ function createTopLevelScopedHelper<F extends string | ((...args: any[]) => any)
         const importBind = ts.createImportSpecifier(uniqueName, ts.createIdentifier(fnName))
         const importClause = importDec.importClause!
         const importBindings = importClause.namedBindings! as NamedImports
-        if (importBindings.elements.find(x => x.name.text === fnName)) {
-            const uniqueName = [...idSet.values()].find(x => x.text === fnName)!
+        if (importBindings.elements.find((x) => x.name.text === fnName)) {
+            const uniqueName = [...idSet.values()].find((x) => x.text === fnName)!
             return [uniqueName, (...args: any) => ts.createCall(uniqueName, void 0, args)] as const
         }
         importDec = ts.updateImportDeclaration(
@@ -726,7 +732,7 @@ function createTopLevelScopedHelper<F extends string | ((...args: any[]) => any)
     )
     ts.setEmitFlags(f, ts.EmitFlags.NoComments)
     ts.setEmitFlags(f, ts.EmitFlags.NoNestedComments)
-    writeSourceFileMeta(sourceFile, topLevelScopedHelperMap, new Map(), x => x.set(helper, [uniqueName, f]))
+    writeSourceFileMeta(sourceFile, topLevelScopedHelperMap, new Map(), (x) => x.set(helper, [uniqueName, f]))
     return returnValue
 }
 
@@ -751,7 +757,7 @@ function parseJS<T extends Node = Node>(
         }
     }
     const sf = ts.createSourceFile(fileName, source, ts.ScriptTarget.ESNext, false, ts.ScriptKind.JS)
-    if (sf.statements.filter(x => !ts.isEmptyStatement(x)).length !== 1)
+    if (sf.statements.filter((x) => !ts.isEmptyStatement(x)).length !== 1)
         return { type: 'syntax error', error: 'Unexpected statement count ' + sf.statements.length }
     const [firstStatement] = sf.statements
     if (kind === 'expression') {
