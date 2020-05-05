@@ -423,7 +423,7 @@ function importOrExportClauseToUMD(
     function getDefaultImport(defaultImport: Identifier) {
         let umdAccess: Expression
         if (esModuleInterop) {
-            const [, createESModuleInteropCall] = createTopLevelScopedHelper(ctx, ttsclib.__esModuleInterop, [])
+            const [, createESModuleInteropCall] = createTopLevelScopedHelper(ctx, ttsclib.__esModuleInterop)
             umdAccess = createCheckedUMDAccess(createESModuleInteropCall, ts.createLiteral('default'))
         } else {
             umdAccess = createCheckedUMDAccess((x) => x, ts.createLiteral('default'))
@@ -462,7 +462,7 @@ function importOrExportClauseToUMD(
         )
     }
     function createCheckedUMDAccess(wrapper: (x: Expression) => Expression, ...names: StringLiteral[]) {
-        const [, createUMDBindCheck] = createTopLevelScopedHelper(ctx, ttsclib.__UMDBindCheck, [])
+        const [, createUMDBindCheck] = createTopLevelScopedHelper(ctx, ttsclib.__UMDBindCheck)
         return createUMDBindCheck(
             wrapper(umdAccess),
             ts.createArrayLiteral(names),
@@ -523,7 +523,7 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
         })
         switch (rewriteStrategy.type) {
             case 'error':
-                const [id] = createTopLevelScopedHelper(ctx, dynamicImportFailedHelper(args), [])
+                const [id] = createTopLevelScopedHelper(ctx, dynamicImportFailedHelper(args))
                 return [ts.createCall(id, void 0, [ts.createLiteral(rewriteStrategy.message), ...args])]
             case 'noop':
                 return [node]
@@ -532,7 +532,7 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
             }
             case 'umd': {
                 if (rest.length !== 0) {
-                    const [id] = createTopLevelScopedHelper(ctx, dynamicImportFailedHelper(args), [])
+                    const [id] = createTopLevelScopedHelper(ctx, dynamicImportFailedHelper(args))
                     return [
                         ts.createCall(id, void 0, [
                             ts.createLiteral(moreThan1ArgumentDynamicImportErrorMessage),
@@ -559,7 +559,7 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
         }
     } else {
         if (rest.length !== 0) {
-            const [id] = createTopLevelScopedHelper(ctx, dynamicImportFailedHelper(args), [])
+            const [id] = createTopLevelScopedHelper(ctx, dynamicImportFailedHelper(args))
             return [ts.createCall(id, void 0, [ts.createLiteral(moreThan1ArgumentDynamicImportErrorMessage), ...args])]
         }
         const opt = config.dynamicImportPathRewrite
@@ -573,14 +573,13 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
         const [dynamicImportTransformIdentifier, createDynamicImportTransform] = createTopLevelScopedHelper(
             ctx,
             ttsclib.__dynamicImportTransform,
-            [moduleSpecifierTransform_.value],
         )
         const stringifiedConfig = ts.createCall(ts.createIdentifier('JSON.parse'), void 0, [
             ts.createLiteral(JSON.stringify(config)),
         ])
-        const [dynamicImportNative] = createTopLevelScopedHelper(ctx, dynamicImportNativeString, [])
-        const [umdBindCheck] = createTopLevelScopedHelper(ctx, ttsclib.__UMDBindCheck, [])
-        const [moduleSpecifierTransform] = createTopLevelScopedHelper(ctx, ttsclib.moduleSpecifierTransform, [])
+        const [dynamicImportNative] = createTopLevelScopedHelper(ctx, dynamicImportNativeString)
+        const [umdBindCheck] = createTopLevelScopedHelper(ctx, ttsclib.__UMDBindCheck)
+        const [moduleSpecifierTransform] = createTopLevelScopedHelper(ctx, ttsclib.moduleSpecifierTransform)
         const helperArgs = [stringifiedConfig, dynamicImportNative, umdBindCheck, moduleSpecifierTransform] as const
         if (opt === 'auto' || opt === undefined) {
             /**
@@ -613,7 +612,7 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
                 },
             )
         }
-        const [, createCustomImportHelper] = createTopLevelScopedHelper(ctx, ttsclib.__customDynamicImportHelper, [])
+        const [, createCustomImportHelper] = createTopLevelScopedHelper(ctx, ttsclib.__customDynamicImportHelper)
         /**
          * __customImportHelper(
          *     path,
@@ -654,7 +653,6 @@ const ttsclibImportMap = new Map<SourceFile, [ImportDeclaration, Set<Identifier>
 function createTopLevelScopedHelper<F extends string | ((...args: any[]) => any)>(
     context: Pick<Context<any>, 'ts' | 'sourceFile' | 'config' | 'ttsclib' | 'queryPackageVersion'>,
     helper: F | string,
-    additionDeclarations: FunctionDeclaration[],
 ): readonly [Identifier, (...args: CastArray<LevelUpArgs<Parameters<CastFunction<F>>>>) => Expression] {
     const { config, ts, sourceFile, ttsclib, queryPackageVersion } = context
     const result = topLevelScopedHelperMap.get(sourceFile)?.get(helper)
@@ -726,9 +724,7 @@ function createTopLevelScopedHelper<F extends string | ((...args: any[]) => any)
         void 0,
         parsedFunction.parameters,
         void 0,
-        parsedFunction.body
-            ? ts.updateBlock(parsedFunction.body, [...parsedFunction.body.statements, ...additionDeclarations])
-            : parsedFunction.body,
+        parsedFunction.body,
     )
     ts.setEmitFlags(f, ts.EmitFlags.NoComments)
     ts.setEmitFlags(f, ts.EmitFlags.NoNestedComments)

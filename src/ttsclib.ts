@@ -316,13 +316,16 @@ export function moduleSpecifierTransform(
         throw new Error('Unreachable case at ' + str)
     }
     function isBrowserCompatibleModuleSpecifier(path: string) {
-        return isHTTPModuleSpecifier(path) || isLocalModuleSpecifier(path)
+        return isHTTPModuleSpecifier(path) || isLocalModuleSpecifier(path) || isDataOrBlobModuleSpecifier(path)
     }
     function isHTTPModuleSpecifier(path: string) {
         return path.startsWith('http://') || path.startsWith('https://')
     }
     function isLocalModuleSpecifier(path: string) {
         return path.startsWith('.') || path.startsWith('/')
+    }
+    function isDataOrBlobModuleSpecifier(path: string) {
+        return path.startsWith('blob:') || path.startsWith('data:')
     }
     function appendExtensionName(path: string, expectedExt: string) {
         if (path.endsWith(expectedExt)) return path
