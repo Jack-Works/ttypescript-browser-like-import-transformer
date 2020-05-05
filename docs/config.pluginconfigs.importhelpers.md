@@ -299,8 +299,9 @@ function __UMDBindCheck(mod, bindings, path, mappedName, hasESModuleInterop) {
             console.warn(umdInvalid);
         }
     }
-    if (typeof mod !== "object" || mod === null) {
-        throw new SyntaxError(`${head} provides an invalid export object. The provided record is type of ${typeof mod}`);
+    const modType = typeof mod;
+    if ((modType !== "object" && modType !== "function") || mod === null) {
+        throw new SyntaxError(`${head} provides an invalid export object. The provided record is type of ${modType}`);
     }
     if (hasESModuleInterop && bindings.toString() === "default" && mod.default === undefined) {
         throw new SyntaxError(umdInvalid);
