@@ -7,6 +7,7 @@
     "author": "Jack Works <jackworks@protonmail.com>",
     "license": "MIT",
     "scripts": {
+        "prepublishOnly": "npm run build:cjs && npm run build:es",
         "release": "standard-version",
         "test": "node ./cjs/run-tests.js && npm run doc",
         "start:cjs": "tsc -w -p src",
