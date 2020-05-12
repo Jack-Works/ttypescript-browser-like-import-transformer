@@ -18,4 +18,4 @@ function __dynamicImport2Ary(reason, ...args) {
     console.warn(reason, ...args);
     return import(args[0], args[1]);
 }
-import { __dynamicImportTransform as __dynamicImportTransform, __UMDBindCheck as __UMDBindCheck, moduleSpecifierTransform as moduleSpecifierTransform } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.0.4/es/ttsclib.min.js";
+import { __dynamicImportTransform as __dynamicImportTransform, __UMDBindCheck as __UMDBindCheck, moduleSpecifierTransform as moduleSpecifierTransform } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.0.5/es/ttsclib.min.js";

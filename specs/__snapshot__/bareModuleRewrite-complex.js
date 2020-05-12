@@ -6,4 +6,4 @@ const y = __UMDBindCheck(globalThis["lodash"], ["default"], "lodash", "globalThi
 import z from "https://unpkg.com/lodash-es?module";
 import w from "/web_modules/other.js";
 console.log(x, y, z, w, i);
-import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.0.4/es/ttsclib.min.js";
+import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.0.5/es/ttsclib.min.js";
