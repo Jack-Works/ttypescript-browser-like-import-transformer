@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.5](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/compare/v2.0.4...v2.0.5) (2020-05-12)
+
+
+### Bug Fixes
+
+* re-impl [#19](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/issues/19) ([4e51686](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/commit/4e51686d44753c1e50767812fb1eb31cfda0161a))
+
 ### [2.0.4](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/compare/v2.0.3...v2.0.4) (2020-05-06)
 
 

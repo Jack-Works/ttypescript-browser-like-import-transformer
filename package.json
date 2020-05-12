@@ -1,6 +1,6 @@
 {
     "name": "@magic-works/ttypescript-browser-like-import-transformer",
-    "version": "2.0.4",
+    "version": "2.0.5",
     "description": "A custom transformer that can be used with ttypescript to transform ts imports to browser style imports",
     "main": "cjs/node.js",
     "repository": "https://github.com/Jack-Works/ttypescript-browser-like-import-transformer",
