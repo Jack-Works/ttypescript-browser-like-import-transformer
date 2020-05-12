@@ -71,6 +71,7 @@ function moduleSpecifierTransform(context, opt) {
         const { path, config, parseRegExp, queryPackageVersion } = context;
         if (opt.type === "noop")
             return noop;
+        const expectedExtension = config.appendExtensionName === true ? ".js" : (_a = config.appendExtensionName) !== null && _a !== void 0 ? _a : ".js";
         if (isBrowserCompatibleModuleSpecifier(path)) {
             if (path === ".")
                 return noop;
@@ -78,7 +79,7 @@ function moduleSpecifierTransform(context, opt) {
                 return noop;
             if (config.appendExtensionNameForRemote !== true && isHTTPModuleSpecifier(path))
                 return noop;
-            const nextPath = appendExtensionName(path, config.appendExtensionName === true ? ".js" : (_a = config.appendExtensionName) !== null && _a !== void 0 ? _a : ".js");
+            const nextPath = appendExtensionName(path, expectedExtension);
             return { type: "rewrite", nextPath: nextPath };
         }
         const { sub, nspkg } = resolveNS(path);
@@ -86,7 +87,9 @@ function moduleSpecifierTransform(context, opt) {
             case "simple": {
                 const e = opt.enum;
                 switch (e) {
-                    case "snowpack": return { nextPath: `${(_b = config.webModulePath) !== null && _b !== void 0 ? _b : "/web_modules/"}${path}.js`, type: "rewrite" };
+                    case "snowpack": return {
+                        nextPath: `${(_b = config.webModulePath) !== null && _b !== void 0 ? _b : "/web_modules/"}${appendExtensionName(path, expectedExtension)}`, type: "rewrite",
+                    };
                     case "pikacdn":
                     case "unpkg": {
                         const a = "https://cdn.pika.dev/$packageName$@$version$$subpath$";
@@ -191,6 +194,8 @@ function moduleSpecifierTransform(context, opt) {
         return path.startsWith("blob:") || path.startsWith("data:");
     }
     function appendExtensionName(path, expectedExt) {
+        if (expectedExt === false)
+            return path;
         if (path.endsWith(expectedExt))
             return path;
         return path + expectedExt;

@@ -192,14 +192,12 @@ export function moduleSpecifierTransform(
         const { path, config, parseRegExp, queryPackageVersion } = context
         if (opt.type === 'noop') return noop
 
+        const expectedExtension = config.appendExtensionName === true ? '.js' : config.appendExtensionName ?? '.js'
         if (isBrowserCompatibleModuleSpecifier(path)) {
             if (path === '.') return noop
             if (config.appendExtensionName === false) return noop
             if (config.appendExtensionNameForRemote !== true && isHTTPModuleSpecifier(path)) return noop
-            const nextPath = appendExtensionName(
-                path,
-                config.appendExtensionName === true ? '.js' : config.appendExtensionName ?? '.js',
-            )
+            const nextPath = appendExtensionName(path, expectedExtension)
             return { type: 'rewrite', nextPath: nextPath }
         }
         const { sub, nspkg } = resolveNS(path)
@@ -208,11 +206,13 @@ export function moduleSpecifierTransform(
                 const e = opt.enum
                 switch (e) {
                     case 'snowpack':
-                        const nextPath = appendExtensionName(
-                            path,
-                            config.appendExtensionName === true ? '.js' : config.appendExtensionName ?? '.js',
-                        )
-                        return { nextPath: `${config.webModulePath ?? '/web_modules/'}${nextPath}`, type: 'rewrite' }
+                        return {
+                            nextPath: `${config.webModulePath ?? '/web_modules/'}${appendExtensionName(
+                                path,
+                                expectedExtension,
+                            )}`,
+                            type: 'rewrite',
+                        }
                     case 'pikacdn':
                     case 'unpkg': {
                         const a = 'https://cdn.pika.dev/$packageName$@$version$$subpath$'
@@ -331,7 +331,8 @@ export function moduleSpecifierTransform(
     function isDataOrBlobModuleSpecifier(path: string) {
         return path.startsWith('blob:') || path.startsWith('data:')
     }
-    function appendExtensionName(path: string, expectedExt: string) {
+    function appendExtensionName(path: string, expectedExt: string | false) {
+        if (expectedExt === false) return path
         if (path.endsWith(expectedExt)) return path
         return path + expectedExt
     }
