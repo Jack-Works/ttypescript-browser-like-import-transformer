@@ -73,7 +73,7 @@ import fs from 'std:fs';
 import isarray from "/web_modules/isarray.js";
 import "/web_modules/other-polyfill.js";
 console.log(React, lodash, AsyncCall, fs, isarray, MUI, MUILab);
-import { __esModuleInterop as __esModuleInterop, __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.0.2/es/ttsclib.min.js";
+import { __esModuleInterop as __esModuleInterop, __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.0.4/es/ttsclib.min.js";
 
 ```
 
