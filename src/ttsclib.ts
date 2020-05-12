@@ -208,7 +208,11 @@ export function moduleSpecifierTransform(
                 const e = opt.enum
                 switch (e) {
                     case 'snowpack':
-                        return { nextPath: `${config.webModulePath ?? '/web_modules/'}${path}.js`, type: 'rewrite' }
+                        const nextPath = appendExtensionName(
+                            path,
+                            config.appendExtensionName === true ? '.js' : config.appendExtensionName ?? '.js',
+                        )
+                        return { nextPath: `${config.webModulePath ?? '/web_modules/'}${nextPath}`, type: 'rewrite' }
                     case 'pikacdn':
                     case 'unpkg': {
                         const a = 'https://cdn.pika.dev/$packageName$@$version$$subpath$'
