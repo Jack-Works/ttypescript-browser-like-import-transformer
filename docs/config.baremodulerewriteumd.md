@@ -105,8 +105,8 @@ Extra file: (Therefore you can feed this file to Webpack / Rollup and get treesh
 
 ```js
 const _ = new Map();
-import { a as _1, c as _2 } from "1";
-_.set("1", createESModuleInterop({ a: _1, c: _2 }));
+import { a as _1, b as _2 } from "1";
+_.set("1", createESModuleInterop({ a: _1, b: _2 }));
 import * as _3 from "2";
 _.set("2", _3);
 import "3";

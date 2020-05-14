@@ -21,7 +21,6 @@ import type {
     StringLiteral,
     NumericLiteral,
     ArrayLiteralExpression,
-    FunctionDeclaration,
     BooleanLiteral,
     Program,
     PropertyAccessExpression,
@@ -216,14 +215,14 @@ function getImportedItems(ts: ts, node: ImportDeclaration | ExportDeclaration): 
             const b = clause.namedBindings
             if (ts.isNamespaceImport(b)) result.add('*')
             else if (ts.isNamedImports(b)) {
-                b.elements.forEach((x) => result.add(x.name.text))
+                b.elements.forEach((x) => result.add((x.propertyName || x.name).text))
             }
         }
     } else {
         if (!node.exportClause) return new Set('*')
         const clause = node.exportClause
         if (ts.isNamedExports(clause)) {
-            clause.elements.forEach((x) => result.add(x.name.text))
+            clause.elements.forEach((x) => result.add((x.propertyName || x.name).text))
         }
         if (ts?.isNamespaceExport(clause)) result.add('*')
     }
