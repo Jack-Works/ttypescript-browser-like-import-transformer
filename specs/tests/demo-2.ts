@@ -1,4 +1,4 @@
-/// { bareModuleRewrite: { react: "umd", "lodash-es": "pikacdn", "async-call-rpc": "unpkg", "std:fs": false,"isarray": "snowpack", "/^@material-ui\\/(.+)/g": { type: "umd", target: "MaterialUI.$1", globalObject: "window" }, "/(.+)/g": "snowpack" } }
+/// { rules: { react: "umd", "lodash-es": "pikacdn", "async-call-rpc": "unpkg", "std:fs": false,"isarray": "snowpack", "/^@material-ui\\/(.+)/g": { type: "umd", target: "MaterialUI.$1", globalObject: "window" }, "/(.+)/g": "snowpack" } }
 //! { esModuleInterop: true }
 import React from 'react'
 import lodash from 'lodash-es'

@@ -5,9 +5,9 @@
  * and expected to run in any ES2020 compatible environment (with console.warn).
  */
 
-import type { BareModuleRewriteUMD } from './plugin-config'
+import type { RewriteRulesUMD } from './plugin-config'
 import type { CustomTransformationContext } from './core'
-import type { NormalizedPluginConfig, NormalizedBareModuleRewrite } from './config-parser'
+import type { NormalizedPluginConfig, NormalizedRewriteRules } from './config-parser'
 
 /**
  * This function is a helper for UMD transform.
@@ -148,7 +148,7 @@ type ModuleSpecifierTransformResult =
     | {
           type: 'noop'
       }
-    | BareModuleRewriteUMD
+    | RewriteRulesUMD
 /**
  * This function will also be included in the runtime for dynamic transform.
  * @internal
@@ -163,7 +163,7 @@ export function moduleSpecifierTransform(
             'config' | 'path' | 'queryWellknownUMD' | 'queryPackageVersion' | 'treeshakeProvider' | 'getCompilerOptions'
         >
     >,
-    opt?: NormalizedBareModuleRewrite,
+    opt?: NormalizedRewriteRules,
 ): ModuleSpecifierTransformResult {
     const { queryWellknownUMD } = context
     const packageNameRegExp = /\$packageName\$/g
@@ -185,7 +185,7 @@ export function moduleSpecifierTransform(
     return self(context, opt)
     /** Can't use the name moduleSpecifierTransform to do recursive, the name might be changed in the inline mode */
     function self(
-        ...[context, opt = context.config.bareModuleRewrite || { type: 'simple', enum: 'umd' }]: Parameters<
+        ...[context, opt = context.config.rules || { type: 'simple', enum: 'umd' }]: Parameters<
             typeof moduleSpecifierTransform
         >
     ): ModuleSpecifierTransformResult {
@@ -227,7 +227,7 @@ export function moduleSpecifierTransform(
                         const { globalObject } = config
                         if (!target) return error(Diag.TransformToUMDFailed, path, '')
                         // TODO: Collect some common CDN path maybe?
-                        const nextOpt: BareModuleRewriteUMD = {
+                        const nextOpt: RewriteRulesUMD = {
                             type: 'umd',
                             target,
                             globalObject,

@@ -1,5 +1,5 @@
 // CompilerOptions: {"module":"ESNext"}
-// PluginConfig: {"bareModuleRewrite":"umd"}
+// PluginConfig: {"rules":"umd"}
 const x = __UMDBindCheck(globalThis["React"], ["default"], "react", "globalThis.React", false).default;
 const { useState } = __UMDBindCheck(globalThis["React"], ["useState"], "react", "globalThis.React", false);
 const React = __UMDBindCheck(globalThis["React"], [], "react", "globalThis.React", false);

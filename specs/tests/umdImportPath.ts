@@ -1,4 +1,4 @@
-/// { bareModuleRewrite: {"/.+/": {umdImportPath: 'https://unpkg.com/$packageName$', type:'umd', target: '$umdName$'}} }
+/// { rules: {"/.+/": {umdImportPath: 'https://unpkg.com/$packageName$', type:'umd', target: '$umdName$'}} }
 
 import 'react1'
 import React from 'react2'

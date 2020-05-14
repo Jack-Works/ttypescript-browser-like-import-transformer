@@ -27,7 +27,7 @@ import type {
     NamedImports,
     CompilerOptions,
 } from 'typescript'
-import type { PluginConfigs, ImportMapFunctionOpts, BareModuleRewriteUMD } from './plugin-config'
+import type { PluginConfigs, ImportMapFunctionOpts, RewriteRulesUMD } from './plugin-config'
 import type { NormalizedPluginConfig } from './config-parser'
 type ts = typeof import('typescript')
 
@@ -48,7 +48,7 @@ export interface CustomTransformationContext<T extends Node> {
     treeshakeProvider?: (
         pkg: string,
         accessedImports: Set<string>,
-        cfg: NonNullable<BareModuleRewriteUMD['treeshake']>,
+        cfg: NonNullable<RewriteRulesUMD['treeshake']>,
         compilerOptions: CompilerOptions,
     ) => void
     configParser: typeof import('./config-parser')
@@ -265,7 +265,7 @@ function createThrowExpression(...[ts, type, message]: Parameters<typeof createT
 const hoistUMDImportDeclaration = new Map<SourceFile, Set<Statement>>()
 function updateImportExportDeclaration(
     context: Context<ImportDeclaration | ExportDeclaration>,
-    opt = context.config.bareModuleRewrite,
+    opt = context.config.rules,
 ): Statement[] {
     const { node, sourceFile, ts, ttsclib } = context
     const rewriteStrategy = ttsclib.moduleSpecifierTransform(

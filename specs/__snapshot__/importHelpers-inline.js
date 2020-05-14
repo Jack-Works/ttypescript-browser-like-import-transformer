@@ -66,7 +66,7 @@ function moduleSpecifierTransform(context, opt) {
     };
     const noop = { type: "noop" };
     return self(context, opt);
-    function self(...[context, opt = context.config.bareModuleRewrite || { type: "simple", enum: "umd" }]) {
+    function self(...[context, opt = context.config.rules || { type: "simple", enum: "umd" }]) {
         var _a, _b;
         const { path, config, parseRegExp, queryPackageVersion } = context;
         if (opt.type === "noop")

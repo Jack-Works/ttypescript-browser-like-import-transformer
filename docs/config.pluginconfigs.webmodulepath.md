@@ -65,7 +65,7 @@ Outputs:
 
 ```js
 // CompilerOptions: {"module":"ESNext"}
-// PluginConfig: {"bareModuleRewrite":"snowpack","webModulePath":"https://cdn.example.com/web_modules/"}
+// PluginConfig: {"rules":"snowpack","webModulePath":"https://cdn.example.com/web_modules/"}
 console.log('Should run after all imports', a, b, c, d, e, a1, b1, c1, d1, e1, a2, b2, c2, d2, e2);
 // Node style import
 import a from "https://cdn.example.com/web_modules/a.js";
@@ -98,7 +98,7 @@ export * as e2 from 'http://example.com/';
 
 ```js
 // CompilerOptions: {"module":"ESNext"}
-// PluginConfig: {"bareModuleRewrite":"snowpack"}
+// PluginConfig: {"rules":"snowpack"}
 console.log('Should run after all imports', a, b, c, d, e, a1, b1, c1, d1, e1, a2, b2, c2, d2, e2);
 // Node style import
 import a from "/web_modules/a.js";

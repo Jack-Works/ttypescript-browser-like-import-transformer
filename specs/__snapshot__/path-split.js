@@ -1,5 +1,5 @@
 // CompilerOptions: {"module":"ESNext"}
-// PluginConfig: {"bareModuleRewrite":{"/@material-ui\\/(.+)/":{"type":"umd","target":"MaterialUI.$1"},"lodash":"umd","jquery":"pikacdn","/lodash-es/":"unpkg","/.+/":"snowpack"}}
+// PluginConfig: {"rules":{"/@material-ui\\/(.+)/":{"type":"umd","target":"MaterialUI.$1"},"lodash":"umd","jquery":"pikacdn","/lodash-es/":"unpkg","/.+/":"snowpack"}}
 const a = __UMDBindCheck(globalThis["MaterialUI.core"], ["default"], "@material-ui/core", "globalThis.MaterialUI.core", false).default;
 const x = __UMDBindCheck(globalThis["MaterialUI.core/abc"], ["default"], "@material-ui/core/abc", "globalThis.MaterialUI.core/abc", false).default;
 import y from "/web_modules/lodash/fp.js";

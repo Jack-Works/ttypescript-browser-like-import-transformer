@@ -94,7 +94,7 @@ See the **TTypeScript Support** in the [Importing Packages by Name](https://www.
             {
                 "transform": "@magic-works/ttypescript-browser-like-import-transformer",
                 "after": true,
-                "bareModuleRewrite": "snowpack"
+                "rules": "snowpack"
             }
         ]
     }
@@ -114,7 +114,7 @@ See the **TTypeScript Support** in the [Importing Packages by Name](https://www.
             {
                 "transform": "@magic-works/ttypescript-browser-like-import-transformer",
                 "after": true,
-                "bareModuleRewrite": "pikacdn" // or "unpkg"
+                "rules": "pikacdn" // or "unpkg"
             }
         ]
     }

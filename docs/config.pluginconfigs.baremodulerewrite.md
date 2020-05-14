@@ -4,76 +4,26 @@
 
 ## PluginConfigs.bareModuleRewrite property
 
+> Warning: This API is now obsolete.
+> 
+> Renamed to "rules", will be removed in 3.0
+> 
+
 The transformation rule. Specify how this transformer will handle your imports.
 
 <b>Signature:</b>
 
 ```typescript
-bareModuleRewrite?: Exclude<BareModuleRewriteObject, BareModuleRewriteUMD> & Record<string, BareModuleRewriteObject>
+bareModuleRewrite?: PluginConfigs['rules']
 ```
 
 ## Remarks
 
-This is the most powerful part of this transformer. You can specify the transform rule of bare imports (like `import 'React'`<!-- -->) to the form that browser can recognize. See [BareModuleRewriteObject](./config.baremodulerewriteobject.md)
+This is the most powerful part of this transformer. You can specify the transform rule of bare imports (like `import 'React'`<!-- -->) to the form that browser can recognize. See [RewriteRulesObject](./config.rewriterulesobject.md)
 
-When it is a `Record<string, BareModuleRewriteObject>`<!-- -->, you can use two kinds of matching rule to matching your import paths.
+When it is a `Record<string, RewriteRulesObject>`<!-- -->, you can use two kinds of matching rule to matching your import paths.
 
 - Full match: use normal string to do a full match. (`"react"` will only match "react")
 
 - RegExp match: use JavaScript RegExp to match dependencies. (`"/^@material-ui\/(.+)/g"` will match all packages started with `@material-ui`<!-- -->)
-
-## Example
-
-A complex example:
-
-```js
-{bareModuleRewrite: {
-     react: "umd",
-     "lodash-es": "pikacdn",
-     "async-call-rpc": "unpkg",
-     "std:fs": false,
-     "isarray": "snowpack",
-     // === /^@material-ui\/(.+)/g
-     "/^@material-ui\\/(.+)/g": {
-         type: "umd",
-         target: "MaterialUI.$1",
-         globalObject: "window"
-     },
-     "/(.+)/g": "snowpack"
-}}
-
-```
-
-```ts
-/// { bareModuleRewrite: { react: "umd", "lodash-es": "pikacdn", "async-call-rpc": "unpkg", "std:fs": false,"isarray": "snowpack", "/^@material-ui\\/(.+)/g": { type: "umd", target: "MaterialUI.$1", globalObject: "window" }, "/(.+)/g": "snowpack" } }
-//! { esModuleInterop: true }
-import React from 'react'
-import lodash from 'lodash-es'
-import * as AsyncCall from 'async-call-rpc'
-import fs from 'std:fs'
-import isarray from 'isarray'
-import * as MUI from '@material-ui/core'
-import * as MUILab from '@material-ui/labs'
-import 'other-polyfill'
-
-console.log(React, lodash, AsyncCall, fs, isarray, MUI, MUILab)
-
-```
-Output:
-
-```js
-// CompilerOptions: {"module":"ESNext","esModuleInterop":true}
-// PluginConfig: {"bareModuleRewrite":{"react":"umd","lodash-es":"pikacdn","async-call-rpc":"unpkg","std:fs":false,"isarray":"snowpack","/^@material-ui\\/(.+)/g":{"type":"umd","target":"MaterialUI.$1","globalObject":"window"},"/(.+)/g":"snowpack"}}
-const React = __UMDBindCheck(__esModuleInterop(globalThis["React"]), ["default"], "react", "globalThis.React", true).default;
-const MUI = __UMDBindCheck(window["MaterialUI.core"], [], "@material-ui/core", "window.MaterialUI.core", true);
-const MUILab = __UMDBindCheck(window["MaterialUI.labs"], [], "@material-ui/labs", "window.MaterialUI.labs", true);
-import lodash from "https://cdn.pika.dev/lodash-es";
-import * as AsyncCall from "https://unpkg.com/async-call-rpc?module";
-import fs from 'std:fs';
-import isarray from "/web_modules/isarray.js";
-import "/web_modules/other-polyfill.js";
-console.log(React, lodash, AsyncCall, fs, isarray, MUI, MUILab);
-import { __esModuleInterop as __esModuleInterop, __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.0.6/es/ttsclib.min.js";
-
-```
 

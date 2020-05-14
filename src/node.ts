@@ -8,7 +8,7 @@ import * as configParser from './config-parser'
 import { queryWellknownUMD } from './well-known-umd'
 import { readFileSync, writeFileSync } from 'fs'
 import { join, relative, posix } from 'path'
-import type { ImportMapFunctionOpts, BareModuleRewriteUMD } from './plugin-config'
+import type { ImportMapFunctionOpts, RewriteRulesUMD } from './plugin-config'
 export default creatTransform({
     ts,
     queryWellknownUMD,
@@ -26,7 +26,7 @@ const treeshakeMap = new Map<
 function treeshakeProvider(
     dependency: string,
     accessImports: Set<string>,
-    config: NonNullable<BareModuleRewriteUMD['treeshake']>,
+    config: NonNullable<RewriteRulesUMD['treeshake']>,
     opts: ts.CompilerOptions,
 ) {
     const tsconfigPath = opts.configFilePath as string
