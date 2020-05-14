@@ -1,0 +1,1 @@
+// type of extNameRemote in the tsconfig is not correct

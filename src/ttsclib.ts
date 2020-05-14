@@ -192,12 +192,14 @@ export function moduleSpecifierTransform(
         const { path, config, parseRegExp, queryPackageVersion } = context
         if (opt.type === 'noop') return noop
 
-        const expectedExtension = config.appendExtensionName === true ? '.js' : config.appendExtensionName ?? '.js'
+        const conf = config.extName ?? config.appendExtensionName
+        const expectedExtension = conf === true ? '.js' : conf ?? '.js'
         if (isBrowserCompatibleModuleSpecifier(path)) {
             if (path === '.') return noop
-            if (config.appendExtensionName === false) return noop
-            if (config.appendExtensionNameForRemote !== true && isHTTPModuleSpecifier(path)) return noop
-            const nextPath = appendExtensionName(path, expectedExtension)
+            if (conf === false) return noop
+            const remote = config.extNameRemote ?? config.appendExtensionNameForRemote
+            if (remote !== true && isHTTPModuleSpecifier(path)) return noop
+            const nextPath = appendExt(path, expectedExtension)
             return { type: 'rewrite', nextPath: nextPath }
         }
         const { sub, nspkg } = resolveNS(path)
@@ -207,10 +209,7 @@ export function moduleSpecifierTransform(
                 switch (e) {
                     case 'snowpack':
                         return {
-                            nextPath: `${config.webModulePath ?? '/web_modules/'}${appendExtensionName(
-                                path,
-                                expectedExtension,
-                            )}`,
+                            nextPath: `${config.webModulePath ?? '/web_modules/'}${appendExt(path, expectedExtension)}`,
                             type: 'rewrite',
                         }
                     case 'pikacdn':
@@ -331,7 +330,7 @@ export function moduleSpecifierTransform(
     function isDataOrBlobModuleSpecifier(path: string) {
         return path.startsWith('blob:') || path.startsWith('data:')
     }
-    function appendExtensionName(path: string, expectedExt: string | false) {
+    function appendExt(path: string, expectedExt: string | false) {
         if (expectedExt === false) return path
         if (path.endsWith(expectedExt)) return path
         return path + expectedExt

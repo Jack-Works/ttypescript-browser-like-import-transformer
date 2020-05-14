@@ -1,5 +1,5 @@
 // CompilerOptions: {"module":"ESNext"}
-// PluginConfig: {"appendExtensionName":false}
+// PluginConfig: {"extName":false}
 import './local-file';
 import '/local-file';
 import 'http://remote/file';

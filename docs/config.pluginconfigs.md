@@ -16,10 +16,12 @@ export interface PluginConfigs
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [appendExtensionName](./config.pluginconfigs.appendextensionname.md) | <code>string &#124; boolean</code> | Add '.js' extension for local import path. |
-|  [appendExtensionNameForRemote](./config.pluginconfigs.appendextensionnameforremote.md) | <code>boolean</code> | Also append extension '.js' to http:// or https:// URLs. |
+|  [appendExtensionName](./config.pluginconfigs.appendextensionname.md) | <code>string &#124; boolean</code> |  |
+|  [appendExtensionNameForRemote](./config.pluginconfigs.appendextensionnameforremote.md) | <code>boolean</code> |  |
 |  [bareModuleRewrite](./config.pluginconfigs.baremodulerewrite.md) | <code>PluginConfigs['rules']</code> | The transformation rule. Specify how this transformer will handle your imports. |
 |  [dynamicImportPathRewrite](./config.pluginconfigs.dynamicimportpathrewrite.md) | <code>false &#124; 'auto' &#124; DynamicImportPathRewriteCustom</code> | Config how to rewrite dynamic import. |
+|  [extName](./config.pluginconfigs.extname.md) | <code>string &#124; boolean</code> | Add '.js' extension for local import path. |
+|  [extNameRemote](./config.pluginconfigs.extnameremote.md) | <code>boolean</code> | Also append extension '.js' to http:// or https:// URLs. |
 |  [globalObject](./config.pluginconfigs.globalobject.md) | <code>string</code> | When using UMD import, this option indicates what global object will be used to find the UMD variables. |
 |  [importHelpers](./config.pluginconfigs.importhelpers.md) | <code>'inline' &#124; 'auto' &#124; 'cdn' &#124; 'node' &#124; string</code> | Import emit helpers (e.g. <code>\__UMDBindCheck</code>, <code>\__dynamicImportTransform</code>, etc..) from ttsclib (a local file in this package). |
 |  [importMap](./config.pluginconfigs.importmap.md) | <code>ImportMapResolution &#124; ImportMapCustomResolution</code> | Use import map as the transform rules. (This has the highest priority.) |

@@ -18,11 +18,15 @@ export interface PluginConfigs {
      * - a string: set your extension name like ".mjs", ".js" or ".ejs"
      * @example
      * Source code:
-     * !src(appendExtensionName-default.ts)
+     * !src(extName-default.ts)
      * Outputs:
-     * !out(appendExtensionName-false.js)
-     * !out(appendExtensionName-true.js)
-     * !out(appendExtensionName-string.js)
+     * !out(extName-false.js)
+     * !out(extName-true.js)
+     * !out(extName-string.js)
+     */
+    extName?: string | boolean
+    /**
+     * @deprecated See "extName", will be removed in 3.0
      */
     appendExtensionName?: string | boolean
     /**
@@ -30,10 +34,14 @@ export interface PluginConfigs {
      * @defaultValue false
      * @example
      * Source code:
-     * !src(appendExtensionName-default.ts)
+     * !src(extName-default.ts)
      * Outputs:
-     * !out(appendExtensionNameForRemote-false.js)
-     * !out(appendExtensionNameForRemote-true.js)
+     * !out(extNameRemote-false.js)
+     * !out(extNameRemote-true.js)
+     */
+    extNameRemote?: boolean
+    /**
+     * @deprecated use "extNameRemote", will be removed in 3.0
      */
     appendExtensionNameForRemote?: boolean
     /**

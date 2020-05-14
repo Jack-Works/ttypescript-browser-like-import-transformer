@@ -149,19 +149,21 @@ function moduleSpecifierTransform(context, opt) {
     const noop = { type: "noop" };
     return self(context, opt);
     function self(...[context, opt = context.config.rules || { type: "simple", enum: "umd" }]) {
-        var _a, _b;
+        var _a, _b, _c;
         const { path, config, parseRegExp, queryPackageVersion } = context;
         if (opt.type === "noop")
             return noop;
-        const expectedExtension = config.appendExtensionName === true ? ".js" : (_a = config.appendExtensionName) !== null && _a !== void 0 ? _a : ".js";
+        const conf = (_a = config.extName) !== null && _a !== void 0 ? _a : config.appendExtensionName;
+        const expectedExtension = conf === true ? ".js" : conf !== null && conf !== void 0 ? conf : ".js";
         if (isBrowserCompatibleModuleSpecifier(path)) {
             if (path === ".")
                 return noop;
-            if (config.appendExtensionName === false)
+            if (conf === false)
                 return noop;
-            if (config.appendExtensionNameForRemote !== true && isHTTPModuleSpecifier(path))
+            const remote = (_b = config.extNameRemote) !== null && _b !== void 0 ? _b : config.appendExtensionNameForRemote;
+            if (remote !== true && isHTTPModuleSpecifier(path))
                 return noop;
-            const nextPath = appendExtensionName(path, expectedExtension);
+            const nextPath = appendExt(path, expectedExtension);
             return { type: "rewrite", nextPath: nextPath };
         }
         const { sub, nspkg } = resolveNS(path);
@@ -170,7 +172,7 @@ function moduleSpecifierTransform(context, opt) {
                 const e = opt.enum;
                 switch (e) {
                     case "snowpack": return {
-                        nextPath: `${(_b = config.webModulePath) !== null && _b !== void 0 ? _b : "/web_modules/"}${appendExtensionName(path, expectedExtension)}`, type: "rewrite",
+                        nextPath: `${(_c = config.webModulePath) !== null && _c !== void 0 ? _c : "/web_modules/"}${appendExt(path, expectedExtension)}`, type: "rewrite",
                     };
                     case "pikacdn":
                     case "unpkg": {
@@ -275,7 +277,7 @@ function moduleSpecifierTransform(context, opt) {
     function isDataOrBlobModuleSpecifier(path) {
         return path.startsWith("blob:") || path.startsWith("data:");
     }
-    function appendExtensionName(path, expectedExt) {
+    function appendExt(path, expectedExt) {
         if (expectedExt === false)
             return path;
         if (path.endsWith(expectedExt))

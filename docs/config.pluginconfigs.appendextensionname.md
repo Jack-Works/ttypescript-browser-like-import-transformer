@@ -4,58 +4,13 @@
 
 ## PluginConfigs.appendExtensionName property
 
-Add '.js' extension for local import path.
+> Warning: This API is now obsolete.
+> 
+> See "extName", will be removed in 3.0
+> 
 
 <b>Signature:</b>
 
 ```typescript
 appendExtensionName?: string | boolean
 ```
-
-## Remarks
-
-- `false`<!-- -->: disable the transform
-
-- `true`<!-- -->: same as ".js"
-
-- a string: set your extension name like ".mjs", ".js" or ".ejs"
-
-## Example
-
-Source code:
-
-```ts
-import './local-file'
-import '/local-file'
-import 'http://remote/file'
-
-```
-Outputs:
-
-```js
-// CompilerOptions: {"module":"ESNext"}
-// PluginConfig: {"appendExtensionName":false}
-import './local-file';
-import '/local-file';
-import 'http://remote/file';
-
-```
-
-```js
-// CompilerOptions: {"module":"ESNext"}
-// PluginConfig: {"appendExtensionName":true}
-import "./local-file.js";
-import "/local-file.js";
-import 'http://remote/file';
-
-```
-
-```js
-// CompilerOptions: {"module":"ESNext"}
-// PluginConfig: {"appendExtensionName":".ts"}
-import "./local-file.ts";
-import "/local-file.ts";
-import 'http://remote/file';
-
-```
-

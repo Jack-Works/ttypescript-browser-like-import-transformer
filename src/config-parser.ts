@@ -13,6 +13,8 @@ export class ConfigError extends Error {}
 export function validateConfig(config: PluginConfigs, options: CompilerOptions) {
     type('appendExtensionName', ['string', 'boolean'])
     type('appendExtensionNameForRemote', ['boolean'])
+    type('extName', ['string', 'boolean'])
+    type('extNameRemote', ['boolean'])
     type('bareModuleRewrite', ['boolean', 'string', 'object'])
     type('rules', ['boolean', 'string', 'object'])
     type('dynamicImportPathRewrite', ['boolean', 'string', 'object'])

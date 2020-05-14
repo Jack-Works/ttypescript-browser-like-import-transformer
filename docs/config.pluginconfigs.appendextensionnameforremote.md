@@ -4,41 +4,13 @@
 
 ## PluginConfigs.appendExtensionNameForRemote property
 
-Also append extension '.js' to http:// or https:// URLs.
+> Warning: This API is now obsolete.
+> 
+> use "extNameRemote", will be removed in 3.0
+> 
 
 <b>Signature:</b>
 
 ```typescript
 appendExtensionNameForRemote?: boolean
 ```
-
-## Example
-
-Source code:
-
-```ts
-import './local-file'
-import '/local-file'
-import 'http://remote/file'
-
-```
-Outputs:
-
-```js
-// CompilerOptions: {"module":"ESNext"}
-// PluginConfig: {"appendExtensionNameForRemote":false}
-import "./local-file.js";
-import "/local-file.js";
-import 'http://remote/file';
-
-```
-
-```js
-// CompilerOptions: {"module":"ESNext"}
-// PluginConfig: {"appendExtensionNameForRemote":true}
-import "./local-file.js";
-import "/local-file.js";
-import "http://remote/file.js";
-
-```
-

@@ -1,1 +1,0 @@
-//@ appendExtensionName-default.ts
