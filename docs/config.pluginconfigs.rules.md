@@ -43,6 +43,7 @@ A complex example:
 }}
 
 ```
+Filename: demo-2.ts
 
 ```ts
 /// { rules: { react: "umd", "lodash-es": "pikacdn", "async-call-rpc": "unpkg", "std:fs": false,"isarray": "snowpack", "/^@material-ui\\/(.+)/g": { type: "umd", target: "MaterialUI.$1", globalObject: "window" }, "/(.+)/g": "snowpack" } }
@@ -60,6 +61,8 @@ console.log(React, lodash, AsyncCall, fs, isarray, MUI, MUILab)
 
 ```
 Output:
+
+Filename: demo-2.js
 
 ```js
 // CompilerOptions: {"module":"ESNext","esModuleInterop":true}

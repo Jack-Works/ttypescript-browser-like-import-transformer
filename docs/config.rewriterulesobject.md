@@ -50,6 +50,8 @@ Example for `Record<string, `[RewriteRulesObject](./config.rewriterulesobject.md
 ```
 Source code:
 
+Filename: rules-default.ts
+
 ```ts
 console.log('Should run after all imports', a, b, c2, d, e, c2)
 // Node style import
@@ -68,6 +70,8 @@ export * as e from 'c'
 ```
 Outputs:
 
+Filename: rules-false.js
+
 ```js
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {"rules":false}
@@ -85,6 +89,7 @@ export { c, d } from 'b';
 export * as e from 'c';
 
 ```
+Filename: rules-umd.js
 
 ```js
 // CompilerOptions: {"module":"ESNext"}
@@ -105,6 +110,7 @@ export { x };
 import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.0.6/es/ttsclib.min.js";
 
 ```
+Filename: rules-pikacdn.js
 
 ```js
 // CompilerOptions: {"module":"ESNext"}
@@ -123,6 +129,7 @@ export { c, d } from "https://cdn.pika.dev/b";
 export * as e from "https://cdn.pika.dev/c";
 
 ```
+Filename: rules-snowpack.js
 
 ```js
 // CompilerOptions: {"module":"ESNext"}
@@ -141,6 +148,7 @@ export { c, d } from "/web_modules/b.js";
 export * as e from "/web_modules/c.js";
 
 ```
+Filename: rules-unpkg.js
 
 ```js
 // CompilerOptions: {"module":"ESNext"}
@@ -159,6 +167,7 @@ export { c, d } from "https://unpkg.com/b?module";
 export * as e from "https://unpkg.com/c?module";
 
 ```
+Filename: rules-url.js
 
 ```js
 // CompilerOptions: {"module":"ESNext"}
@@ -179,6 +188,8 @@ export * as e from "std:c";
 ```
 Complex example:
 
+Filename: rules-complex.ts
+
 ```ts
 /// { rules: { "/@material-ui\\/(.+)/": {type: "umd", target: "MaterialUI.$1"}, "lodash": "umd", "jquery": "pikacdn", "lodash-es": "unpkg", "/.+/": "snowpack" } }
 
@@ -191,6 +202,8 @@ console.log(x, y, z, w, i)
 
 ```
 Output:
+
+Filename: rules-complex.js
 
 ```js
 // CompilerOptions: {"module":"ESNext"}

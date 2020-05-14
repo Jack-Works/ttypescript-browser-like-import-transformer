@@ -22,6 +22,8 @@ globalObject?: string
 
 Source:
 
+Filename: globalObject-default.ts
+
 ```ts
 /// {}
 import R from 'react'
@@ -29,6 +31,8 @@ console.log(R)
 
 ```
 Outputs:
+
+Filename: globalObject-undefined.js
 
 ```js
 // CompilerOptions: {"module":"ESNext"}
@@ -38,6 +42,7 @@ console.log(R);
 import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.0.6/es/ttsclib.min.js";
 
 ```
+Filename: globalObject-string.js
 
 ```js
 // CompilerOptions: {"module":"ESNext"}
@@ -47,6 +52,7 @@ console.log(R);
 import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.0.6/es/ttsclib.min.js";
 
 ```
+Filename: globalObject-window.js
 
 ```js
 // CompilerOptions: {"module":"ESNext"}

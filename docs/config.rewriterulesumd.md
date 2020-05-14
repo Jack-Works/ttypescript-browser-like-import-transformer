@@ -19,6 +19,7 @@ export interface RewriteRulesUMD
 { "type": "umd", target: "mylib", globalObject: "window" }
 
 ```
+Filename: rules-complex.ts
 
 ```ts
 /// { rules: { "/@material-ui\\/(.+)/": {type: "umd", target: "MaterialUI.$1"}, "lodash": "umd", "jquery": "pikacdn", "lodash-es": "unpkg", "/.+/": "snowpack" } }
@@ -33,6 +34,8 @@ console.log(x, y, z, w, i)
 ```
 Output:
 
+Filename: rules-complex.js
+
 ```js
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {"rules":{"/@material-ui\\/(.+)/":{"type":"umd","target":"MaterialUI.$1"},"lodash":"umd","jquery":"pikacdn","lodash-es":"unpkg","/.+/":"snowpack"}}
@@ -46,6 +49,8 @@ import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@
 
 ```
 This option also support treeshake.
+
+Filename: treeshake-test/tsconfig.json
 
 ```json
 {
@@ -75,6 +80,7 @@ This option also support treeshake.
 }
 
 ```
+Filename: treeshake-test/src/index.ts
 
 ```ts
 import { a, b as c } from '1'
@@ -87,6 +93,8 @@ export { x, y, z } from '6'
 
 ```
 Output:
+
+Filename: treeshake-test/index.js
 
 ```js
 const { a, b: c } = __UMDBindCheck(dependencies["1"], ["a", "b"], "1", "dependencies.1", false);
@@ -102,6 +110,8 @@ import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@
 
 ```
 Extra file: (Therefore you can feed this file to Webpack / Rollup and get treeshaked.)
+
+Filename: treeshake-test/deps.js
 
 ```js
 const _ = new Map();

@@ -34,6 +34,8 @@ import(x)
 ```
 Output:
 
+Filename: importHelpers-auto.js
+
 ```js
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {"importHelpers":"auto"}
@@ -44,6 +46,7 @@ function __dynamicImportNative(path) {
 import { __dynamicImportTransform as __dynamicImportTransform, __UMDBindCheck as __UMDBindCheck, moduleSpecifierTransform as moduleSpecifierTransform } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.0.6/es/ttsclib.min.js";
 
 ```
+Filename: importHelpers-string.js
 
 ```js
 // CompilerOptions: {"module":"ESNext"}
@@ -56,6 +59,7 @@ function __dynamicImportNative(path) {
 import { __dynamicImportTransform as __dynamicImportTransform, __UMDBindCheck as __UMDBindCheck, moduleSpecifierTransform as moduleSpecifierTransform, __customDynamicImportHelper as __customDynamicImportHelper } from "/polyfill/ttsc-helper.js";
 
 ```
+Filename: importHelpers-cdn.js
 
 ```js
 // CompilerOptions: {"module":"ESNext"}
@@ -67,6 +71,7 @@ function __dynamicImportNative(path) {
 import { __dynamicImportTransform as __dynamicImportTransform, __UMDBindCheck as __UMDBindCheck, moduleSpecifierTransform as moduleSpecifierTransform } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.0.6/es/ttsclib.min.js";
 
 ```
+Filename: importHelpers-node.js
 
 ```js
 // CompilerOptions: {"module":"ESNext"}
@@ -78,6 +83,7 @@ function __dynamicImportNative(path) {
 import { __dynamicImportTransform as __dynamicImportTransform, __UMDBindCheck as __UMDBindCheck, moduleSpecifierTransform as moduleSpecifierTransform } from "@magic-works/ttypescript-browser-like-import-transformer/cjs/ttsclib.js";
 
 ```
+Filename: importHelpers-inline.js
 
 ```js
 // CompilerOptions: {"module":"ESNext"}

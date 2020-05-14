@@ -31,6 +31,8 @@ tsconfig.json # tsconfig at here
 ```
 You must set `rootDir` when using importMap.
 
+Filename: snowpack/tsconfig.json
+
 ```json
 {
     "compilerOptions": {
@@ -58,12 +60,16 @@ You must set `rootDir` when using importMap.
 ```
 Source:
 
+Filename: snowpack/src/index.ts
+
 ```ts
 import * as _ from 'lodash-es'
 console.log(_)
 
 ```
 Output:
+
+Filename: snowpack/index.js
 
 ```js
 import * as _ from "/web_modules/lodash-es.js?rev=806d1b9f78";

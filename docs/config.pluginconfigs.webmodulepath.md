@@ -25,6 +25,8 @@ Choose what `webModulePath` to use when transform as snowpack import. See docume
 
 Source:
 
+Filename: default.ts
+
 ```ts
 /// {}
 console.log('Should run after all imports', a, b, c, d, e, a1, b1, c1, d1, e1, a2, b2, c2, d2, e2)
@@ -63,6 +65,8 @@ export * as e2 from 'http://example.com/'
 ```
 Outputs:
 
+Filename: webModulePath-string.js
+
 ```js
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {"rules":"snowpack","webModulePath":"https://cdn.example.com/web_modules/"}
@@ -95,6 +99,7 @@ export { c2, d2 } from 'http://example.com/';
 export * as e2 from 'http://example.com/';
 
 ```
+Filename: webModulePath-undefined.js
 
 ```js
 // CompilerOptions: {"module":"ESNext"}

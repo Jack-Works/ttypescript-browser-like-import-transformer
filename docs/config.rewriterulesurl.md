@@ -25,6 +25,8 @@ export interface RewriteRulesURL
 ```
 Source code:
 
+Filename: rules-default.ts
+
 ```ts
 console.log('Should run after all imports', a, b, c2, d, e, c2)
 // Node style import
@@ -42,6 +44,8 @@ export * as e from 'c'
 
 ```
 Output:
+
+Filename: rules-url.js
 
 ```js
 // CompilerOptions: {"module":"ESNext"}
