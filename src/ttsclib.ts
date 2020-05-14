@@ -83,7 +83,7 @@ export function __esModuleInterop(mod: object) {
 export function __dynamicImportTransform(
     _path: unknown,
     config: NormalizedPluginConfig,
-    dynamicImport: (path: string) => Promise<unknown>,
+    dynamicImport: (path: string, jsonPath?: string) => Promise<unknown>,
     UMDBindCheck: typeof __UMDBindCheck,
     _moduleSpecifierTransform: typeof moduleSpecifierTransform,
 ): Promise<unknown> {
@@ -93,10 +93,13 @@ export function __dynamicImportTransform(
         config,
         path,
         queryWellknownUMD: () => void 0,
-        parseRegExp: () => (console.warn('RegExp rule is not supported in runtime yet'), null),
+        parseRegExp: () => (console.error('RegExp rule is not supported in runtime yet'), null),
         queryPackageVersion: () => null,
         getCompilerOptions: () => ({}),
         accessingImports: new Set('*'),
+        currentFile: null,
+        resolveJSONImport: () => '',
+        runtime: true,
     })
     const header = `ttypescript-browser-like-import-transformer: Runtime transform error:`
     switch (result.type) {
@@ -116,8 +119,10 @@ export function __dynamicImportTransform(
             if (config.globalObject === 'window') return Promise.resolve((window as any)[result.target]).then(_)
             return Promise.reject(header + 'Unreachable transform case')
         }
+        case 'json':
+            return dynamicImport('', result.path)
         default:
-            unreachable(result)
+            return unreachable(result)
     }
     function unreachable(_x: never): never {
         throw new Error('Unreachable case' + _x)
@@ -135,6 +140,11 @@ export function __customDynamicImportHelper(
 }
 //#region Internal code
 type ModuleSpecifierTransformResult =
+    | {
+          type: 'json'
+          json: string | null
+          path: string
+      }
     | {
           type: 'rewrite'
           nextPath: string
@@ -158,9 +168,17 @@ export function moduleSpecifierTransform(
         {
             parseRegExp: (string: string) => RegExp | null
             accessingImports: Set<string>
+            currentFile: string | null
+            runtime: boolean
         } & Pick<
             CustomTransformationContext<any>,
-            'config' | 'path' | 'queryWellknownUMD' | 'queryPackageVersion' | 'treeshakeProvider' | 'getCompilerOptions'
+            | 'config'
+            | 'path'
+            | 'queryWellknownUMD'
+            | 'queryPackageVersion'
+            | 'treeshakeProvider'
+            | 'getCompilerOptions'
+            | 'resolveJSONImport'
         >
     >,
     opt?: NormalizedRewriteRules,
@@ -198,6 +216,33 @@ export function moduleSpecifierTransform(
             if (path === '.') return noop
             if (conf === false) return noop
             const remote = config.extNameRemote ?? config.appendExtensionNameForRemote
+            const jsonImport = config.jsonImport
+            if (jsonImport && path.endsWith('.json')) {
+                if (context.runtime) return { type: 'json', path, json: null }
+                if (!context.currentFile) unreachable('', null!)
+                else {
+                    const { path } = context
+                    const nondeterministicJSONImport = { type: 'json', json: null, path } as const
+                    if (isHTTPModuleSpecifier(path)) return nondeterministicJSONImport
+                    try {
+                        const json = context.resolveJSONImport(path, context.currentFile)
+                        switch (jsonImport) {
+                            case 'data':
+                                return {
+                                    type: 'rewrite',
+                                    nextPath: `data:text/javascript,export default JSON.parse(${JSON.stringify(json)})`,
+                                }
+                            case 'inline':
+                            case true:
+                                return { type: 'json', json, path }
+                            default:
+                                return unreachable('json', jsonImport)
+                        }
+                    } catch (e) {
+                        return nondeterministicJSONImport
+                    }
+                }
+            }
             if (remote !== true && isHTTPModuleSpecifier(path)) return noop
             const nextPath = appendExt(path, expectedExtension)
             return { type: 'rewrite', nextPath: nextPath }
@@ -234,7 +279,7 @@ export function moduleSpecifierTransform(
                         }
                         return self(context, nextOpt)
                     default:
-                        return unreachable('simple type')
+                        return unreachable('simple type', e)
                 }
             }
             case 'umd': {
@@ -267,7 +312,7 @@ export function moduleSpecifierTransform(
                             .replace(packageNameRegExp, nspkg)
                             .replace(subpathRegExp, sub === undefined ? '' : '/' + sub),
                     }
-                return unreachable('url case')
+                return unreachable('url case', null!)
             }
             case 'complex': {
                 for (const [rule, ruleValue] of Object.entries(opt.config)) {
@@ -303,7 +348,7 @@ export function moduleSpecifierTransform(
                 return noop
             }
             default:
-                return unreachable(' opt switch')
+                return unreachable('opt switch', opt)
         }
     }
     function error(type: Diag, arg0: string, arg1: string): ModuleSpecifierTransformResult {
@@ -315,12 +360,14 @@ export function moduleSpecifierTransform(
             key: type.toString(),
         }
     }
-    function unreachable(str: string): never {
+    function unreachable(str: string, val: never): never {
+        console.error(val)
         throw new Error('Unreachable case at ' + str)
     }
     function isBrowserCompatibleModuleSpecifier(path: string) {
         return isHTTPModuleSpecifier(path) || isLocalModuleSpecifier(path) || isDataOrBlobModuleSpecifier(path)
     }
+    // copy pasted to core, remember to sync them.
     function isHTTPModuleSpecifier(path: string) {
         return path.startsWith('http://') || path.startsWith('https://')
     }

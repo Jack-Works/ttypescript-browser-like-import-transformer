@@ -17,6 +17,9 @@ export default creatTransform({
     queryPackageVersion,
     configParser,
     treeshakeProvider,
+    resolveJSONImport(path, parent) {
+        return readFileSync(join(parent, '../', path), 'utf-8')
+    },
 })
 
 const treeshakeMap = new Map<

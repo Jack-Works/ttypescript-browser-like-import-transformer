@@ -21,6 +21,7 @@ export function validateConfig(config: PluginConfigs, options: CompilerOptions) 
     type('globalObject', ['string'])
     type('webModulePath', ['string'])
     type('importHelpers', ['string'])
+    type('jsonImport', ['string', 'boolean'])
     type('importMap', ['object'])
 
     if (config.importMap && !options.rootDir) throw new ConfigError('When using importMap, rootDir must be set')
@@ -33,10 +34,12 @@ export function validateConfig(config: PluginConfigs, options: CompilerOptions) 
     const enums = Object.keys(RewriteRulesSimpleEnumLocal) as RewriteRulesSimple[]
     enumCheck('bareModuleRewrite', enums as any)
     enumCheck('rules', enums as any)
+    enumCheck('jsonImport', ['data', 'inline'])
 
     falseOnly('bareModuleRewrite')
     falseOnly('rules')
     falseOnly('dynamicImportPathRewrite')
+    trueOnly('jsonImport')
 
     const _x = typeof config
     function type(name: keyof PluginConfigs, _: typeof _x[], v: any = config[name], noUndefined = false) {
@@ -53,6 +56,9 @@ export function validateConfig(config: PluginConfigs, options: CompilerOptions) 
     }
     function falseOnly(name: keyof PluginConfigs, v: any = config[name]) {
         if (v === true) throw new ConfigError(`When ${name} is a boolean, it must be false`)
+    }
+    function trueOnly(name: keyof PluginConfigs, v: any = config[name]) {
+        if (v === false) throw new ConfigError(`When ${name} is a boolean, it must be true`)
     }
 }
 

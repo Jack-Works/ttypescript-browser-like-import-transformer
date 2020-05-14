@@ -89,7 +89,7 @@ function __dynamicImportTransform(_path, config, dynamicImport, UMDBindCheck, _m
         _path = String(_path);
     const path = _path;
     const result = _moduleSpecifierTransform({
-        config, path, queryWellknownUMD: () => void 0, parseRegExp: () => (console.warn("RegExp rule is not supported in runtime yet"), null), queryPackageVersion: () => null, getCompilerOptions: () => ({}), accessingImports: new Set("*"),
+        config, path, queryWellknownUMD: () => void 0, parseRegExp: () => (console.error("RegExp rule is not supported in runtime yet"), null), queryPackageVersion: () => null, getCompilerOptions: () => ({}), accessingImports: new Set("*"), currentFile: null, resolveJSONImport: () => "", runtime: true,
     });
     const header = `ttypescript-browser-like-import-transformer: Runtime transform error:`;
     switch (result.type) {
@@ -106,7 +106,8 @@ function __dynamicImportTransform(_path, config, dynamicImport, UMDBindCheck, _m
                 return Promise.resolve(window[result.target]).then(_);
             return Promise.reject(header + "Unreachable transform case");
         }
-        default: unreachable(result);
+        case "json": return dynamicImport("", result.path);
+        default: return unreachable(result);
     }
     function unreachable(_x) {
         throw new Error("Unreachable case" + _x);
@@ -161,6 +162,33 @@ function moduleSpecifierTransform(context, opt) {
             if (conf === false)
                 return noop;
             const remote = (_b = config.extNameRemote) !== null && _b !== void 0 ? _b : config.appendExtensionNameForRemote;
+            const jsonImport = config.jsonImport;
+            if (jsonImport && path.endsWith(".json")) {
+                if (context.runtime)
+                    return { type: "json", path, json: null };
+                if (!context.currentFile)
+                    unreachable("", null);
+                else {
+                    const { path } = context;
+                    const nondeterministicJSONImport = { type: "json", json: null, path };
+                    if (isHTTPModuleSpecifier(path))
+                        return nondeterministicJSONImport;
+                    try {
+                        const json = context.resolveJSONImport(path, context.currentFile);
+                        switch (jsonImport) {
+                            case "data": return {
+                                type: "rewrite", nextPath: `data:text/javascript,export default JSON.parse(${JSON.stringify(json)})`,
+                            };
+                            case "inline":
+                            case true: return { type: "json", json, path };
+                            default: return unreachable("json", jsonImport);
+                        }
+                    }
+                    catch (e) {
+                        return nondeterministicJSONImport;
+                    }
+                }
+            }
             if (remote !== true && isHTTPModuleSpecifier(path))
                 return noop;
             const nextPath = appendExt(path, expectedExtension);
@@ -192,7 +220,7 @@ function moduleSpecifierTransform(context, opt) {
                             type: "umd", target, globalObject, umdImportPath: void 0,
                         };
                         return self(context, nextOpt);
-                    default: return unreachable("simple type");
+                    default: return unreachable("simple type", e);
                 }
             }
             case "umd": {
@@ -222,7 +250,7 @@ function moduleSpecifierTransform(context, opt) {
                     return {
                         type: "rewrite", nextPath: string.replace(packageNameRegExp, nspkg).replace(subpathRegExp, sub === undefined ? "" : "/" + sub),
                     };
-                return unreachable("url case");
+                return unreachable("url case", null);
             }
             case "complex": {
                 for (const [rule, ruleValue] of Object.entries(opt.config)) {
@@ -254,7 +282,7 @@ function moduleSpecifierTransform(context, opt) {
                 }
                 return noop;
             }
-            default: return unreachable(" opt switch");
+            default: return unreachable("opt switch", opt);
         }
     }
     function error(type, arg0, arg1) {
@@ -262,7 +290,8 @@ function moduleSpecifierTransform(context, opt) {
             type: "error", message: message[type].replace("{0}", arg0).replace("{1}", arg1), code: type, key: type.toString(),
         };
     }
-    function unreachable(str) {
+    function unreachable(str, val) {
+        console.error(val);
         throw new Error("Unreachable case at " + str);
     }
     function isBrowserCompatibleModuleSpecifier(path) {

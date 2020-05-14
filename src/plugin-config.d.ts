@@ -209,6 +209,45 @@ export interface PluginConfigs {
      * !out(safeAccess-false.js)
      */
     safeAccess?: string
+    /**
+     * JSON import
+     * @defaultValue true
+     * @remarks
+     * Resolve the JSON import
+     *
+     * - true: same as "inline"
+     *
+     * - "data": import it as a data url.
+     *
+     * - "inline": import it as a inline object.
+     *
+     * @example
+     *
+     * true / "inline"
+     *
+     * Source:
+     * !src(json-import-auto/tsconfig.json)
+     * !src(json-import-auto/index.ts)
+     * !src(json-import-auto/import-failed.ts)
+     * !src(json-import-auto/dyn-import-failed.ts)
+     * Output:
+     * !out(json-import-auto/index.js)
+     * !out(json-import-auto/import-failed.js)
+     * !out(json-import-auto/dyn-import-failed.js)
+     *
+     * "data"
+     *
+     * Source:
+     * !src(json-import-data/index.ts)
+     * !src(json-import-data/import-failed.ts)
+     * !src(json-import-data/dyn-import-failed.ts)
+     * Output:
+     * !out(json-import-data/index.js)
+     * !out(json-import-data/import-failed.js)
+     * !out(json-import-data/dyn-import-failed.js)
+     *
+     */
+    jsonImport?: 'data' | 'inline' | true
 }
 /**
  * @public
