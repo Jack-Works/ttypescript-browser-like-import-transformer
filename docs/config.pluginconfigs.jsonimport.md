@@ -38,7 +38,7 @@ true / "inline"
 
 Source:
 
-Filename: json-import-auto/tsconfig.json
+Filename: `json-import-auto/tsconfig.json`
 
 ```json
 {
@@ -58,7 +58,7 @@ Filename: json-import-auto/tsconfig.json
 }
 
 ```
-Filename: json-import-auto/index.ts
+Filename: `json-import-auto/index.ts`
 
 ```ts
 import * as file from './file.json'
@@ -71,7 +71,7 @@ import('./file.json').then((x) => console.log('Deterministic dynamic import', x)
 import(`./file${''}.json`).then((x) => console.log('Nondeterministic dynamic import', x))
 
 ```
-Filename: json-import-auto/import-failed.ts
+Filename: `json-import-auto/import-failed.ts`
 
 ```ts
 // @ts-ignore
@@ -81,7 +81,7 @@ import y from 'https://raw.githubusercontent.com/angular/angular-cli/master/pack
 console.log(x, y)
 
 ```
-Filename: json-import-auto/dyn-import-failed.ts
+Filename: `json-import-auto/dyn-import-failed.ts`
 
 ```ts
 // @ts-ignore
@@ -95,7 +95,7 @@ import('https://raw.githubusercontent.com/angular/angular-cli/master/packages/an
 ```
 Output:
 
-Filename: json-import-auto/index.js
+Filename: `json-import-auto/index.js`
 
 ```js
 const file = JSON.parse("{\n    \"json\": true\n}\n");
@@ -118,7 +118,7 @@ function __dynamicImportNative(path, json) {
 import { __esModuleInterop as __esModuleInterop, __dynamicImportTransform as __dynamicImportTransform, __UMDBindCheck as __UMDBindCheck, moduleSpecifierTransform as moduleSpecifierTransform } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.0.6/es/ttsclib.min.js";
 
 ```
-Filename: json-import-auto/import-failed.js
+Filename: `json-import-auto/import-failed.js`
 
 ```js
 // @ts-ignore
@@ -128,7 +128,7 @@ import y from 'https://raw.githubusercontent.com/angular/angular-cli/master/pack
 console.log(x, y);
 
 ```
-Filename: json-import-auto/dyn-import-failed.js
+Filename: `json-import-auto/dyn-import-failed.js`
 
 ```js
 // @ts-ignore
@@ -152,7 +152,7 @@ import { __dynamicImportTransform as __dynamicImportTransform, __UMDBindCheck as
 
 Source:
 
-Filename: json-import-data/index.ts
+Filename: `json-import-data/index.ts`
 
 ```ts
 import * as file from './file.json'
@@ -165,7 +165,7 @@ import('./file.json').then((x) => console.log('Deterministic dynamic import', x)
 import(`./file${''}.json`).then((x) => console.log('Nondeterministic dynamic import', x))
 
 ```
-Filename: json-import-data/import-failed.ts
+Filename: `json-import-data/import-failed.ts`
 
 ```ts
 // @ts-ignore
@@ -175,7 +175,7 @@ import y from 'https://raw.githubusercontent.com/angular/angular-cli/master/pack
 console.log(x, y)
 
 ```
-Filename: json-import-data/dyn-import-failed.ts
+Filename: `json-import-data/dyn-import-failed.ts`
 
 ```ts
 // @ts-ignore
@@ -189,7 +189,7 @@ import('https://raw.githubusercontent.com/angular/angular-cli/master/packages/an
 ```
 Output:
 
-Filename: json-import-data/index.js
+Filename: `json-import-data/index.js`
 
 ```js
 import * as file from "data:text/javascript,export default JSON.parse(\"{\\n    \\\"json\\\": true\\n}\\n\")";
@@ -212,7 +212,7 @@ function __dynamicImportNative(path, json) {
 import { __dynamicImportTransform as __dynamicImportTransform, __UMDBindCheck as __UMDBindCheck, moduleSpecifierTransform as moduleSpecifierTransform } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.0.6/es/ttsclib.min.js";
 
 ```
-Filename: json-import-data/import-failed.js
+Filename: `json-import-data/import-failed.js`
 
 ```js
 // @ts-ignore
@@ -222,7 +222,7 @@ import y from 'https://raw.githubusercontent.com/angular/angular-cli/master/pack
 console.log(x, y);
 
 ```
-Filename: json-import-data/dyn-import-failed.js
+Filename: `json-import-data/dyn-import-failed.js`
 
 ```js
 // @ts-ignore

@@ -25,7 +25,7 @@ Choose what `webModulePath` to use when transform as snowpack import. See docume
 
 Source:
 
-Filename: default.ts
+Filename: `default.ts`
 
 ```ts
 /// {}
@@ -65,7 +65,7 @@ export * as e2 from 'http://example.com/'
 ```
 Outputs:
 
-Filename: webModulePath-string.js
+Filename: `webModulePath-string.js`
 
 ```js
 // CompilerOptions: {"module":"ESNext"}
@@ -99,7 +99,7 @@ export { c2, d2 } from 'http://example.com/';
 export * as e2 from 'http://example.com/';
 
 ```
-Filename: webModulePath-undefined.js
+Filename: `webModulePath-undefined.js`
 
 ```js
 // CompilerOptions: {"module":"ESNext"}

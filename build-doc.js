@@ -27,13 +27,14 @@ function touch(o = file) {
  * @param {(file: any) => string } getFile
  */
 function replace(str, regex, getFile) {
+    const backquote = '```'
     return str.replace(regex, (_, file) =>
         `
 
-Filename: ${file}
-\`\`\`${file.replace(/^.+\./, '')}
-${getFile(file).replace(/\n+$/, '')}
-\`\`\`
+Filename: \`${file}\`
+${backquote}${file.replace(/^.+\./, '')}
+${getFile(file).replace(/[\s\r\n]+$/, '')}
+${backquote}
 `
             .split('\n')
             .map((x, i) => (i === 0 ? x : ' * ' + x))

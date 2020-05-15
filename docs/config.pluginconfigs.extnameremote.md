@@ -16,7 +16,7 @@ extNameRemote?: boolean
 
 Source code:
 
-Filename: extName-default.ts
+Filename: `extName-default.ts`
 
 ```ts
 import './local-file'
@@ -26,7 +26,7 @@ import 'http://remote/file'
 ```
 Outputs:
 
-Filename: extNameRemote-false.js
+Filename: `extNameRemote-false.js`
 
 ```js
 // CompilerOptions: {"module":"ESNext"}
@@ -36,7 +36,7 @@ import "/local-file.js";
 import 'http://remote/file';
 
 ```
-Filename: extNameRemote-true.js
+Filename: `extNameRemote-true.js`
 
 ```js
 // CompilerOptions: {"module":"ESNext"}

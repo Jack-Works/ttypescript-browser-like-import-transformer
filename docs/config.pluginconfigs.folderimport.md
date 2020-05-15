@@ -24,32 +24,32 @@ Only open it when your codebase is not easy to migrate from Node specified behav
 
 Source:
 
-Filename: folder-import/index.ts
+Filename: `folder-import/index.ts`
 
 ```ts
 import './folder'
 
 ```
-Filename: folder-import/folder/index.ts
+Filename: `folder-import/folder/index.ts`
 
 ```ts
 export default 0
 import '../f2'
 
 ```
-Filename: folder-import/f2/index.ts
+Filename: `folder-import/f2/index.ts`
 
 ```ts
 export {}
 
 ```
-Filename: folder-import/f2/f2.ts
+Filename: `folder-import/f2/f2.ts`
 
 ```ts
 import './'
 
 ```
-Filename: folder-import/f2/inner/f.ts
+Filename: `folder-import/f2/inner/f.ts`
 
 ```ts
 import '../'
@@ -57,32 +57,32 @@ import '../'
 ```
 Output:
 
-Filename: folder-import/index.js
+Filename: `folder-import/index.js`
 
 ```js
 import "./folder/index.js";
 
 ```
-Filename: folder-import/folder/index.js
+Filename: `folder-import/folder/index.js`
 
 ```js
 export default 0;
 import "../f2/index.js";
 
 ```
-Filename: folder-import/f2/index.js
+Filename: `folder-import/f2/index.js`
 
 ```js
 
 
 ```
-Filename: folder-import/f2/f2.js
+Filename: `folder-import/f2/f2.js`
 
 ```js
 import "./index.js";
 
 ```
-Filename: folder-import/f2/inner/f.js
+Filename: `folder-import/f2/inner/f.js`
 
 ```js
 import "../index.js";

@@ -24,7 +24,7 @@ extName?: string | boolean
 
 Source code:
 
-Filename: extName-default.ts
+Filename: `extName-default.ts`
 
 ```ts
 import './local-file'
@@ -34,7 +34,7 @@ import 'http://remote/file'
 ```
 Outputs:
 
-Filename: extName-false.js
+Filename: `extName-false.js`
 
 ```js
 // CompilerOptions: {"module":"ESNext"}
@@ -44,7 +44,7 @@ import '/local-file';
 import 'http://remote/file';
 
 ```
-Filename: extName-true.js
+Filename: `extName-true.js`
 
 ```js
 // CompilerOptions: {"module":"ESNext"}
@@ -54,7 +54,7 @@ import "/local-file.js";
 import 'http://remote/file';
 
 ```
-Filename: extName-string.js
+Filename: `extName-string.js`
 
 ```js
 // CompilerOptions: {"module":"ESNext"}
