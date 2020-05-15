@@ -122,6 +122,7 @@ function queryPackageVersion(path: string) {
  */
 function importMapResolve(opt: ImportMapFunctionOpts): string | null {
     const { config, moduleSpecifier, sourceFilePath, rootDir, tsconfigPath } = opt
+    if (opt.moduleSpecifier.startsWith('.') || opt.moduleSpecifier.startsWith('/')) return null
     if (config.importMap === undefined) return null
     if (config.importMap.type === 'function') return config.importMap.function(opt)
     let lib: _jsenv_import_map
