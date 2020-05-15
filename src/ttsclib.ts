@@ -5,9 +5,9 @@
  * and expected to run in any ES2020 compatible environment (with console.warn).
  */
 
-import type { BareModuleRewriteUMD } from './plugin-config'
+import type { RewriteRulesUMD } from './plugin-config'
 import type { CustomTransformationContext } from './core'
-import type { NormalizedPluginConfig, NormalizedBareModuleRewrite } from './config-parser'
+import type { NormalizedPluginConfig, NormalizedRewriteRules } from './config-parser'
 
 /**
  * This function is a helper for UMD transform.
@@ -83,20 +83,25 @@ export function __esModuleInterop(mod: object) {
 export function __dynamicImportTransform(
     _path: unknown,
     config: NormalizedPluginConfig,
-    dynamicImport: (path: string) => Promise<unknown>,
+    dynamicImport: (path: string, jsonPath?: string) => Promise<unknown>,
     UMDBindCheck: typeof __UMDBindCheck,
     _moduleSpecifierTransform: typeof moduleSpecifierTransform,
 ): Promise<unknown> {
     if (typeof _path !== 'string') _path = String(_path)
     const path = _path as string
+    const nullResult = () => null
     const result = _moduleSpecifierTransform({
         config,
         path,
-        queryWellknownUMD: () => void 0,
-        parseRegExp: () => (console.warn('RegExp rule is not supported in runtime yet'), null),
-        queryPackageVersion: () => null,
+        queryWellknownUMD: nullResult,
+        parseRegExp: nullResult,
+        queryPackageVersion: nullResult,
+        resolveJSONImport: nullResult,
+        resolveFolderImport: nullResult,
         getCompilerOptions: () => ({}),
         accessingImports: new Set('*'),
+        currentFile: null,
+        runtime: true,
     })
     const header = `ttypescript-browser-like-import-transformer: Runtime transform error:`
     switch (result.type) {
@@ -108,16 +113,19 @@ export function __dynamicImportTransform(
         case 'rewrite':
             return dynamicImport(result.nextPath)
         case 'umd': {
+            const { globalObject } = config
             // ? treat it as ns import
             const _ = (v: unknown) =>
                 UMDBindCheck(v, [], path, `${result.globalObject ?? 'globalThis'}.${result.target}`, false)
-            if (config.globalObject === 'globalThis' || config.globalObject === undefined)
+            if (globalObject === 'globalThis' || globalObject === undefined)
                 return Promise.resolve((globalThis as any)[result.target]).then(_)
-            if (config.globalObject === 'window') return Promise.resolve((window as any)[result.target]).then(_)
+            if (globalObject === 'window') return Promise.resolve((window as any)[result.target]).then(_)
             return Promise.reject(header + 'Unreachable transform case')
         }
+        case 'json':
+            return dynamicImport('', result.path)
         default:
-            unreachable(result)
+            return unreachable(result)
     }
     function unreachable(_x: never): never {
         throw new Error('Unreachable case' + _x)
@@ -136,6 +144,11 @@ export function __customDynamicImportHelper(
 //#region Internal code
 type ModuleSpecifierTransformResult =
     | {
+          type: 'json'
+          json: string | null
+          path: string
+      }
+    | {
           type: 'rewrite'
           nextPath: string
       }
@@ -148,7 +161,7 @@ type ModuleSpecifierTransformResult =
     | {
           type: 'noop'
       }
-    | BareModuleRewriteUMD
+    | RewriteRulesUMD
 /**
  * This function will also be included in the runtime for dynamic transform.
  * @internal
@@ -158,12 +171,21 @@ export function moduleSpecifierTransform(
         {
             parseRegExp: (string: string) => RegExp | null
             accessingImports: Set<string>
+            currentFile: string | null
+            runtime: boolean
         } & Pick<
             CustomTransformationContext<any>,
-            'config' | 'path' | 'queryWellknownUMD' | 'queryPackageVersion' | 'treeshakeProvider' | 'getCompilerOptions'
+            | 'config'
+            | 'path'
+            | 'queryWellknownUMD'
+            | 'queryPackageVersion'
+            | 'treeshakeProvider'
+            | 'getCompilerOptions'
+            | 'resolveJSONImport'
+            | 'resolveFolderImport'
         >
     >,
-    opt?: NormalizedBareModuleRewrite,
+    opt?: NormalizedRewriteRules,
 ): ModuleSpecifierTransformResult {
     const { queryWellknownUMD } = context
     const packageNameRegExp = /\$packageName\$/g
@@ -185,19 +207,66 @@ export function moduleSpecifierTransform(
     return self(context, opt)
     /** Can't use the name moduleSpecifierTransform to do recursive, the name might be changed in the inline mode */
     function self(
-        ...[context, opt = context.config.bareModuleRewrite || { type: 'simple', enum: 'umd' }]: Parameters<
+        ...[context, opt = context.config.rules || { type: 'simple', enum: 'umd' }]: Parameters<
             typeof moduleSpecifierTransform
         >
     ): ModuleSpecifierTransformResult {
-        const { path, config, parseRegExp, queryPackageVersion } = context
+        const {
+            path,
+            config,
+            parseRegExp,
+            queryPackageVersion,
+            currentFile,
+            accessingImports,
+            getCompilerOptions,
+            resolveFolderImport,
+            resolveJSONImport,
+            runtime,
+            treeshakeProvider,
+        } = context
+        const { extName, appendExtensionName, extNameRemote, appendExtensionNameForRemote, webModulePath } = config
         if (opt.type === 'noop') return noop
+        if (path === '.') return noop
 
-        const expectedExtension = config.appendExtensionName === true ? '.js' : config.appendExtensionName ?? '.js'
+        const conf = extName ?? appendExtensionName
+        const expectedExtension = conf === true ? '.js' : conf ?? '.js'
         if (isBrowserCompatibleModuleSpecifier(path)) {
-            if (path === '.') return noop
-            if (config.appendExtensionName === false) return noop
-            if (config.appendExtensionNameForRemote !== true && isHTTPModuleSpecifier(path)) return noop
-            const nextPath = appendExtensionName(path, expectedExtension)
+            if (conf === false) return noop
+            const remote = extNameRemote ?? appendExtensionNameForRemote
+            const { jsonImport, folderImport } = config
+            if (jsonImport && path.endsWith('.json')) {
+                if (runtime) return { type: 'json', path, json: null }
+                if (!currentFile) unreachable('', null!)
+                else {
+                    const { path } = context
+                    const nondeterministicJSONImport = { type: 'json', json: null, path } as const
+                    if (isHTTPModuleSpecifier(path)) return nondeterministicJSONImport
+                    try {
+                        const json = resolveJSONImport(path, currentFile)
+                        switch (jsonImport) {
+                            case 'data':
+                                return {
+                                    type: 'rewrite',
+                                    nextPath: `data:text/javascript,export default JSON.parse(${JSON.stringify(json)})`,
+                                }
+                            case 'inline':
+                            case true:
+                                return { type: 'json', json, path }
+                            default:
+                                return unreachable('json', jsonImport)
+                        }
+                    } catch (e) {
+                        return nondeterministicJSONImport
+                    }
+                }
+            }
+            if (remote !== true && isHTTPModuleSpecifier(path)) return noop
+            if (endsWithExt(path, expectedExtension)) return noop
+            if (folderImport && currentFile) {
+                const result = resolveFolderImport(path, currentFile)
+                if (result) return { type: 'rewrite', nextPath: appendExt(result, expectedExtension) }
+            }
+            const nextPath = appendExt(path, expectedExtension)
             return { type: 'rewrite', nextPath: nextPath }
         }
         const { sub, nspkg } = resolveNS(path)
@@ -207,10 +276,7 @@ export function moduleSpecifierTransform(
                 switch (e) {
                     case 'snowpack':
                         return {
-                            nextPath: `${config.webModulePath ?? '/web_modules/'}${appendExtensionName(
-                                path,
-                                expectedExtension,
-                            )}`,
+                            nextPath: `${webModulePath ?? '/web_modules/'}${appendExt(path, expectedExtension)}`,
                             type: 'rewrite',
                         }
                     case 'pikacdn':
@@ -227,7 +293,7 @@ export function moduleSpecifierTransform(
                         const { globalObject } = config
                         if (!target) return error(Diag.TransformToUMDFailed, path, '')
                         // TODO: Collect some common CDN path maybe?
-                        const nextOpt: BareModuleRewriteUMD = {
+                        const nextOpt: RewriteRulesUMD = {
                             type: 'umd',
                             target,
                             globalObject,
@@ -235,18 +301,13 @@ export function moduleSpecifierTransform(
                         }
                         return self(context, nextOpt)
                     default:
-                        return unreachable('simple type')
+                        return unreachable('simple type', e)
                 }
             }
             case 'umd': {
                 const [{ globalObject }, { umdImportPath }] = [config, opt]
-                if (opt.treeshake && context.treeshakeProvider) {
-                    context.treeshakeProvider(
-                        path,
-                        context.accessingImports,
-                        opt.treeshake,
-                        context.getCompilerOptions(),
-                    )
+                if (opt.treeshake && treeshakeProvider) {
+                    treeshakeProvider(path, accessingImports, opt.treeshake, getCompilerOptions())
                     return { type: 'umd', target: path, globalObject: opt.target, umdImportPath }
                 } else {
                     if (opt.treeshake) console.error('Tree shaking is not available at runtime.')
@@ -268,7 +329,7 @@ export function moduleSpecifierTransform(
                             .replace(packageNameRegExp, nspkg)
                             .replace(subpathRegExp, sub === undefined ? '' : '/' + sub),
                     }
-                return unreachable('url case')
+                return unreachable('url case', null!)
             }
             case 'complex': {
                 for (const [rule, ruleValue] of Object.entries(opt.config)) {
@@ -304,7 +365,7 @@ export function moduleSpecifierTransform(
                 return noop
             }
             default:
-                return unreachable(' opt switch')
+                return unreachable('opt switch', opt)
         }
     }
     function error(type: Diag, arg0: string, arg1: string): ModuleSpecifierTransformResult {
@@ -316,12 +377,14 @@ export function moduleSpecifierTransform(
             key: type.toString(),
         }
     }
-    function unreachable(str: string): never {
+    function unreachable(str: string, val: never): never {
+        console.error(val)
         throw new Error('Unreachable case at ' + str)
     }
     function isBrowserCompatibleModuleSpecifier(path: string) {
         return isHTTPModuleSpecifier(path) || isLocalModuleSpecifier(path) || isDataOrBlobModuleSpecifier(path)
     }
+    // copy pasted to core, remember to sync them.
     function isHTTPModuleSpecifier(path: string) {
         return path.startsWith('http://') || path.startsWith('https://')
     }
@@ -331,9 +394,13 @@ export function moduleSpecifierTransform(
     function isDataOrBlobModuleSpecifier(path: string) {
         return path.startsWith('blob:') || path.startsWith('data:')
     }
-    function appendExtensionName(path: string, expectedExt: string | false) {
-        if (expectedExt === false) return path
-        if (path.endsWith(expectedExt)) return path
+    function endsWithExt(path: string, expectedExt: string | false) {
+        if (expectedExt === false) return true
+        if (path.endsWith(expectedExt)) return true
+        return false
+    }
+    function appendExt(path: string, expectedExt: string | false) {
+        if (endsWithExt(path, expectedExt)) return path
         return path + expectedExt
     }
     /** Parse '@namespace/package/folder' into ns, pkg, sub */

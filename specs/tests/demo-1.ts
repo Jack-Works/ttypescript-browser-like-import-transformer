@@ -1,4 +1,4 @@
-/// {bareModuleRewrite: "umd"}
+/// {rules: "umd"}
 
 import x from 'react'
 import { useState } from 'react'

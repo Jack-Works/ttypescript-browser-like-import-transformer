@@ -1,1 +1,0 @@
-// type of appendExtensionNameForRemote in the tsconfig is not correct

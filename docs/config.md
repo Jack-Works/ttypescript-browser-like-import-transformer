@@ -9,18 +9,18 @@
 
 |  Interface | Description |
 |  --- | --- |
-|  [BareModuleRewriteUMD](./config.baremodulerewriteumd.md) | Rewrite module to a UMD access |
-|  [BareModuleRewriteURL](./config.baremodulerewriteurl.md) | Rewrite module to another URL |
 |  [DynamicImportPathRewriteCustom](./config.dynamicimportpathrewritecustom.md) | Rewrite dynamic import with a custom function |
 |  [ImportMapCustomResolution](./config.importmapcustomresolution.md) |  |
 |  [ImportMapResolution](./config.importmapresolution.md) |  |
 |  [PluginConfigs](./config.pluginconfigs.md) | Config of this transformer |
+|  [RewriteRulesUMD](./config.rewriterulesumd.md) | Rewrite module to a UMD access |
+|  [RewriteRulesURL](./config.rewriterulesurl.md) | Rewrite module to another URL |
 
 ## Type Aliases
 
 |  Type Alias | Description |
 |  --- | --- |
-|  [BareModuleRewriteObject](./config.baremodulerewriteobject.md) | Rewrite the module by complex rules. |
-|  [BareModuleRewriteSimple](./config.baremodulerewritesimple.md) | Predefined rewrite rules |
 |  [ImportMapFunctionOpts](./config.importmapfunctionopts.md) |  |
+|  [RewriteRulesObject](./config.rewriterulesobject.md) | Rewrite the module by complex rules. |
+|  [RewriteRulesSimple](./config.rewriterulessimple.md) | Predefined rewrite rules |
 

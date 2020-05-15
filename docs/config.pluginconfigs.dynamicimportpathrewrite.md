@@ -24,6 +24,8 @@ dynamicImportPathRewrite?: false | 'auto' | DynamicImportPathRewriteCustom
 
 Source:
 
+Filename: `dynamicImportPathRewrite-default.ts`
+
 ```ts
 // Static dynamic import
 import('a')
@@ -39,6 +41,8 @@ import(y, 'second argument')
 
 ```
 Outputs:
+
+Filename: `dynamicImportPathRewrite-auto.js`
 
 ```js
 // CompilerOptions: {"module":"ESNext"}
@@ -61,9 +65,10 @@ function __dynamicImport2Ary(reason, ...args) {
     console.warn(reason, ...args);
     return import(args[0], args[1]);
 }
-import { __dynamicImportTransform as __dynamicImportTransform, __UMDBindCheck as __UMDBindCheck, moduleSpecifierTransform as moduleSpecifierTransform } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.0.5/es/ttsclib.min.js";
+import { __dynamicImportTransform as __dynamicImportTransform, __UMDBindCheck as __UMDBindCheck, moduleSpecifierTransform as moduleSpecifierTransform } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.0.6/es/ttsclib.min.js";
 
 ```
+Filename: `dynamicImportPathRewrite-custom-arrow.js`
 
 ```js
 // CompilerOptions: {"module":"ESNext"}
@@ -89,9 +94,10 @@ function __dynamicImport2Ary(reason, ...args) {
     console.warn(reason, ...args);
     return import(args[0], args[1]);
 }
-import { __dynamicImportTransform as __dynamicImportTransform, __UMDBindCheck as __UMDBindCheck, moduleSpecifierTransform as moduleSpecifierTransform, __customDynamicImportHelper as __customDynamicImportHelper } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.0.5/es/ttsclib.min.js";
+import { __dynamicImportTransform as __dynamicImportTransform, __UMDBindCheck as __UMDBindCheck, moduleSpecifierTransform as moduleSpecifierTransform, __customDynamicImportHelper as __customDynamicImportHelper } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.0.6/es/ttsclib.min.js";
 
 ```
+Filename: `dynamicImportPathRewrite-false.js`
 
 ```js
 // CompilerOptions: {"module":"ESNext"}

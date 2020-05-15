@@ -7,7 +7,7 @@
         "plugins": [
             {
                 "transform": "../../../cjs/node.js",
-                "bareModuleRewrite": "umd"
+                "rules": "umd"
             }
         ]
     },

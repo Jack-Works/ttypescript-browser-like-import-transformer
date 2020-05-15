@@ -18,11 +18,15 @@ export interface PluginConfigs {
      * - a string: set your extension name like ".mjs", ".js" or ".ejs"
      * @example
      * Source code:
-     * !src(appendExtensionName-default.ts)
+     * !src(extName-default.ts)
      * Outputs:
-     * !out(appendExtensionName-false.js)
-     * !out(appendExtensionName-true.js)
-     * !out(appendExtensionName-string.js)
+     * !out(extName-false.js)
+     * !out(extName-true.js)
+     * !out(extName-string.js)
+     */
+    extName?: string | boolean
+    /**
+     * @deprecated See "extName", will be removed in 3.0
      */
     appendExtensionName?: string | boolean
     /**
@@ -30,10 +34,14 @@ export interface PluginConfigs {
      * @defaultValue false
      * @example
      * Source code:
-     * !src(appendExtensionName-default.ts)
+     * !src(extName-default.ts)
      * Outputs:
-     * !out(appendExtensionNameForRemote-false.js)
-     * !out(appendExtensionNameForRemote-true.js)
+     * !out(extNameRemote-false.js)
+     * !out(extNameRemote-true.js)
+     */
+    extNameRemote?: boolean
+    /**
+     * @deprecated use "extNameRemote", will be removed in 3.0
      */
     appendExtensionNameForRemote?: boolean
     /**
@@ -41,9 +49,9 @@ export interface PluginConfigs {
      * @remarks
      * This is the most powerful part of this transformer.
      * You can specify the transform rule of bare imports (like `import 'React'`) to the form that browser can recognize.
-     * See {@link BareModuleRewriteObject}
+     * See {@link RewriteRulesObject}
      *
-     * When it is a `Record<string, BareModuleRewriteObject>`,
+     * When it is a `Record<string, RewriteRulesObject>`,
      * you can use two kinds of matching rule to matching your import paths.
      *
      * - Full match: use normal string to do a full match. (`"react"` will only match "react")
@@ -53,7 +61,7 @@ export interface PluginConfigs {
      * @example
      * A complex example:
      * ```js
-     * {bareModuleRewrite: {
+     * {rules: {
      *      react: "umd",
      *      "lodash-es": "pikacdn",
      *      "async-call-rpc": "unpkg",
@@ -72,7 +80,12 @@ export interface PluginConfigs {
      * Output:
      * !out(demo-2.js)
      */
-    bareModuleRewrite?: Exclude<BareModuleRewriteObject, BareModuleRewriteUMD> & Record<string, BareModuleRewriteObject>
+    rules?: Exclude<RewriteRulesObject, RewriteRulesUMD> & Record<string, RewriteRulesObject>
+    /**
+     * {@inheritdoc PluginConfigs.rules}
+     * @deprecated Renamed to "rules", will be removed in 3.0
+     */
+    bareModuleRewrite?: PluginConfigs['rules']
     /**
      * Config how to rewrite dynamic import.
      * @remarks
@@ -196,6 +209,83 @@ export interface PluginConfigs {
      * !out(safeAccess-false.js)
      */
     safeAccess?: string
+    /**
+     * JSON import
+     * @defaultValue undefined
+     * @remarks
+     * Resolve the JSON import.
+     *
+     * Not recommend because this is not a Web standard yet.
+     *
+     * Only open it when your codebase is not easy to migrate from Node specified behaviors.
+     *
+     * **Important**: if you want to keep JSON identity between different files, please use "data" mode.
+     *
+     * **Important**: if your environment use CSP and bans data URL, please use "inline" mode.
+     *
+     * - undefined: disable this feature
+     *
+     * - true: same as "inline"
+     *
+     * - "data": import it as a data url.
+     *
+     * - "inline": import it as a inline object.
+     *
+     * @example
+     *
+     * true / "inline"
+     *
+     * Source:
+     * !src(json-import-auto/tsconfig.json)
+     * !src(json-import-auto/index.ts)
+     * !src(json-import-auto/import-failed.ts)
+     * !src(json-import-auto/dyn-import-failed.ts)
+     * Output:
+     * !out(json-import-auto/index.js)
+     * !out(json-import-auto/import-failed.js)
+     * !out(json-import-auto/dyn-import-failed.js)
+     *
+     * "data"
+     *
+     * Source:
+     * !src(json-import-data/index.ts)
+     * !src(json-import-data/import-failed.ts)
+     * !src(json-import-data/dyn-import-failed.ts)
+     * Output:
+     * !out(json-import-data/index.js)
+     * !out(json-import-data/import-failed.js)
+     * !out(json-import-data/dyn-import-failed.js)
+     *
+     */
+    jsonImport?: 'data' | 'inline' | true
+    /**
+     * Resolve NodeJS style path './x' to './x/index.js'
+     * @defaultValue undefined
+     * @remarks
+     *
+     * Resolve NodeJS style folder import to their correct path.
+     *
+     * Not recommend because it never will become a Web standard.
+     *
+     * Only open it when your codebase is not easy to migrate from Node specified behaviors.
+     *
+     * @example
+     *
+     * Source:
+     * !src(folder-import/index.ts)
+     * !src(folder-import/folder/index.ts)
+     * !src(folder-import/f2/index.ts)
+     * !src(folder-import/f2/f2.ts)
+     * !src(folder-import/f2/inner/f.ts)
+     *
+     * Output:
+     * !out(folder-import/index.js)
+     * !out(folder-import/folder/index.js)
+     * !out(folder-import/f2/index.js)
+     * !out(folder-import/f2/f2.js)
+     * !out(folder-import/f2/inner/f.js)
+     */
+    folderImport?: boolean
 }
 /**
  * @public
@@ -241,15 +331,15 @@ export interface ImportMapResolution {
  *
  * @example
  * Source code:
- * !src(bareModuleRewrite-default.ts)
+ * !src(rules-default.ts)
  * Outputs:
- * !out(bareModuleRewrite-umd.js)
- * !out(bareModuleRewrite-pikacdn.js)
- * !out(bareModuleRewrite-snowpack.js)
- * !out(bareModuleRewrite-unpkg.js)
+ * !out(rules-umd.js)
+ * !out(rules-pikacdn.js)
+ * !out(rules-snowpack.js)
+ * !out(rules-unpkg.js)
  * @public
  */
-export type BareModuleRewriteSimple = 'snowpack' | 'umd' | 'unpkg' | 'pikacdn'
+export type RewriteRulesSimple = 'snowpack' | 'umd' | 'unpkg' | 'pikacdn'
 /**
  * Rewrite module to a UMD access
  * @example
@@ -257,9 +347,9 @@ export type BareModuleRewriteSimple = 'snowpack' | 'umd' | 'unpkg' | 'pikacdn'
  * { "type": "umd", target: "mylib", globalObject: "window" }
  * ```
  *
- * !src(bareModuleRewrite-complex.ts)
+ * !src(rules-complex.ts)
  * Output:
- * !out(bareModuleRewrite-complex.js)
+ * !out(rules-complex.js)
  *
  * This option also support treeshake.
  * !src(treeshake-test/tsconfig.json)
@@ -271,7 +361,7 @@ export type BareModuleRewriteSimple = 'snowpack' | 'umd' | 'unpkg' | 'pikacdn'
  * !src(treeshake-test/deps.js)
  * @public
  */
-export interface BareModuleRewriteUMD {
+export interface RewriteRulesUMD {
     type: 'umd'
     /**
      * Rewrite the matching import statement to specified global variable
@@ -303,11 +393,11 @@ export interface BareModuleRewriteUMD {
  * ```
  *
  * Source code:
- * !src(bareModuleRewrite-default.ts)
+ * !src(rules-default.ts)
  * Output:
- * !out(bareModuleRewrite-url.js)
+ * !out(rules-url.js)
  */
-export interface BareModuleRewriteURL {
+export interface RewriteRulesURL {
     type: 'url'
     /**
      * Rewrite to this URL if the transformer can read the version of the package
@@ -323,13 +413,13 @@ export interface BareModuleRewriteURL {
  * @remarks
  * - `false`: disable the transform
  *
- * - {@link BareModuleRewriteURL}: Rewrite to another URL
+ * - {@link RewriteRulesURL}: Rewrite to another URL
  *
- * - {@link BareModuleRewriteUMD}: Rewrite to a UMD variable access.
+ * - {@link RewriteRulesUMD}: Rewrite to a UMD variable access.
  *
- * - `Record<string, `{@link BareModuleRewriteObject}`>`: string can be a string or a RegExp to match import path. If you're using the package "type", you should write it as "/^type$/"
+ * - `Record<string, `{@link RewriteRulesObject}`>`: string can be a string or a RegExp to match import path. If you're using the package "type", you should write it as "/^type$/"
  *
- * - Enum {@link BareModuleRewriteSimple}:
+ * - Enum {@link RewriteRulesSimple}:
  *
  * - - `"snowpack"`: if you are using {@link https://github.com/pikapkg/snowpack | snowpack}
  *
@@ -340,7 +430,7 @@ export interface BareModuleRewriteURL {
  * - - `"pikacdn"`: try to transform import path to "https://cdn.pika.dev/package\@version"
  *
  * @example
- * Example for `Record<string, `{@link BareModuleRewriteObject}`>`
+ * Example for `Record<string, `{@link RewriteRulesObject}`>`
  * ```jsonc
  * {
  *    "my-pkg": "umd", // to globalThis.myPkg
@@ -354,23 +444,23 @@ export interface BareModuleRewriteURL {
  * ```
  *
  * Source code:
- * !src(bareModuleRewrite-default.ts)
+ * !src(rules-default.ts)
  * Outputs:
- * !out(bareModuleRewrite-false.js)
- * !out(bareModuleRewrite-umd.js)
- * !out(bareModuleRewrite-pikacdn.js)
- * !out(bareModuleRewrite-snowpack.js)
- * !out(bareModuleRewrite-unpkg.js)
- * !out(bareModuleRewrite-url.js)
+ * !out(rules-false.js)
+ * !out(rules-umd.js)
+ * !out(rules-pikacdn.js)
+ * !out(rules-snowpack.js)
+ * !out(rules-unpkg.js)
+ * !out(rules-url.js)
  *
  * Complex example:
- * !src(bareModuleRewrite-complex.ts)
+ * !src(rules-complex.ts)
  * Output:
- * !out(bareModuleRewrite-complex.js)
+ * !out(rules-complex.js)
  * @defaultValue umd
  * @public
  */
-export type BareModuleRewriteObject = false | BareModuleRewriteSimple | BareModuleRewriteUMD | BareModuleRewriteURL
+export type RewriteRulesObject = false | RewriteRulesSimple | RewriteRulesUMD | RewriteRulesURL
 /**
  * Rewrite dynamic import with a custom function
  * @public

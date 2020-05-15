@@ -1,0 +1,2 @@
+/// {extNameRemote: {}}
+//@ extName-default.ts

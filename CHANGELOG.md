@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.1.0](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/compare/v2.0.6...v2.1.0) (2020-05-15)
+
+
+### Features
+
+* impl folder import, close [#21](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/issues/21) ([61fa336](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/commit/61fa336b7355baee89212eb8c9581a7a26d4860b))
+* impl JSON import, close [#22](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/issues/22) ([6902e03](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/commit/6902e037b8f74865a512709b15036eb54c4df782))
+* rename appendExtensionName to extName, deprecate(but still support) the old name ([12ce563](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/commit/12ce563c373ceb35e05653695c59279b07bdca93))
+* rename bareModuleRewrite to rules, deprecate(but still support) the old name ([6278cdf](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/commit/6278cdf741f45c87a9277c2e717b95fe5f63fb71))
+
 ### [2.0.6](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/compare/v2.0.5...v2.0.6) (2020-05-14)
 
 

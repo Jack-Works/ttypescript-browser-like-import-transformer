@@ -5,7 +5,7 @@
                 // @magic-works/ttypescript-browser-like-import-transformer
                 "transform": "../../../cjs/node.js",
                 "after": true,
-                "bareModuleRewrite": {
+                "rules": {
                     "/(.+)/": {
                         "type": "umd",
                         "target": "dependencies",

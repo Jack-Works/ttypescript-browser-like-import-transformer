@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "esModuleInterop": true,
+        "module": "ESNext",
+        "plugins": [
+            {
+                "transform": "../../../cjs/node.js",
+                "jsonImport": "inline"
+            }
+        ],
+        "resolveJsonModule": true,
+        "moduleResolution": "Node",
+        "rootDir": "./"
+    }
+}

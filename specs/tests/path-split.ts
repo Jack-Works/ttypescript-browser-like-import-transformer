@@ -1,4 +1,4 @@
-/// { bareModuleRewrite: { "/@material-ui\\/(.+)/": {type: "umd", target: "MaterialUI.$1"}, "lodash": "umd", "jquery": "pikacdn", "/lodash-es/": "unpkg", "/.+/": "snowpack" } }
+/// { rules: { "/@material-ui\\/(.+)/": {type: "umd", target: "MaterialUI.$1"}, "lodash": "umd", "jquery": "pikacdn", "/lodash-es/": "unpkg", "/.+/": "snowpack" } }
 
 import a from '@material-ui/core'
 import x from '@material-ui/core/abc'

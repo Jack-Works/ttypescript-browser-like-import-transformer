@@ -1,0 +1,2 @@
+/// {extName: {}}
+//@ extName-default.ts

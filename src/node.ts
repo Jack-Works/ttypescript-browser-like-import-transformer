@@ -6,9 +6,9 @@ import * as ts from 'typescript'
 import * as ttsclib from './ttsclib'
 import * as configParser from './config-parser'
 import { queryWellknownUMD } from './well-known-umd'
-import { readFileSync, writeFileSync } from 'fs'
+import { readFileSync, writeFileSync, existsSync } from 'fs'
 import { join, relative, posix } from 'path'
-import type { ImportMapFunctionOpts, BareModuleRewriteUMD } from './plugin-config'
+import type { ImportMapFunctionOpts, RewriteRulesUMD } from './plugin-config'
 export default creatTransform({
     ts,
     queryWellknownUMD,
@@ -17,6 +17,19 @@ export default creatTransform({
     queryPackageVersion,
     configParser,
     treeshakeProvider,
+    resolveJSONImport(path, parent) {
+        return readFileSync(join(parent, '../', path), 'utf-8')
+    },
+    resolveFolderImport(path, parent) {
+        const absolute = join(parent, '../', path)
+        let indexed = posix.join(path, './index')
+        if (!indexed.startsWith('.')) indexed = './' + indexed
+        const candidates = guessExtension(absolute, path).concat(guessExtension(join(absolute, './index'), indexed))
+        function guessExtension(x: string, orig: string) {
+            return ['.tsx', '.ts', '.mjs', '.cjs', '.jsx', '.js'].map((y) => [x + y, orig] as const)
+        }
+        return candidates.find(([a]) => existsSync(a))?.[1] ?? null
+    },
 })
 
 const treeshakeMap = new Map<
@@ -26,7 +39,7 @@ const treeshakeMap = new Map<
 function treeshakeProvider(
     dependency: string,
     accessImports: Set<string>,
-    config: NonNullable<BareModuleRewriteUMD['treeshake']>,
+    config: NonNullable<RewriteRulesUMD['treeshake']>,
     opts: ts.CompilerOptions,
 ) {
     const tsconfigPath = opts.configFilePath as string

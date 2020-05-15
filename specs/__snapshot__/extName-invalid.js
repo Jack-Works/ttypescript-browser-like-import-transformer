@@ -1,0 +1,1 @@
+// type of extName in the tsconfig is not correct
