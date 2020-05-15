@@ -43,7 +43,7 @@ __dynamicImportTransform(x, JSON.parse("{\"after\":true,\"importHelpers\":\"auto
 function __dynamicImportNative(path) {
     return import(path);
 }
-import { __dynamicImportTransform as __dynamicImportTransform, __UMDBindCheck as __UMDBindCheck, moduleSpecifierTransform as moduleSpecifierTransform } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.1.0/es/ttsclib.min.js";
+import { __dynamicImportTransform as __dynamicImportTransform, __UMDBindCheck as __UMDBindCheck, moduleSpecifierTransform as moduleSpecifierTransform } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.1.1/es/ttsclib.min.js";
 
 ```
 Filename: `importHelpers-string.js`
@@ -68,7 +68,7 @@ __dynamicImportTransform(x, JSON.parse("{\"after\":true,\"importHelpers\":\"cdn\
 function __dynamicImportNative(path) {
     return import(path);
 }
-import { __dynamicImportTransform as __dynamicImportTransform, __UMDBindCheck as __UMDBindCheck, moduleSpecifierTransform as moduleSpecifierTransform } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.1.0/es/ttsclib.min.js";
+import { __dynamicImportTransform as __dynamicImportTransform, __UMDBindCheck as __UMDBindCheck, moduleSpecifierTransform as moduleSpecifierTransform } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.1.1/es/ttsclib.min.js";
 
 ```
 Filename: `importHelpers-node.js`
@@ -153,48 +153,46 @@ function moduleSpecifierTransform(context, opt) {
     const umdNameRegExp = /\$umdName\$/g;
     const subpathRegExp = /\$subpath\$/g;
     const message = {
-        [392859]: "Failed to transform the path {0} to UMD import declaration.", [392861]: "Failed to query the package version of import {0}.", [392860]: "Failed to transform the path {0} to UMD import declaration. After applying the rule {1}, the result is an empty string.",
+        [392859]: "Failed to transform the path \"{0}\" to UMD import declaration.", [392861]: "Failed to query the package version of import \"{0}\".", [392860]: "Failed to transform the path \"{0}\" to UMD import declaration. After applying the rule \"{1}\", the result is an empty string.", [392862]: "Invalid path \"{0}\".{1}",
     };
     const noop = { type: "noop" };
     return self(context, opt);
     function self(...[context, opt = context.config.rules || { type: "simple", enum: "umd" }]) {
         const { path, config, parseRegExp, queryPackageVersion, currentFile, accessingImports, getCompilerOptions, resolveFolderImport, resolveJSONImport, runtime, treeshakeProvider, } = context;
-        const { extName, appendExtensionName, extNameRemote, appendExtensionNameForRemote, webModulePath } = config;
-        if (opt.type === "noop")
-            return noop;
-        if (path === ".")
-            return noop;
+        const { jsonImport, folderImport, extName, appendExtensionName, extNameRemote, appendExtensionNameForRemote, webModulePath, globalObject, } = config;
         const conf = extName !== null && extName !== void 0 ? extName : appendExtensionName;
         const expectedExtension = conf === true ? ".js" : conf !== null && conf !== void 0 ? conf : ".js";
+        if (opt.type === "noop")
+            return noop;
+        if (path === ".") {
+            if (folderImport)
+                return ToRewrite(appendExt("./index", expectedExtension));
+            else
+                return ToError(392862, ".", " Please write \"./index\" instead.");
+        }
         if (isBrowserCompatibleModuleSpecifier(path)) {
             if (conf === false)
                 return noop;
             const remote = extNameRemote !== null && extNameRemote !== void 0 ? extNameRemote : appendExtensionNameForRemote;
-            const { jsonImport, folderImport } = config;
             if (jsonImport && path.endsWith(".json")) {
+                const nondeterministicJSONImport = ToJSON(null, path);
                 if (runtime)
-                    return { type: "json", path, json: null };
+                    return nondeterministicJSONImport;
                 if (!currentFile)
-                    unreachable("", null);
-                else {
-                    const { path } = context;
-                    const nondeterministicJSONImport = { type: "json", json: null, path };
-                    if (isHTTPModuleSpecifier(path))
-                        return nondeterministicJSONImport;
-                    try {
-                        const json = resolveJSONImport(path, currentFile);
-                        switch (jsonImport) {
-                            case "data": return {
-                                type: "rewrite", nextPath: `data:text/javascript,export default JSON.parse(${JSON.stringify(json)})`,
-                            };
-                            case "inline":
-                            case true: return { type: "json", json, path };
-                            default: return unreachable("json", jsonImport);
-                        }
+                    return unreachable("", null);
+                if (isHTTPModuleSpecifier(path))
+                    return nondeterministicJSONImport;
+                try {
+                    const json = resolveJSONImport(path, currentFile);
+                    switch (jsonImport) {
+                        case "data": return ToRewrite(`data:text/javascript,export default JSON.parse(${JSON.stringify(json)})`);
+                        case "inline":
+                        case true: return ToJSON(json, path);
+                        default: return unreachable("json", jsonImport);
                     }
-                    catch (e) {
-                        return nondeterministicJSONImport;
-                    }
+                }
+                catch (e) {
+                    return nondeterministicJSONImport;
                 }
             }
             if (remote !== true && isHTTPModuleSpecifier(path))
@@ -204,19 +202,16 @@ function moduleSpecifierTransform(context, opt) {
             if (folderImport && currentFile) {
                 const result = resolveFolderImport(path, currentFile);
                 if (result)
-                    return { type: "rewrite", nextPath: appendExt(result, expectedExtension) };
+                    return ToRewrite(appendExt(result, expectedExtension));
             }
-            const nextPath = appendExt(path, expectedExtension);
-            return { type: "rewrite", nextPath: nextPath };
+            return ToRewrite(appendExt(path, expectedExtension));
         }
         const { sub, nspkg } = resolveNS(path);
         switch (opt.type) {
             case "simple": {
                 const e = opt.enum;
                 switch (e) {
-                    case "snowpack": return {
-                        nextPath: `${webModulePath !== null && webModulePath !== void 0 ? webModulePath : "/web_modules/"}${appendExt(path, expectedExtension)}`, type: "rewrite",
-                    };
+                    case "snowpack": return ToRewrite(`${webModulePath !== null && webModulePath !== void 0 ? webModulePath : "/web_modules/"}${appendExt(path, expectedExtension)}`);
                     case "pikacdn":
                     case "unpkg": {
                         const a = "https://cdn.pika.dev/$packageName$@$version$$subpath$";
@@ -228,9 +223,8 @@ function moduleSpecifierTransform(context, opt) {
                     }
                     case "umd":
                         const target = importPathToUMDName(path);
-                        const { globalObject } = config;
                         if (!target)
-                            return error(392859, path, "");
+                            return ToError(392859, path, "");
                         const nextOpt = {
                             type: "umd", target, globalObject, umdImportPath: void 0,
                         };
@@ -239,18 +233,18 @@ function moduleSpecifierTransform(context, opt) {
                 }
             }
             case "umd": {
-                const [{ globalObject }, { umdImportPath }] = [config, opt];
-                if (opt.treeshake && treeshakeProvider) {
-                    treeshakeProvider(path, accessingImports, opt.treeshake, getCompilerOptions());
-                    return { type: "umd", target: path, globalObject: opt.target, umdImportPath };
+                const { umdImportPath, treeshake, target } = opt;
+                if (treeshake && treeshakeProvider) {
+                    treeshakeProvider(path, accessingImports, treeshake, getCompilerOptions());
+                    return ToUMD({ target: path, globalObject: target, umdImportPath });
                 }
                 else {
-                    if (opt.treeshake)
+                    if (treeshake)
                         console.error("Tree shaking is not available at runtime.");
                     const target = importPathToUMDName(path);
                     if (!target)
-                        return error(392859, path, "");
-                    return { type: "umd", target, globalObject, umdImportPath };
+                        return ToError(392859, path, "");
+                    return ToUMD({ target, globalObject, umdImportPath });
                 }
             }
             case "url": {
@@ -262,9 +256,7 @@ function moduleSpecifierTransform(context, opt) {
                 if ((version && !withVersion && noVersion) || (!version && noVersion))
                     string = noVersion;
                 if (string)
-                    return {
-                        type: "rewrite", nextPath: string.replace(packageNameRegExp, nspkg).replace(subpathRegExp, sub === undefined ? "" : "/" + sub),
-                    };
+                    return ToRewrite(string.replace(packageNameRegExp, nspkg).replace(subpathRegExp, sub === undefined ? "" : "/" + sub));
                 return unreachable("url case", null);
             }
             case "complex": {
@@ -284,23 +276,32 @@ function moduleSpecifierTransform(context, opt) {
                         return self(context, ruleValue);
                     const target = rule === path ? ruleValue.target : path.replace(regexp, ruleValue.target);
                     if (!target)
-                        return error(392860, path, rule);
+                        return ToError(392860, path, rule);
                     const umdName = importPathToUMDName(path);
                     const version = queryPackageVersion(path);
                     const { globalObject = config.globalObject, umdImportPath } = ruleValue;
                     if (!umdName && (target.match(umdNameRegExp) || (umdImportPath === null || umdImportPath === void 0 ? void 0 : umdImportPath.match(umdNameRegExp))))
-                        return error(392859, path, rule);
+                        return ToError(392859, path, rule);
                     if (!version && (target.match(versionRegExp) || (umdImportPath === null || umdImportPath === void 0 ? void 0 : umdImportPath.match(versionRegExp))))
-                        return error(392861, path, rule);
+                        return ToError(392861, path, rule);
                     const [nextTarget, nextUMDImportPath] = [target, umdImportPath || ""].map((x) => x.replace(packageNameRegExp, path).replace(umdNameRegExp, umdName).replace(versionRegExp, version));
-                    return { type: "umd", target: nextTarget, globalObject, umdImportPath: nextUMDImportPath };
+                    return ToUMD({ target: nextTarget, globalObject, umdImportPath: nextUMDImportPath });
                 }
                 return noop;
             }
             default: return unreachable("opt switch", opt);
         }
     }
-    function error(type, arg0, arg1) {
+    function ToUMD(rest) {
+        return Object.assign({ type: "umd" }, rest);
+    }
+    function ToRewrite(nextPath) {
+        return { type: "rewrite", nextPath };
+    }
+    function ToJSON(json, path) {
+        return { type: "json", json, path };
+    }
+    function ToError(type, arg0, arg1) {
         return {
             type: "error", message: message[type].replace("{0}", arg0).replace("{1}", arg1), code: type, key: type.toString(),
         };

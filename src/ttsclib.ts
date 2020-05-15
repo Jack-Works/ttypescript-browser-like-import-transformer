@@ -141,27 +141,31 @@ export function __customDynamicImportHelper(
 ) {
     return (p: string) => _(p, c, d, u, m)
 }
+type ToJSON = {
+    type: 'json'
+    json: string | null
+    path: string
+}
+
+type ToRewrite = {
+    type: 'rewrite'
+    nextPath: string
+}
+type DiagObj = {
+    message: string
+    key: string
+    code: number
+}
+type ToError = {
+    type: 'error'
+} & DiagObj
+
+type ToNoOP = {
+    type: 'noop'
+}
+
 //#region Internal code
-type ModuleSpecifierTransformResult =
-    | {
-          type: 'json'
-          json: string | null
-          path: string
-      }
-    | {
-          type: 'rewrite'
-          nextPath: string
-      }
-    | {
-          type: 'error'
-          message: string
-          key: string
-          code: number
-      }
-    | {
-          type: 'noop'
-      }
-    | RewriteRulesUMD
+type ModuleSpecifierTransformResult = ToJSON | ToRewrite | ToError | ToNoOP | RewriteRulesUMD
 /**
  * This function will also be included in the runtime for dynamic transform.
  * @internal
@@ -196,14 +200,16 @@ export function moduleSpecifierTransform(
         TransformToUMDFailed = 392859,
         TransformToUMDFailedCustom,
         QueryPackageVersionFailed,
+        InvalidPath,
     }
     const message = {
-        [Diag.TransformToUMDFailed]: 'Failed to transform the path {0} to UMD import declaration.',
-        [Diag.QueryPackageVersionFailed]: 'Failed to query the package version of import {0}.',
+        [Diag.TransformToUMDFailed]: 'Failed to transform the path "{0}" to UMD import declaration.',
+        [Diag.QueryPackageVersionFailed]: 'Failed to query the package version of import "{0}".',
         [Diag.TransformToUMDFailedCustom]:
-            'Failed to transform the path {0} to UMD import declaration. After applying the rule {1}, the result is an empty string.',
+            'Failed to transform the path "{0}" to UMD import declaration. After applying the rule "{1}", the result is an empty string.',
+        [Diag.InvalidPath]: 'Invalid path "{0}".{1}',
     }
-    const noop = { type: 'noop' } as const
+    const noop: ToNoOP = { type: 'noop' }
     return self(context, opt)
     /** Can't use the name moduleSpecifierTransform to do recursive, the name might be changed in the inline mode */
     function self(
@@ -224,50 +230,55 @@ export function moduleSpecifierTransform(
             runtime,
             treeshakeProvider,
         } = context
-        const { extName, appendExtensionName, extNameRemote, appendExtensionNameForRemote, webModulePath } = config
-        if (opt.type === 'noop') return noop
-        if (path === '.') return noop
-
+        const {
+            jsonImport,
+            folderImport,
+            extName,
+            appendExtensionName,
+            extNameRemote,
+            appendExtensionNameForRemote,
+            webModulePath,
+            globalObject,
+        } = config
         const conf = extName ?? appendExtensionName
         const expectedExtension = conf === true ? '.js' : conf ?? '.js'
+
+        if (opt.type === 'noop') return noop
+        if (path === '.') {
+            // special case fast pass
+            if (folderImport) return ToRewrite(appendExt('./index', expectedExtension))
+            else return ToError(Diag.InvalidPath, '.', ' Please write "./index" instead.')
+        }
         if (isBrowserCompatibleModuleSpecifier(path)) {
             if (conf === false) return noop
             const remote = extNameRemote ?? appendExtensionNameForRemote
-            const { jsonImport, folderImport } = config
             if (jsonImport && path.endsWith('.json')) {
-                if (runtime) return { type: 'json', path, json: null }
-                if (!currentFile) unreachable('', null!)
-                else {
-                    const { path } = context
-                    const nondeterministicJSONImport = { type: 'json', json: null, path } as const
-                    if (isHTTPModuleSpecifier(path)) return nondeterministicJSONImport
-                    try {
-                        const json = resolveJSONImport(path, currentFile)
-                        switch (jsonImport) {
-                            case 'data':
-                                return {
-                                    type: 'rewrite',
-                                    nextPath: `data:text/javascript,export default JSON.parse(${JSON.stringify(json)})`,
-                                }
-                            case 'inline':
-                            case true:
-                                return { type: 'json', json, path }
-                            default:
-                                return unreachable('json', jsonImport)
-                        }
-                    } catch (e) {
-                        return nondeterministicJSONImport
+                const nondeterministicJSONImport = ToJSON(null, path)
+                if (runtime) return nondeterministicJSONImport
+                if (!currentFile) return unreachable('', null!)
+                if (isHTTPModuleSpecifier(path)) return nondeterministicJSONImport
+                try {
+                    const json = resolveJSONImport(path, currentFile)
+                    switch (jsonImport) {
+                        case 'data':
+                            return ToRewrite(`data:text/javascript,export default JSON.parse(${JSON.stringify(json)})`)
+                        case 'inline':
+                        case true:
+                            return ToJSON(json, path)
+                        default:
+                            return unreachable('json', jsonImport)
                     }
+                } catch (e) {
+                    return nondeterministicJSONImport
                 }
             }
             if (remote !== true && isHTTPModuleSpecifier(path)) return noop
             if (endsWithExt(path, expectedExtension)) return noop
             if (folderImport && currentFile) {
                 const result = resolveFolderImport(path, currentFile)
-                if (result) return { type: 'rewrite', nextPath: appendExt(result, expectedExtension) }
+                if (result) return ToRewrite(appendExt(result, expectedExtension))
             }
-            const nextPath = appendExt(path, expectedExtension)
-            return { type: 'rewrite', nextPath: nextPath }
+            return ToRewrite(appendExt(path, expectedExtension))
         }
         const { sub, nspkg } = resolveNS(path)
         switch (opt.type) {
@@ -275,10 +286,7 @@ export function moduleSpecifierTransform(
                 const e = opt.enum
                 switch (e) {
                     case 'snowpack':
-                        return {
-                            nextPath: `${webModulePath ?? '/web_modules/'}${appendExt(path, expectedExtension)}`,
-                            type: 'rewrite',
-                        }
+                        return ToRewrite(`${webModulePath ?? '/web_modules/'}${appendExt(path, expectedExtension)}`)
                     case 'pikacdn':
                     case 'unpkg': {
                         const a = 'https://cdn.pika.dev/$packageName$@$version$$subpath$'
@@ -290,9 +298,7 @@ export function moduleSpecifierTransform(
                     }
                     case 'umd':
                         const target = importPathToUMDName(path)
-                        const { globalObject } = config
-                        if (!target) return error(Diag.TransformToUMDFailed, path, '')
-                        // TODO: Collect some common CDN path maybe?
+                        if (!target) return ToError(Diag.TransformToUMDFailed, path, '')
                         const nextOpt: RewriteRulesUMD = {
                             type: 'umd',
                             target,
@@ -305,15 +311,15 @@ export function moduleSpecifierTransform(
                 }
             }
             case 'umd': {
-                const [{ globalObject }, { umdImportPath }] = [config, opt]
-                if (opt.treeshake && treeshakeProvider) {
-                    treeshakeProvider(path, accessingImports, opt.treeshake, getCompilerOptions())
-                    return { type: 'umd', target: path, globalObject: opt.target, umdImportPath }
+                const { umdImportPath, treeshake, target } = opt
+                if (treeshake && treeshakeProvider) {
+                    treeshakeProvider(path, accessingImports, treeshake, getCompilerOptions())
+                    return ToUMD({ target: path, globalObject: target, umdImportPath })
                 } else {
-                    if (opt.treeshake) console.error('Tree shaking is not available at runtime.')
+                    if (treeshake) console.error('Tree shaking is not available at runtime.')
                     const target = importPathToUMDName(path)
-                    if (!target) return error(Diag.TransformToUMDFailed, path, '')
-                    return { type: 'umd', target, globalObject, umdImportPath }
+                    if (!target) return ToError(Diag.TransformToUMDFailed, path, '')
+                    return ToUMD({ target, globalObject, umdImportPath })
                 }
             }
             case 'url': {
@@ -323,12 +329,11 @@ export function moduleSpecifierTransform(
                 if (version && withVersion) string = withVersion.replace(versionRegExp, version)
                 if ((version && !withVersion && noVersion) || (!version && noVersion)) string = noVersion
                 if (string)
-                    return {
-                        type: 'rewrite',
-                        nextPath: string
+                    return ToRewrite(
+                        string
                             .replace(packageNameRegExp, nspkg)
                             .replace(subpathRegExp, sub === undefined ? '' : '/' + sub),
-                    }
+                    )
                 return unreachable('url case', null!)
             }
             case 'complex': {
@@ -345,22 +350,22 @@ export function moduleSpecifierTransform(
                     if (ruleValue.type === 'umd' && ruleValue.treeshake) return self(context, ruleValue)
 
                     const target = rule === path ? ruleValue.target : path.replace(regexp!, ruleValue.target)
-                    if (!target) return error(Diag.TransformToUMDFailedCustom, path, rule)
+                    if (!target) return ToError(Diag.TransformToUMDFailedCustom, path, rule)
 
                     const umdName = importPathToUMDName(path)
                     const version = queryPackageVersion(path)
                     const { globalObject = config.globalObject, umdImportPath } = ruleValue
                     if (!umdName && (target.match(umdNameRegExp) || umdImportPath?.match(umdNameRegExp)))
-                        return error(Diag.TransformToUMDFailed, path, rule)
+                        return ToError(Diag.TransformToUMDFailed, path, rule)
                     if (!version && (target.match(versionRegExp) || umdImportPath?.match(versionRegExp)))
-                        return error(Diag.QueryPackageVersionFailed, path, rule)
+                        return ToError(Diag.QueryPackageVersionFailed, path, rule)
                     const [nextTarget, nextUMDImportPath] = [target, umdImportPath || ''].map((x) =>
                         x
                             .replace(packageNameRegExp, path)
                             .replace(umdNameRegExp, umdName!)
                             .replace(versionRegExp, version!),
                     )
-                    return { type: 'umd', target: nextTarget, globalObject, umdImportPath: nextUMDImportPath }
+                    return ToUMD({ target: nextTarget, globalObject, umdImportPath: nextUMDImportPath })
                 }
                 return noop
             }
@@ -368,7 +373,16 @@ export function moduleSpecifierTransform(
                 return unreachable('opt switch', opt)
         }
     }
-    function error(type: Diag, arg0: string, arg1: string): ModuleSpecifierTransformResult {
+    function ToUMD(rest: Omit<RewriteRulesUMD, 'type'>): RewriteRulesUMD {
+        return { type: 'umd', ...rest }
+    }
+    function ToRewrite(nextPath: string): ToRewrite {
+        return { type: 'rewrite', nextPath }
+    }
+    function ToJSON(json: ToJSON['json'], path: ToJSON['path']): ToJSON {
+        return { type: 'json', json, path }
+    }
+    function ToError(type: Diag, arg0: string, arg1: string): ToError {
         return {
             type: 'error',
             message: message[type].replace('{0}', arg0).replace('{1}', arg1),
