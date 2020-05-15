@@ -310,18 +310,12 @@ function updateImportExportDeclaration(
         case 'umd':
             return umd(rewriteStrategy)
         case 'json':
-            const { json, path } = rewriteStrategy
-            // Sorry for the copy-paste from ttsclib. remind to sync them.
-            function isHTTPModuleSpecifier(path: string) {
-                return path.startsWith('http://') || path.startsWith('https://')
-            }
-            // noop
-            if (!json && isHTTPModuleSpecifier(rewriteStrategy.path)) return [node]
+            const { json } = rewriteStrategy
+            // If the JSON doesn't exist fallback, do not rewrite it
+            if (!json) return [node]
             const t: ExprTarget = {
                 type: 'umd',
-                target: json
-                    ? createJSONObject(ts, json)
-                    : createThrowExpression(ts, 'SyntaxError', `GET ${rewriteStrategy.path} net::ERR_FILE_NOT_FOUND`),
+                target: createJSONObject(ts, json),
             }
             return umd(t, true)
         default:
