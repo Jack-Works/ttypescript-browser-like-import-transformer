@@ -5,5 +5,5 @@ const map = new Map([
     ['@material-ui/core', 'MaterialUI'],
 ])
 export function queryWellknownUMD(packageName: string) {
-    return map.get(packageName)
+    return map.get(packageName) ?? null
 }

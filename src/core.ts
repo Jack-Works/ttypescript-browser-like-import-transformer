@@ -41,10 +41,11 @@ export interface CustomTransformationContext<T extends Node> {
     config: NormalizedPluginConfig
     context: TransformationContext
     node: T
-    queryWellknownUMD: (path: string) => string | undefined
+    queryWellknownUMD: (path: string) => string | null
     importMapResolve: (opt: ImportMapFunctionOpts) => string | null
     queryPackageVersion: (pkg: string) => string | null
-    resolveJSONImport: (path: string, parent: string) => string
+    resolveJSONImport: (path: string, parent: string) => string | null
+    resolveFolderImport: (path: string, parent: string) => string | null
     getCompilerOptions: () => CompilerOptions
     treeshakeProvider?: (
         pkg: string,
@@ -72,6 +73,7 @@ export default function createTransformer(
         | 'ts'
         | 'treeshakeProvider'
         | 'resolveJSONImport'
+        | 'resolveFolderImport'
     >,
 ) {
     const { ts, configParser, importMapResolve } = core

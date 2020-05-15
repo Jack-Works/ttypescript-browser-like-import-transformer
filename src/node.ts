@@ -6,7 +6,7 @@ import * as ts from 'typescript'
 import * as ttsclib from './ttsclib'
 import * as configParser from './config-parser'
 import { queryWellknownUMD } from './well-known-umd'
-import { readFileSync, writeFileSync } from 'fs'
+import { readFileSync, writeFileSync, existsSync } from 'fs'
 import { join, relative, posix } from 'path'
 import type { ImportMapFunctionOpts, RewriteRulesUMD } from './plugin-config'
 export default creatTransform({
@@ -19,6 +19,16 @@ export default creatTransform({
     treeshakeProvider,
     resolveJSONImport(path, parent) {
         return readFileSync(join(parent, '../', path), 'utf-8')
+    },
+    resolveFolderImport(path, parent) {
+        const absolute = join(parent, '../', path)
+        let indexed = posix.join(path, './index')
+        if (!indexed.startsWith('.')) indexed = './' + indexed
+        const candidates = guessExtension(absolute, path).concat(guessExtension(join(absolute, './index'), indexed))
+        function guessExtension(x: string, orig: string) {
+            return ['.tsx', '.ts', '.mjs', '.cjs', '.jsx', '.js'].map((y) => [x + y, orig] as const)
+        }
+        return candidates.find(([a]) => existsSync(a))?.[1] ?? null
     },
 })
 

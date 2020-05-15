@@ -219,6 +219,10 @@ export interface PluginConfigs {
      *
      * Only open it when your codebase is not easy to migrate from Node specified behaviors.
      *
+     * **Important**: if you want to keep JSON identity between different files, please use "data" mode.
+     *
+     * **Important**: if your environment use CSP and bans data URL, please use "inline" mode.
+     *
      * - undefined: disable this feature
      *
      * - true: same as "inline"
@@ -254,6 +258,34 @@ export interface PluginConfigs {
      *
      */
     jsonImport?: 'data' | 'inline' | true
+    /**
+     * Resolve NodeJS style path './x' to './x/index.js'
+     * @defaultValue undefined
+     * @remarks
+     *
+     * Resolve NodeJS style folder import to their correct path.
+     *
+     * Not recommend because it never will become a Web standard.
+     *
+     * Only open it when your codebase is not easy to migrate from Node specified behaviors.
+     *
+     * @example
+     *
+     * Source:
+     * !src(folder-import/index.ts)
+     * !src(folder-import/folder/index.ts)
+     * !src(folder-import/f2/index.ts)
+     * !src(folder-import/f2/f2.ts)
+     * !src(folder-import/f2/inner/f.ts)
+     *
+     * Output:
+     * !out(folder-import/index.js)
+     * !out(folder-import/folder/index.js)
+     * !out(folder-import/f2/index.js)
+     * !out(folder-import/f2/f2.js)
+     * !out(folder-import/f2/inner/f.js)
+     */
+    folderImport?: boolean
 }
 /**
  * @public

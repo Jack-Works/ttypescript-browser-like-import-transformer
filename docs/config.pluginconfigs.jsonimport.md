@@ -20,6 +20,10 @@ Not recommend because this is not a Web standard yet.
 
 Only open it when your codebase is not easy to migrate from Node specified behaviors.
 
+\*\*Important\*\*: if you want to keep JSON identity between different files, please use "data" mode.
+
+\*\*Important\*\*: if your environment use CSP and bans data URL, please use "inline" mode.
+
 - undefined: disable this feature
 
 - true: same as "inline"
