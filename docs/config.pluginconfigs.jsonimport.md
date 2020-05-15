@@ -14,7 +14,13 @@ jsonImport?: 'data' | 'inline' | true
 
 ## Remarks
 
-Resolve the JSON import
+Resolve the JSON import.
+
+Not recommend because this is not a Web standard yet.
+
+Only open it when your codebase is not easy to migrate from Node specified behaviors.
+
+- undefined: disable this feature
 
 - true: same as "inline"
 
