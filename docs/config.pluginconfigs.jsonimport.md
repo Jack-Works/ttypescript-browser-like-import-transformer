@@ -47,7 +47,7 @@ Filename: `json-import-auto/tsconfig.json`
         "module": "ESNext",
         "plugins": [
             {
-                "transform": "../../../cjs/node.js",
+                "transform": "@magic-works/ttypescript-browser-like-import-transformer",
                 "jsonImport": true
             }
         ],

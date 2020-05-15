@@ -58,7 +58,7 @@ Filename: `treeshake-test/tsconfig.json`
         "plugins": [
             {
                 // @magic-works/ttypescript-browser-like-import-transformer
-                "transform": "../../../cjs/node.js",
+                "transform": "@magic-works/ttypescript-browser-like-import-transformer",
                 "after": true,
                 "rules": {
                     "/(.+)/": {
