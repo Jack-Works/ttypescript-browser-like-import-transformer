@@ -42,7 +42,7 @@ const y = __UMDBindCheck(globalThis["lodash"], ["default"], "lodash", "globalThi
 import z from "https://unpkg.com/lodash-es?module";
 import w from "/web_modules/other.js";
 console.log(x, y, z, w, i);
-import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.0.2/es/ttsclib.min.js";
+import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.0.5/es/ttsclib.min.js";
 
 ```
 This option also support treeshake.
@@ -98,15 +98,15 @@ export { x_1 as x, y_1 as y, z_1 as z };
 console.log(a, c, d);
 "import \"3\" is eliminated because it expected to have no side effects in UMD transform.";
 "import \"4\" is eliminated because it expected to have no side effects in UMD transform.";
-import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.0.2/es/ttsclib.min.js";
+import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.0.5/es/ttsclib.min.js";
 
 ```
 Extra file: (Therefore you can feed this file to Webpack / Rollup and get treeshaked.)
 
 ```js
 const _ = new Map();
-import { a as _1, c as _2 } from "1";
-_.set("1", createESModuleInterop({ a: _1, c: _2 }));
+import { a as _1, b as _2 } from "1";
+_.set("1", createESModuleInterop({ a: _1, b: _2 }));
 import * as _3 from "2";
 _.set("2", _3);
 import "3";

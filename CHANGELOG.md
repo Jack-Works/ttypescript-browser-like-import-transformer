@@ -2,6 +2,36 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.6](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/compare/v2.0.5...v2.0.6) (2020-05-14)
+
+
+### Bug Fixes
+
+* wrong tree shaking result ([9f0025b](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/commit/9f0025b63b8738abb1d435cb1f59e0439608e3f9))
+
+### [2.0.5](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/compare/v2.0.4...v2.0.5) (2020-05-12)
+
+
+### Bug Fixes
+
+* re-impl [#19](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/issues/19) ([4e51686](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/commit/4e51686d44753c1e50767812fb1eb31cfda0161a))
+
+### [2.0.4](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/compare/v2.0.3...v2.0.4) (2020-05-06)
+
+
+### Bug Fixes
+
+* outdated es/cjs files ([1d3a2b2](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/commit/1d3a2b21702bfdbdc0e0444739a493917c889f44))
+
+### [2.0.3](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/compare/v2.0.2...v2.0.3) (2020-05-05)
+
+
+### Bug Fixes
+
+* exclude blob and data urls from transform, close [#18](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/issues/18) ([bcd56e4](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/commit/bcd56e40549b76e0f8d3065a63be9643eda13eec))
+* r.config is not iterable ([c3f1c64](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/commit/c3f1c64f1b1ab2685552754d220cb3c8ebde4195))
+* umd bind check failed for function exports close [#15](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/issues/15) ([f82e057](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/commit/f82e057b9b47f207d5f36fc833531b1fae71f319))
+
 ### [2.0.2](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/compare/v2.0.0...v2.0.2) (2020-03-01)
 
 

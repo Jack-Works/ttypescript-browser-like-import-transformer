@@ -8,7 +8,7 @@ import * as configParser from './config-parser'
 import { queryWellknownUMD } from './well-known-umd'
 import { readFileSync, writeFileSync } from 'fs'
 import { join, relative, posix } from 'path'
-import { ImportMapFunctionOpts, BareModuleRewriteUMD } from './plugin-config'
+import type { ImportMapFunctionOpts, BareModuleRewriteUMD } from './plugin-config'
 export default creatTransform({
     ts,
     queryWellknownUMD,
@@ -36,7 +36,7 @@ function treeshakeProvider(
     if (!fileMap.has(dependency)) fileMap.set(dependency, new Set())
     const usedImports = fileMap.get(dependency)!
 
-    accessImports.forEach(x => usedImports.add(x))
+    accessImports.forEach((x) => usedImports.add(x))
 
     {
         const end = ';\n'
@@ -56,14 +56,14 @@ function treeshakeProvider(
             }
             if (bindings.has('!')) file += `import ${path}` + end
             const binds = Array.from(bindings)
-                .filter(x => x !== '!')
-                .map<[string, string]>(x => {
+                .filter((x) => x !== '!')
+                .map<[string, string]>((x) => {
                     const uniq = uniqueName()
                     return [x, uniq]
                 })
             if (binds.length === 0) continue
-            file += `import { ${binds.map(x => x.join(' as ')).join(', ')} } from ${path}` + end
-            file += `_.set(${path}, createESModuleInterop({ ${binds.map(x => x.join(': ')).join(', ')} }))` + end
+            file += `import { ${binds.map((x) => x.join(' as ')).join(', ')} } from ${path}` + end
+            file += `_.set(${path}, createESModuleInterop({ ${binds.map((x) => x.join(': ')).join(', ')} }))` + end
         }
         file += `export default (${createExport.toString()})()` + end
         file += createESModuleInterop.toString() + end

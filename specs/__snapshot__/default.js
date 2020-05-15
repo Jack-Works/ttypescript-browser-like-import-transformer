@@ -28,4 +28,4 @@ export * as e1 from "./c.js";
 // browser style import
 export { c2, d2 } from 'http://example.com/';
 export * as e2 from 'http://example.com/';
-import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.0.2/es/ttsclib.min.js";
+import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.0.5/es/ttsclib.min.js";

@@ -5,9 +5,9 @@
  * and expected to run in any ES2020 compatible environment (with console.warn).
  */
 
-import { BareModuleRewriteUMD } from './plugin-config'
-import { CustomTransformationContext } from './core'
-import { NormalizedPluginConfig, NormalizedBareModuleRewrite } from './config-parser'
+import type { BareModuleRewriteUMD } from './plugin-config'
+import type { CustomTransformationContext } from './core'
+import type { NormalizedPluginConfig, NormalizedBareModuleRewrite } from './config-parser'
 
 /**
  * This function is a helper for UMD transform.
@@ -52,8 +52,9 @@ export function __UMDBindCheck(
             console.warn(umdInvalid)
         }
     }
-    if (typeof mod !== 'object' || mod === null) {
-        throw new SyntaxError(`${head} provides an invalid export object. The provided record is type of ${typeof mod}`)
+    const modType = typeof mod
+    if ((modType !== 'object' && modType !== 'function') || mod === null) {
+        throw new SyntaxError(`${head} provides an invalid export object. The provided record is type of ${modType}`)
     }
     if (hasESModuleInterop && bindings.toString() === 'default' && (mod as any).default === undefined) {
         throw new SyntaxError(umdInvalid)
@@ -191,14 +192,12 @@ export function moduleSpecifierTransform(
         const { path, config, parseRegExp, queryPackageVersion } = context
         if (opt.type === 'noop') return noop
 
+        const expectedExtension = config.appendExtensionName === true ? '.js' : config.appendExtensionName ?? '.js'
         if (isBrowserCompatibleModuleSpecifier(path)) {
             if (path === '.') return noop
             if (config.appendExtensionName === false) return noop
             if (config.appendExtensionNameForRemote !== true && isHTTPModuleSpecifier(path)) return noop
-            const nextPath = appendExtensionName(
-                path,
-                config.appendExtensionName === true ? '.js' : config.appendExtensionName ?? '.js',
-            )
+            const nextPath = appendExtensionName(path, expectedExtension)
             return { type: 'rewrite', nextPath: nextPath }
         }
         const { sub, nspkg } = resolveNS(path)
@@ -207,7 +206,13 @@ export function moduleSpecifierTransform(
                 const e = opt.enum
                 switch (e) {
                     case 'snowpack':
-                        return { nextPath: `${config.webModulePath ?? '/web_modules/'}${path}.js`, type: 'rewrite' }
+                        return {
+                            nextPath: `${config.webModulePath ?? '/web_modules/'}${appendExtensionName(
+                                path,
+                                expectedExtension,
+                            )}`,
+                            type: 'rewrite',
+                        }
                     case 'pikacdn':
                     case 'unpkg': {
                         const a = 'https://cdn.pika.dev/$packageName$@$version$$subpath$'
@@ -288,7 +293,7 @@ export function moduleSpecifierTransform(
                         return error(Diag.TransformToUMDFailed, path, rule)
                     if (!version && (target.match(versionRegExp) || umdImportPath?.match(versionRegExp)))
                         return error(Diag.QueryPackageVersionFailed, path, rule)
-                    const [nextTarget, nextUMDImportPath] = [target, umdImportPath || ''].map(x =>
+                    const [nextTarget, nextUMDImportPath] = [target, umdImportPath || ''].map((x) =>
                         x
                             .replace(packageNameRegExp, path)
                             .replace(umdNameRegExp, umdName!)
@@ -315,7 +320,7 @@ export function moduleSpecifierTransform(
         throw new Error('Unreachable case at ' + str)
     }
     function isBrowserCompatibleModuleSpecifier(path: string) {
-        return isHTTPModuleSpecifier(path) || isLocalModuleSpecifier(path)
+        return isHTTPModuleSpecifier(path) || isLocalModuleSpecifier(path) || isDataOrBlobModuleSpecifier(path)
     }
     function isHTTPModuleSpecifier(path: string) {
         return path.startsWith('http://') || path.startsWith('https://')
@@ -323,7 +328,11 @@ export function moduleSpecifierTransform(
     function isLocalModuleSpecifier(path: string) {
         return path.startsWith('.') || path.startsWith('/')
     }
-    function appendExtensionName(path: string, expectedExt: string) {
+    function isDataOrBlobModuleSpecifier(path: string) {
+        return path.startsWith('blob:') || path.startsWith('data:')
+    }
+    function appendExtensionName(path: string, expectedExt: string | false) {
+        if (expectedExt === false) return path
         if (path.endsWith(expectedExt)) return path
         return path + expectedExt
     }
