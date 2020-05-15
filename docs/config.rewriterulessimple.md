@@ -64,7 +64,7 @@ console.log('Should run after all imports', a, b, c2, d, e, c2);
 const c = 1;
 const x = 1;
 export { x };
-import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.0.6/es/ttsclib.min.js";
+import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.1.0/es/ttsclib.min.js";
 
 ```
 Filename: `rules-pikacdn.js`

@@ -33,7 +33,9 @@ function replace(str, regex, getFile) {
 
 Filename: \`${file}\`
 ${backquote}${file.replace(/^.+\./, '')}
-${getFile(file).replace(/[\s\r\n]+$/, '')}
+${getFile(file)
+    .replace(/[\s\r\n]+$/, '')
+    .replace('../../../cjs/node.js', '@magic-works/ttypescript-browser-like-import-transformer')}
 ${backquote}
 `
             .split('\n')
