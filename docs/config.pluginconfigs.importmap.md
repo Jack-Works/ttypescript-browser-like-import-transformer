@@ -65,6 +65,7 @@ Filename: `snowpack/src/index.ts`
 ```ts
 import * as _ from 'lodash-es'
 console.log(_)
+import './another'
 
 ```
 Output:
@@ -74,6 +75,7 @@ Filename: `snowpack/index.js`
 ```js
 import * as _ from "/web_modules/lodash-es.js?rev=806d1b9f78";
 console.log(_);
+import "./another.js";
 
 ```
 
