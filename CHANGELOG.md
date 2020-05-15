@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.2](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/compare/v2.1.1...v2.1.2) (2020-05-15)
+
+
+### Bug Fixes
+
+* import map support for relative path ([6db1d4f](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/commit/6db1d4f5a77125aad9103ccc20493958d764e3e8))
+
 ### [2.1.1](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/compare/v2.1.0...v2.1.1) (2020-05-15)
 
 
