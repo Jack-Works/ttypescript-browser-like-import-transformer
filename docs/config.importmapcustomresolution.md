@@ -18,6 +18,6 @@ See [ImportMapFunctionOpts](./config.importmapfunctionopts.md)
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [function](./config.importmapcustomresolution.function.md) | <code>(opt: ImportMapFunctionOpts) =&gt; string &#124; null</code> | The function that will resolve a path to another path. |
-|  [type](./config.importmapcustomresolution.type.md) | <code>'function'</code> |  |
+|  [function](./config.importmapcustomresolution.function.md) | (opt: [ImportMapFunctionOpts](./config.importmapfunctionopts.md)<!-- -->) =&gt; string \| null | The function that will resolve a path to another path. |
+|  [type](./config.importmapcustomresolution.type.md) | 'function' |  |
 

@@ -73,7 +73,7 @@ import "../f2/index.js";
 Filename: `folder-import/f2/index.js`
 
 ```js
-
+export {};
 
 ```
 Filename: `folder-import/f2/f2.js`
