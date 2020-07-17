@@ -69,7 +69,7 @@ export * as e from "std:c";
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [noVersion](./config.rewriterulesurl.noversion.md) | <code>string</code> | Rewrite to this URL if the transformer can't read the version of the package |
-|  [type](./config.rewriterulesurl.type.md) | <code>'url'</code> |  |
-|  [withVersion](./config.rewriterulesurl.withversion.md) | <code>string</code> | Rewrite to this URL if the transformer can read the version of the package |
+|  [noVersion](./config.rewriterulesurl.noversion.md) | string | Rewrite to this URL if the transformer can't read the version of the package |
+|  [type](./config.rewriterulesurl.type.md) | 'url' |  |
+|  [withVersion](./config.rewriterulesurl.withversion.md) | string | Rewrite to this URL if the transformer can read the version of the package |
 

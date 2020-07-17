@@ -154,9 +154,9 @@ function createESModuleInterop(x) {
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [globalObject](./config.rewriterulesumd.globalobject.md) | <code>string</code> | When using UMD import, this option indicates what global object will be used to find the UMD variables. |
-|  [target](./config.rewriterulesumd.target.md) | <code>string</code> | Rewrite the matching import statement to specified global variable |
-|  [treeshake](./config.rewriterulesumd.treeshake.md) | <code>{</code><br/><code>        out: string</code><br/><code>    }</code> |  |
-|  [type](./config.rewriterulesumd.type.md) | <code>'umd'</code> |  |
-|  [umdImportPath](./config.rewriterulesumd.umdimportpath.md) | <code>string</code> | should be a URL. Will use a <code>import 'umdImportPath'</code> to load the UMD then deconstruct from it. |
+|  [globalObject](./config.rewriterulesumd.globalobject.md) | string | When using UMD import, this option indicates what global object will be used to find the UMD variables. |
+|  [target](./config.rewriterulesumd.target.md) | string | Rewrite the matching import statement to specified global variable |
+|  [treeshake](./config.rewriterulesumd.treeshake.md) | { out: string } |  |
+|  [type](./config.rewriterulesumd.type.md) | 'umd' |  |
+|  [umdImportPath](./config.rewriterulesumd.umdimportpath.md) | string | should be a URL. Will use a <code>import 'umdImportPath'</code> to load the UMD then deconstruct from it. |
 

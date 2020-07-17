@@ -39,6 +39,6 @@ The function must be an ArrowFunctionExpression on the syntax level.
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [function](./config.dynamicimportpathrewritecustom.function.md) | <code>string</code> | The function string. It must be an ArrowFunctionExpression. |
-|  [type](./config.dynamicimportpathrewritecustom.type.md) | <code>'custom'</code> |  |
+|  [function](./config.dynamicimportpathrewritecustom.function.md) | string | The function string. It must be an ArrowFunctionExpression. |
+|  [type](./config.dynamicimportpathrewritecustom.type.md) | 'custom' |  |
 
