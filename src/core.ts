@@ -401,7 +401,7 @@ function importOrExportClauseToUMD(
                     node.elements.map<ImportSpecifier>((x) => {
                         const id = ts.createFileLevelUniqueName(x.name.text)
                         ghostBindings.set(x, id)
-                        return ts.createImportSpecifier(x.propertyName, id)
+                        return ts.createImportSpecifier(x.propertyName || ts.createIdentifier(x.name.text), id)
                     }),
                 ),
             ),
@@ -471,7 +471,7 @@ function importOrExportClauseToUMD(
     function transformNamedImportExport(namedImport: NamedImportsOrExports, modifiers: Modifier[] = []) {
         const elements: Array<ImportSpecifier | ExportSpecifier> = []
         namedImport.elements.forEach((y: typeof elements[0]) => elements.push(y))
-        // ? const { a: b, c: d } = __importBindingCheck(value, name, path, mappedName)
+        // ? const { a: b, c: d } = __UMDBindCheck(value, name, path, mappedName)
         return ts.createVariableStatement(
             modifiers,
             ts.createVariableDeclarationList(

@@ -5,7 +5,7 @@ const { useState } = __UMDBindCheck(globalThis["React"], ["useState"], "react", 
 const React = __UMDBindCheck(globalThis["React"], [], "react", "globalThis.React", false);
 const React_1 = __UMDBindCheck(globalThis["React"], [], "react", "globalThis.React", false);
 export { React_1 as React };
-const { useState_1 } = __UMDBindCheck(globalThis["React"], ["useState"], "react", "globalThis.React", false);
+const { useState: useState_1 } = __UMDBindCheck(globalThis["React"], ["useState"], "react", "globalThis.React", false);
 export { useState_1 as useState };
 console.log(x, useState, React);
 import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.1.2/es/ttsclib.min.js";

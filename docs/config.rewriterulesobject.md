@@ -98,7 +98,7 @@ const a = __UMDBindCheck(globalThis["a"], ["default"], "a", "globalThis.a", fals
 const b = __UMDBindCheck(globalThis["b"], ["default"], "b", "globalThis.b", false).default;
 const { c: c2, d } = __UMDBindCheck(globalThis["b"], ["c", "d"], "b", "globalThis.b", false);
 const e = __UMDBindCheck(globalThis["c"], [], "c", "globalThis.c", false);
-const { c_1, d_1 } = __UMDBindCheck(globalThis["b"], ["c", "d"], "b", "globalThis.b", false);
+const { c: c_1, d: d_1 } = __UMDBindCheck(globalThis["b"], ["c", "d"], "b", "globalThis.b", false);
 export { c_1 as c, d_1 as d };
 const e_1 = __UMDBindCheck(globalThis["c"], [], "c", "globalThis.c", false);
 export { e_1 as e };

@@ -18,21 +18,24 @@ const filter = process.argv[2]
 if (isMainThread) {
     for (const testFile of readdirSync(dir)) {
         if (filter !== undefined && !testFile.toLowerCase().match(filter)) continue
-        // worker({ path: join(dir, testFile), filename: testFile }).catch((x) => {
-        //     debugger
-        //     console.error(x)
-        //     process.exit(1)
-        // })
-        const worker = new Worker(__filename, {
-            workerData: { path: join(dir, testFile), filename: testFile } as WorkerParam,
-        })
-        worker.on('error', (e) => {
-            console.error(e)
-            process.exit(1)
-        })
-        worker.on('exit', (code) => {
-            if (code !== 0) throw new Error(`Worker stopped with exit code ${code}`)
-        })
+        if (filter) {
+            worker({ path: join(dir, testFile), filename: testFile }).catch((x) => {
+                debugger
+                console.error(x)
+                process.exit(1)
+            })
+        } else {
+            const worker = new Worker(__filename, {
+                workerData: { path: join(dir, testFile), filename: testFile } as WorkerParam,
+            })
+            worker.on('error', (e) => {
+                console.error(e)
+                process.exit(1)
+            })
+            worker.on('exit', (code) => {
+                if (code !== 0) throw new Error(`Worker stopped with exit code ${code}`)
+            })
+        }
     }
 } else {
     worker().catch((e) => {

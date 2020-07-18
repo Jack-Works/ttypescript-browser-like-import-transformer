@@ -205,7 +205,7 @@ function moduleSpecifierTransform(context, opt) {
         }
     }
     function ToUMD(rest) {
-        return Object.assign({ type: "umd" }, rest);
+        return { type: "umd", ...rest };
     }
     function ToRewrite(nextPath) {
         return { type: "rewrite", nextPath };
