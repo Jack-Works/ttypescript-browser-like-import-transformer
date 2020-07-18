@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.2.0](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/compare/v2.1.2...v2.2.0) (2020-07-18)
+
+
+### Features
+
+* new option umdCheckCompact ([ec32389](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/commit/ec32389007e231c94d67137f68dc8e4bec8f1f76))
+
+
+### Bug Fixes
+
+* deconstruction bug in umd ([21934e9](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/commit/21934e920db93f9b2ec2abb777180d537738106c))
+
 ### [2.1.2](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/compare/v2.1.1...v2.1.2) (2020-05-15)
 
 
