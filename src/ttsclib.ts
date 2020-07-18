@@ -31,10 +31,10 @@ import type { NormalizedPluginConfig, NormalizedRewriteRules } from './config-pa
  * ```
  * should generate the following call
  * ```ts
- * __UMDBindCheck(globalThis.path, [], 'path', 'globalThis.path')
- * __UMDBindCheck(globalThis.path2, ['x'], 'path2', 'globalThis.path2')
+ * __UMDBindCheck(globalThis.path, false, [], 'path', 'globalThis.path')
+ * __UMDBindCheck(globalThis.path2, false, ['x'], 'path2', 'globalThis.path2')
  * // Eliminated in UMD import
- * __UMDBindCheck(globalThis.path4, ['default'], 'path4', 'globalThis.path3')
+ * __UMDBindCheck(globalThis.path4, false, ['default'], 'path4', 'globalThis.path3')
  * ```
  */
 export function __UMDBindCheck(
@@ -44,8 +44,9 @@ export function __UMDBindCheck(
     mappedName: string,
     hasESModuleInterop: boolean,
 ) {
-    const head = `The requested module '${path}' (mapped as ${mappedName})`
-    const umdInvalid = `${head} doesn't provides a valid export object. This is likely to be a mistake. Did you forget to set ${mappedName}?`
+    const head = `The requested module${path ? '' : ` '${path}' (mapped as ${mappedName})`}`
+    const extra = ` This is likely to be a mistake. Did you forget to set ${mappedName}?`
+    const umdInvalid = `${head} doesn't provides a valid export object.${mappedName ? extra : ''}`
     if (mod === undefined) {
         mod = {}
         if (bindings.length === 0) {

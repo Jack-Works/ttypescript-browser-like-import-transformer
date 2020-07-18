@@ -286,6 +286,28 @@ export interface PluginConfigs {
      * !out(folder-import/f2/inner/f.js)
      */
     folderImport?: boolean
+    /**
+     * Make __UMDBindCheck cleaner.
+     * @defaultValue false
+     * @remarks
+     *
+     * Enable this option will make the generated code cleaner but will make the Error message less helpful.
+     *
+     * @example
+     *
+     * Source:
+     * !src(umdCheckCompact-default.ts)
+     *
+     * Default (undefined):
+     * !out(umdCheckCompact-default.js)
+     *
+     * true:
+     * !out(umdCheckCompact-true.js)
+     *
+     * false:
+     * !out(umdCheckCompact-false.js)
+     */
+    umdCheckCompact: boolean
 }
 /**
  * @public

@@ -37,8 +37,9 @@ function __dynamicImportNative(path) {
     return import(path);
 }
 function __UMDBindCheck(mod, bindings, path, mappedName, hasESModuleInterop) {
-    const head = `The requested module '${path}' (mapped as ${mappedName})`;
-    const umdInvalid = `${head} doesn't provides a valid export object. This is likely to be a mistake. Did you forget to set ${mappedName}?`;
+    const head = `The requested module${path ? "" : ` '${path}' (mapped as ${mappedName})`}`;
+    const extra = ` This is likely to be a mistake. Did you forget to set ${mappedName}?`;
+    const umdInvalid = `${head} doesn't provides a valid export object.${mappedName ? extra : ""}`;
     if (mod === undefined) {
         mod = {};
         if (bindings.length === 0) {

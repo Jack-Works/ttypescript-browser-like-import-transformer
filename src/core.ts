@@ -368,6 +368,9 @@ function importOrExportClauseToUMD(
     noUMDBindCheck = false,
 ): { variableNames: Identifier[]; statements: Statement[] } {
     const { node, ts, path, context, ttsclib } = ctx
+    const {
+        config: { umdCheckCompact },
+    } = ctx
     const [umdExpression, globalIdentifier] = getUMDExpressionForModule(umdName, globalObject, ctx)
     const ids: Identifier[] = []
     const statements: Statement[] = []
@@ -497,8 +500,8 @@ function importOrExportClauseToUMD(
         return createUMDBindCheck(
             wrapper(umdExpression),
             ts.createArrayLiteral(names),
-            ts.createLiteral(path),
-            ts.createLiteral(globalIdentifier + '.' + umdName),
+            umdCheckCompact ? ts.createLiteral('') : ts.createLiteral(path),
+            umdCheckCompact ? ts.createLiteral('') : ts.createLiteral(globalIdentifier + '.' + umdName),
             ts.createLiteral(!!esModuleInterop),
         )
     }
@@ -714,13 +717,9 @@ function createTopLevelScopedHelper<F extends string | ((...args: any[]) => any)
             'https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@$version$/es/ttsclib.min.js'
         const node = `@magic-works/ttypescript-browser-like-import-transformer/cjs/ttsclib.js`
         let url
-        if (importHelpers === 'auto' || importHelpers === 'cdn') {
-            url = cdn
-        } else if (importHelpers === 'node') {
-            url = node
-        } else {
-            url = importHelpers
-        }
+        if (importHelpers === 'auto' || importHelpers === 'cdn') url = cdn
+        else if (importHelpers === 'node') url = node
+        else url = importHelpers
         let [importDec, idSet] = ttsclibImportMap.get(sourceFile) || [
             ts.createImportDeclaration(
                 void 0,

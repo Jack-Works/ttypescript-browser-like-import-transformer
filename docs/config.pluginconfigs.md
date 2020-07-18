@@ -29,5 +29,6 @@ export interface PluginConfigs
 |  [jsonImport](./config.pluginconfigs.jsonimport.md) | 'data' \| 'inline' \| true | JSON import |
 |  [rules](./config.pluginconfigs.rules.md) | Exclude&lt;[RewriteRulesObject](./config.rewriterulesobject.md)<!-- -->, [RewriteRulesUMD](./config.rewriterulesumd.md)<!-- -->&gt; &amp; Record&lt;string, [RewriteRulesObject](./config.rewriterulesobject.md)<!-- -->&gt; | The transformation rule. Specify how this transformer will handle your imports. |
 |  [safeAccess](./config.pluginconfigs.safeaccess.md) | string | Use property access syntax to access UMD variable |
+|  [umdCheckCompact](./config.pluginconfigs.umdcheckcompact.md) | boolean | Make \_\_UMDBindCheck cleaner. |
 |  [webModulePath](./config.pluginconfigs.webmodulepath.md) | string | Used in snowpack. web\_modules module path |
 

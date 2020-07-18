@@ -1,3 +1,4 @@
+// @ts-ignore
 import React, { useState } from 'react'
 
 export function Comp() {
