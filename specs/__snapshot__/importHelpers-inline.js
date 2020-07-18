@@ -36,21 +36,19 @@ function __dynamicImportTransform(_path, config, dynamicImport, UMDBindCheck, _m
 function __dynamicImportNative(path) {
     return import(path);
 }
-function _import(mod, bindings, path, mappedName, hasESModuleInterop) {
-    const head = `The requested module${path ? "" : ` '${path}' (mapped as ${mappedName})`}`;
-    const extra = ` This is likely to be a mistake. Did you forget to set ${mappedName}?`;
-    const umdInvalid = `${head} doesn't provides a valid export object.${mappedName ? extra : ""}`;
+function _import(mod, bindings, path, mapped, ESModuleInterop) {
+    const head = `The requested module${path ? "" : ` '${path}' (mapped as ${mapped})`}`;
+    const umdInvalid = `${head} doesn't provides a valid export object.${mapped ? ` This is likely to be a mistake. Did you forget to set ${mapped}?` : ""}`;
     if (mod === undefined) {
         mod = {};
-        if (bindings.length === 0) {
+        if (!bindings.length)
             console.warn(umdInvalid);
-        }
     }
-    const modType = typeof mod;
-    if ((modType !== "object" && modType !== "function") || mod === null) {
-        throw new SyntaxError(`${head} provides an invalid export object. The provided record is type of ${modType}`);
+    const type = typeof mod;
+    if ((type !== "object" && type !== "function") || mod === null) {
+        throw new SyntaxError(`${head} provides an invalid export object. The provided record is type of ${type}`);
     }
-    if (hasESModuleInterop && bindings.toString() === "default" && mod.default === undefined) {
+    if (ESModuleInterop && bindings.toString() === "default" && mod.default === undefined) {
         throw new SyntaxError(umdInvalid);
     }
     for (const i of bindings) {
@@ -139,7 +137,7 @@ function moduleSpecifierTransform(context, opt) {
                         if (!target)
                             return ToError(392859, path, "");
                         const nextOpt = {
-                            type: "umd", target, globalObject, umdImportPath: void 0,
+                            type: "umd", target, globalObject, umdImportPath: undefined,
                         };
                         return self(context, nextOpt);
                     default: return unreachable("simple type", e);
@@ -163,7 +161,7 @@ function moduleSpecifierTransform(context, opt) {
             case "url": {
                 const { noVersion, withVersion } = opt;
                 const version = queryPackageVersion(path);
-                let string = void 0;
+                let string = undefined;
                 if (version && withVersion)
                     string = withVersion.replace(versionRegExp, version);
                 if ((version && !withVersion && noVersion) || (!version && noVersion))

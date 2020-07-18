@@ -19,8 +19,8 @@ import type { NormalizedPluginConfig, NormalizedRewriteRules } from './config-pa
  * @param mod The module record
  * @param bindings Expected import bindings
  * @param path The original import specifier
- * @param mappedName The mapped name
- * @param hasESModuleInterop Does this module need __esModuleInterop
+ * @param mapped The mapped name
+ * @param ESModuleInterop Does this module need __esModuleInterop
  *
  * @example
  * ```ts
@@ -37,27 +37,20 @@ import type { NormalizedPluginConfig, NormalizedRewriteRules } from './config-pa
  * _import(globalThis.path4, false, ['default'], 'path4', 'globalThis.path3')
  * ```
  */
-export function _import(
-    mod: unknown,
-    bindings: string[],
-    path: string,
-    mappedName: string,
-    hasESModuleInterop: boolean,
-) {
-    const head = `The requested module${path ? '' : ` '${path}' (mapped as ${mappedName})`}`
-    const extra = ` This is likely to be a mistake. Did you forget to set ${mappedName}?`
-    const umdInvalid = `${head} doesn't provides a valid export object.${mappedName ? extra : ''}`
+export function _import(mod: unknown, bindings: string[], path: string, mapped: string, ESModuleInterop: boolean) {
+    const head = `The requested module${path ? '' : ` '${path}' (mapped as ${mapped})`}`
+    const umdInvalid = `${head} doesn't provides a valid export object.${
+        mapped ? ` This is likely to be a mistake. Did you forget to set ${mapped}?` : ''
+    }`
     if (mod === undefined) {
         mod = {}
-        if (bindings.length === 0) {
-            console.warn(umdInvalid)
-        }
+        if (!bindings.length) console.warn(umdInvalid)
     }
-    const modType = typeof mod
-    if ((modType !== 'object' && modType !== 'function') || mod === null) {
-        throw new SyntaxError(`${head} provides an invalid export object. The provided record is type of ${modType}`)
+    const type = typeof mod
+    if ((type !== 'object' && type !== 'function') || mod === null) {
+        throw new SyntaxError(`${head} provides an invalid export object. The provided record is type of ${type}`)
     }
-    if (hasESModuleInterop && bindings.toString() === 'default' && (mod as any).default === undefined) {
+    if (ESModuleInterop && bindings.toString() === 'default' && (mod as any).default === undefined) {
         throw new SyntaxError(umdInvalid)
     }
     for (const i of bindings) {
@@ -304,7 +297,7 @@ export function moduleSpecifierTransform(
                             type: 'umd',
                             target,
                             globalObject,
-                            umdImportPath: void 0,
+                            umdImportPath: undefined,
                         }
                         return self(context, nextOpt)
                     default:
@@ -326,7 +319,7 @@ export function moduleSpecifierTransform(
             case 'url': {
                 const { noVersion, withVersion } = opt
                 const version = queryPackageVersion(path)
-                let string: string | undefined = void 0
+                let string: string | undefined = undefined
                 if (version && withVersion) string = withVersion.replace(versionRegExp, version)
                 if ((version && !withVersion && noVersion) || (!version && noVersion)) string = noVersion
                 if (string)
