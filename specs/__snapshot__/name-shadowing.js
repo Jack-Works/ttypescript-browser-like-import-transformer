@@ -1,6 +1,6 @@
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {}
-const aa = __UMDBindCheck_1(globalThis["importMap"], ["default"], "@jsenv/import-map", "globalThis.importMap", false).default;
-const { __UMDBindCheck } = __UMDBindCheck_1(globalThis["aaaa"], ["__UMDBindCheck"], "aaaa", "globalThis.aaaa", false);
-console.log(aa, __UMDBindCheck);
-import { __UMDBindCheck_1 as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.1.2/es/ttsclib.min.js";
+const aa = _import_1(globalThis["importMap"], ["default"], "@jsenv/import-map", "globalThis.importMap", false).default;
+const { _import } = _import_1(globalThis["aaaa"], ["_import"], "aaaa", "globalThis.aaaa", false);
+console.log(aa, _import);
+import { _import_1 as _import } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.1.2/es/ttsclib.min.js";

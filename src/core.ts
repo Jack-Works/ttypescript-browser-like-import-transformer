@@ -328,7 +328,7 @@ function updateImportExportDeclaration(
         target: string | Expression
     }
 
-    function umd(rewriteStrategy: ExprTarget, noUMDBindCheck = false) {
+    function umd(rewriteStrategy: ExprTarget, noImportCheck = false) {
         const nextPath = rewriteStrategy.target
         const globalObject = rewriteStrategy.globalObject
         const clause = ts.isImportDeclaration(node) ? node.importClause : node.exportClause
@@ -344,7 +344,7 @@ function updateImportExportDeclaration(
             }" is eliminated because it expected to have no side effects in UMD transform.`
             return [ts.createExpressionStatement(ts.createLiteral(text))]
         }
-        const { statements } = importOrExportClauseToUMD(nextPath, _with(context, clause), globalObject, noUMDBindCheck)
+        const { statements } = importOrExportClauseToUMD(nextPath, _with(context, clause), globalObject, noImportCheck)
         writeSourceFileMeta(sourceFile, hoistUMDImportDeclaration, new Set<Statement>(), (_) => {
             statements.forEach((x) => _.add(x))
         })
@@ -358,14 +358,14 @@ function updateImportExportDeclaration(
  *
  * export { a, b, c } from 'd' => (a magic import statement); export const a = (magic binding)
  * export * as b from 'd' => (a magic import statement); export const a = (magic binding)
- * @param noUMDBindCheck Disable __UMDBindCheck
+ * @param noImportCheck Disable _import
  *
  */
 function importOrExportClauseToUMD(
     umdName: string | Expression,
     ctx: Context<ImportClause | NamespaceExport | NamedExports>,
     globalObject = ctx.config.globalObject,
-    noUMDBindCheck = false,
+    noImportCheck = false,
 ): { variableNames: Identifier[]; statements: Statement[] } {
     const { node, ts, path, context, ttsclib } = ctx
     const {
@@ -474,7 +474,7 @@ function importOrExportClauseToUMD(
     function transformNamedImportExport(namedImport: NamedImportsOrExports, modifiers: Modifier[] = []) {
         const elements: Array<ImportSpecifier | ExportSpecifier> = []
         namedImport.elements.forEach((y: typeof elements[0]) => elements.push(y))
-        // ? const { a: b, c: d } = __UMDBindCheck(value, name, path, mappedName)
+        // ? const { a: b, c: d } = _import(value, name, path, mappedName)
         return ts.createVariableStatement(
             modifiers,
             ts.createVariableDeclarationList(
@@ -495,9 +495,9 @@ function importOrExportClauseToUMD(
         )
     }
     function createCheckedUMDAccess(wrapper: (x: Expression) => Expression, ...names: StringLiteral[]) {
-        if (noUMDBindCheck) return wrapper(umdExpression)
-        const [, createUMDBindCheck] = createTopLevelScopedHelper(ctx, ttsclib.__UMDBindCheck)
-        return createUMDBindCheck(
+        if (noImportCheck) return wrapper(umdExpression)
+        const [, createImportCheck] = createTopLevelScopedHelper(ctx, ttsclib._import)
+        return createImportCheck(
             wrapper(umdExpression),
             ts.createArrayLiteral(names),
             umdCheckCompact ? ts.createLiteral('') : ts.createLiteral(path),
@@ -627,12 +627,12 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
             ctx,
             config.jsonImport ? dynamicImportNativeWithJSONString : dynamicImportNativeString,
         )
-        const [umdBindCheck] = createTopLevelScopedHelper(ctx, ttsclib.__UMDBindCheck)
+        const [importCheck] = createTopLevelScopedHelper(ctx, ttsclib._import)
         const [moduleSpecifierTransform] = createTopLevelScopedHelper(ctx, ttsclib.moduleSpecifierTransform)
-        const helperArgs = [stringifiedConfig, dynamicImportNative, umdBindCheck, moduleSpecifierTransform] as const
+        const helperArgs = [stringifiedConfig, dynamicImportNative, importCheck, moduleSpecifierTransform] as const
         if (opt === 'auto' || opt === undefined) {
             /**
-             * __dynamicImportTransform(path, config, dynamicImportNative, __UMDBindCheck, moduleSpecifierTransform)
+             * __dynamicImportTransform(path, config, dynamicImportNative, _import, moduleSpecifierTransform)
              */
             return createDynamicImportTransform(first, ...helperArgs)
         }
@@ -665,7 +665,7 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
         /**
          * __customImportHelper(
          *     path,
-         *     __customDynamicImportHelper(__dynamicImportTransform, config, dynamicImportNative, __UMDBindCheck)
+         *     __customDynamicImportHelper(__dynamicImportTransform, config, dynamicImportNative, _import)
          * )
          */
         return ts.createCall(customFunction, undefined, [

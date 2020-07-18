@@ -163,7 +163,7 @@ export interface PluginConfigs {
      */
     importMap?: ImportMapResolution | ImportMapCustomResolution
     /**
-     * Import emit helpers (e.g. `\__UMDBindCheck`, `\__dynamicImportTransform`, etc..)
+     * Import emit helpers (e.g. `\_import`, `\__dynamicImportTransform`, etc..)
      * from ttsclib (a local file in this package).
      *
      * @remarks
@@ -287,7 +287,7 @@ export interface PluginConfigs {
      */
     folderImport?: boolean
     /**
-     * Make __UMDBindCheck cleaner.
+     * Make _import cleaner.
      * @defaultValue false
      * @remarks
      *

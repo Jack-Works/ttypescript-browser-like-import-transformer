@@ -94,20 +94,20 @@ Filename: `rules-umd.js`
 ```js
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {"rules":"umd"}
-const a = __UMDBindCheck(globalThis["a"], ["default"], "a", "globalThis.a", false).default;
-const b = __UMDBindCheck(globalThis["b"], ["default"], "b", "globalThis.b", false).default;
-const { c: c2, d } = __UMDBindCheck(globalThis["b"], ["c", "d"], "b", "globalThis.b", false);
-const e = __UMDBindCheck(globalThis["c"], [], "c", "globalThis.c", false);
-const { c: c_1, d: d_1 } = __UMDBindCheck(globalThis["b"], ["c", "d"], "b", "globalThis.b", false);
+const a = _import(globalThis["a"], ["default"], "a", "globalThis.a", false).default;
+const b = _import(globalThis["b"], ["default"], "b", "globalThis.b", false).default;
+const { c: c2, d } = _import(globalThis["b"], ["c", "d"], "b", "globalThis.b", false);
+const e = _import(globalThis["c"], [], "c", "globalThis.c", false);
+const { c: c_1, d: d_1 } = _import(globalThis["b"], ["c", "d"], "b", "globalThis.b", false);
 export { c_1 as c, d_1 as d };
-const e_1 = __UMDBindCheck(globalThis["c"], [], "c", "globalThis.c", false);
+const e_1 = _import(globalThis["c"], [], "c", "globalThis.c", false);
 export { e_1 as e };
 console.log('Should run after all imports', a, b, c2, d, e, c2);
 "import \"d\" is eliminated because it expected to have no side effects in UMD transform.";
 const c = 1;
 const x = 1;
 export { x };
-import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.1.2/es/ttsclib.min.js";
+import { _import as _import } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.1.2/es/ttsclib.min.js";
 
 ```
 Filename: `rules-pikacdn.js`
@@ -208,13 +208,13 @@ Filename: `rules-complex.js`
 ```js
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {"rules":{"/@material-ui\\/(.+)/":{"type":"umd","target":"MaterialUI.$1"},"lodash":"umd","jquery":"pikacdn","lodash-es":"unpkg","/.+/":"snowpack"}}
-const x = __UMDBindCheck(globalThis["MaterialUI.core"], ["default"], "@material-ui/core", "globalThis.MaterialUI.core", false).default;
-const i = __UMDBindCheck(globalThis["MaterialUI.icons"], ["default"], "@material-ui/icons", "globalThis.MaterialUI.icons", false).default;
-const y = __UMDBindCheck(globalThis["lodash"], ["default"], "lodash", "globalThis.lodash", false).default;
+const x = _import(globalThis["MaterialUI.core"], ["default"], "@material-ui/core", "globalThis.MaterialUI.core", false).default;
+const i = _import(globalThis["MaterialUI.icons"], ["default"], "@material-ui/icons", "globalThis.MaterialUI.icons", false).default;
+const y = _import(globalThis["lodash"], ["default"], "lodash", "globalThis.lodash", false).default;
 import z from "https://unpkg.com/lodash-es?module";
 import w from "/web_modules/other.js";
 console.log(x, y, z, w, i);
-import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.1.2/es/ttsclib.min.js";
+import { _import as _import } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.1.2/es/ttsclib.min.js";
 
 ```
 

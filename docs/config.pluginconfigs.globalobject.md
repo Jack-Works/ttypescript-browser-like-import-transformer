@@ -37,9 +37,9 @@ Filename: `globalObject-undefined.js`
 ```js
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {}
-const R = __UMDBindCheck(globalThis["React"], ["default"], "react", "globalThis.React", false).default;
+const R = _import(globalThis["React"], ["default"], "react", "globalThis.React", false).default;
 console.log(R);
-import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.1.2/es/ttsclib.min.js";
+import { _import as _import } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.1.2/es/ttsclib.min.js";
 
 ```
 Filename: `globalObject-string.js`
@@ -47,9 +47,9 @@ Filename: `globalObject-string.js`
 ```js
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {"globalObject":"global"}
-const R = __UMDBindCheck(global["React"], ["default"], "react", "global.React", false).default;
+const R = _import(global["React"], ["default"], "react", "global.React", false).default;
 console.log(R);
-import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.1.2/es/ttsclib.min.js";
+import { _import as _import } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.1.2/es/ttsclib.min.js";
 
 ```
 Filename: `globalObject-window.js`
@@ -57,9 +57,9 @@ Filename: `globalObject-window.js`
 ```js
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {"globalObject":"window"}
-const R = __UMDBindCheck(window["React"], ["default"], "react", "window.React", false).default;
+const R = _import(window["React"], ["default"], "react", "window.React", false).default;
 console.log(R);
-import { __UMDBindCheck as __UMDBindCheck } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.1.2/es/ttsclib.min.js";
+import { _import as _import } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.1.2/es/ttsclib.min.js";
 
 ```
 

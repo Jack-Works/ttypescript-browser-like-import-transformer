@@ -31,13 +31,13 @@ import type { NormalizedPluginConfig, NormalizedRewriteRules } from './config-pa
  * ```
  * should generate the following call
  * ```ts
- * __UMDBindCheck(globalThis.path, false, [], 'path', 'globalThis.path')
- * __UMDBindCheck(globalThis.path2, false, ['x'], 'path2', 'globalThis.path2')
+ * _import(globalThis.path, false, [], 'path', 'globalThis.path')
+ * _import(globalThis.path2, false, ['x'], 'path2', 'globalThis.path2')
  * // Eliminated in UMD import
- * __UMDBindCheck(globalThis.path4, false, ['default'], 'path4', 'globalThis.path3')
+ * _import(globalThis.path4, false, ['default'], 'path4', 'globalThis.path3')
  * ```
  */
-export function __UMDBindCheck(
+export function _import(
     mod: unknown,
     bindings: string[],
     path: string,
@@ -85,7 +85,7 @@ export function __dynamicImportTransform(
     _path: unknown,
     config: NormalizedPluginConfig,
     dynamicImport: (path: string, jsonPath?: string) => Promise<unknown>,
-    UMDBindCheck: typeof __UMDBindCheck,
+    UMDBindCheck: typeof _import,
     _moduleSpecifierTransform: typeof moduleSpecifierTransform,
 ): Promise<unknown> {
     if (typeof _path !== 'string') _path = String(_path)
@@ -137,7 +137,7 @@ export function __customDynamicImportHelper(
     _: typeof __dynamicImportTransform,
     c: NormalizedPluginConfig,
     d: (x: string) => Promise<unknown>,
-    u: typeof __UMDBindCheck,
+    u: typeof _import,
     m: typeof moduleSpecifierTransform,
 ) {
     return (p: string) => _(p, c, d, u, m)

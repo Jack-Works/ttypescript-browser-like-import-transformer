@@ -1,7 +1,7 @@
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {"importHelpers":"cdn"}
-__dynamicImportTransform(x, JSON.parse("{\"after\":true,\"importHelpers\":\"cdn\"}"), __dynamicImportNative, __UMDBindCheck, moduleSpecifierTransform);
+__dynamicImportTransform(x, JSON.parse("{\"after\":true,\"importHelpers\":\"cdn\"}"), __dynamicImportNative, _import, moduleSpecifierTransform);
 function __dynamicImportNative(path) {
     return import(path);
 }
-import { __dynamicImportTransform as __dynamicImportTransform, __UMDBindCheck as __UMDBindCheck, moduleSpecifierTransform as moduleSpecifierTransform } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.1.2/es/ttsclib.min.js";
+import { __dynamicImportTransform as __dynamicImportTransform, _import as _import, moduleSpecifierTransform as moduleSpecifierTransform } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.1.2/es/ttsclib.min.js";

@@ -4,7 +4,7 @@
 
 ## PluginConfigs.importHelpers property
 
-Import emit helpers (e.g. `\__UMDBindCheck`<!-- -->, `\__dynamicImportTransform`<!-- -->, etc..) from ttsclib (a local file in this package).
+Import emit helpers (e.g. `\_import`<!-- -->, `\__dynamicImportTransform`<!-- -->, etc..) from ttsclib (a local file in this package).
 
 <b>Signature:</b>
 
@@ -39,11 +39,11 @@ Filename: `importHelpers-auto.js`
 ```js
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {"importHelpers":"auto"}
-__dynamicImportTransform(x, JSON.parse("{\"after\":true,\"importHelpers\":\"auto\"}"), __dynamicImportNative, __UMDBindCheck, moduleSpecifierTransform);
+__dynamicImportTransform(x, JSON.parse("{\"after\":true,\"importHelpers\":\"auto\"}"), __dynamicImportNative, _import, moduleSpecifierTransform);
 function __dynamicImportNative(path) {
     return import(path);
 }
-import { __dynamicImportTransform as __dynamicImportTransform, __UMDBindCheck as __UMDBindCheck, moduleSpecifierTransform as moduleSpecifierTransform } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.1.2/es/ttsclib.min.js";
+import { __dynamicImportTransform as __dynamicImportTransform, _import as _import, moduleSpecifierTransform as moduleSpecifierTransform } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.1.2/es/ttsclib.min.js";
 
 ```
 Filename: `importHelpers-string.js`
@@ -52,11 +52,11 @@ Filename: `importHelpers-string.js`
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {"importHelpers":"/polyfill/ttsc-helper.js","dynamicImportPathRewrite":{"type":"custom","function":"(x, y) => y(x)"}}
 const __customImportHelper = (x, y) => y(x);
-__customImportHelper(x, __customDynamicImportHelper(__dynamicImportTransform, JSON.parse("{\"after\":true,\"importHelpers\":\"/polyfill/ttsc-helper.js\",\"dynamicImportPathRewrite\":{\"type\":\"custom\",\"function\":\"(x, y) => y(x)\"}}"), __dynamicImportNative, __UMDBindCheck, moduleSpecifierTransform));
+__customImportHelper(x, __customDynamicImportHelper(__dynamicImportTransform, JSON.parse("{\"after\":true,\"importHelpers\":\"/polyfill/ttsc-helper.js\",\"dynamicImportPathRewrite\":{\"type\":\"custom\",\"function\":\"(x, y) => y(x)\"}}"), __dynamicImportNative, _import, moduleSpecifierTransform));
 function __dynamicImportNative(path) {
     return import(path);
 }
-import { __dynamicImportTransform as __dynamicImportTransform, __UMDBindCheck as __UMDBindCheck, moduleSpecifierTransform as moduleSpecifierTransform, __customDynamicImportHelper as __customDynamicImportHelper } from "/polyfill/ttsc-helper.js";
+import { __dynamicImportTransform as __dynamicImportTransform, _import as _import, moduleSpecifierTransform as moduleSpecifierTransform, __customDynamicImportHelper as __customDynamicImportHelper } from "/polyfill/ttsc-helper.js";
 
 ```
 Filename: `importHelpers-cdn.js`
@@ -64,11 +64,11 @@ Filename: `importHelpers-cdn.js`
 ```js
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {"importHelpers":"cdn"}
-__dynamicImportTransform(x, JSON.parse("{\"after\":true,\"importHelpers\":\"cdn\"}"), __dynamicImportNative, __UMDBindCheck, moduleSpecifierTransform);
+__dynamicImportTransform(x, JSON.parse("{\"after\":true,\"importHelpers\":\"cdn\"}"), __dynamicImportNative, _import, moduleSpecifierTransform);
 function __dynamicImportNative(path) {
     return import(path);
 }
-import { __dynamicImportTransform as __dynamicImportTransform, __UMDBindCheck as __UMDBindCheck, moduleSpecifierTransform as moduleSpecifierTransform } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.1.2/es/ttsclib.min.js";
+import { __dynamicImportTransform as __dynamicImportTransform, _import as _import, moduleSpecifierTransform as moduleSpecifierTransform } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.1.2/es/ttsclib.min.js";
 
 ```
 Filename: `importHelpers-node.js`
@@ -76,11 +76,11 @@ Filename: `importHelpers-node.js`
 ```js
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {"importHelpers":"node"}
-__dynamicImportTransform(x, JSON.parse("{\"after\":true,\"importHelpers\":\"node\"}"), __dynamicImportNative, __UMDBindCheck, moduleSpecifierTransform);
+__dynamicImportTransform(x, JSON.parse("{\"after\":true,\"importHelpers\":\"node\"}"), __dynamicImportNative, _import, moduleSpecifierTransform);
 function __dynamicImportNative(path) {
     return import(path);
 }
-import { __dynamicImportTransform as __dynamicImportTransform, __UMDBindCheck as __UMDBindCheck, moduleSpecifierTransform as moduleSpecifierTransform } from "@magic-works/ttypescript-browser-like-import-transformer/cjs/ttsclib.js";
+import { __dynamicImportTransform as __dynamicImportTransform, _import as _import, moduleSpecifierTransform as moduleSpecifierTransform } from "@magic-works/ttypescript-browser-like-import-transformer/cjs/ttsclib.js";
 
 ```
 Filename: `importHelpers-inline.js`
@@ -89,7 +89,7 @@ Filename: `importHelpers-inline.js`
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {"importHelpers":"inline","dynamicImportPathRewrite":{"type":"custom","function":"(x, y) => y(x)"}}
 const __customImportHelper = (x, y) => y(x);
-__customImportHelper(x, __customDynamicImportHelper(__dynamicImportTransform, JSON.parse("{\"after\":true,\"importHelpers\":\"inline\",\"dynamicImportPathRewrite\":{\"type\":\"custom\",\"function\":\"(x, y) => y(x)\"}}"), __dynamicImportNative, __UMDBindCheck, moduleSpecifierTransform));
+__customImportHelper(x, __customDynamicImportHelper(__dynamicImportTransform, JSON.parse("{\"after\":true,\"importHelpers\":\"inline\",\"dynamicImportPathRewrite\":{\"type\":\"custom\",\"function\":\"(x, y) => y(x)\"}}"), __dynamicImportNative, _import, moduleSpecifierTransform));
 function __dynamicImportTransform(_path, config, dynamicImport, UMDBindCheck, _moduleSpecifierTransform) {
     if (typeof _path !== "string")
         _path = String(_path);
@@ -124,7 +124,7 @@ function __dynamicImportTransform(_path, config, dynamicImport, UMDBindCheck, _m
 function __dynamicImportNative(path) {
     return import(path);
 }
-function __UMDBindCheck(mod, bindings, path, mappedName, hasESModuleInterop) {
+function _import(mod, bindings, path, mappedName, hasESModuleInterop) {
     const head = `The requested module${path ? "" : ` '${path}' (mapped as ${mappedName})`}`;
     const extra = ` This is likely to be a mistake. Did you forget to set ${mappedName}?`;
     const umdInvalid = `${head} doesn't provides a valid export object.${mappedName ? extra : ""}`;

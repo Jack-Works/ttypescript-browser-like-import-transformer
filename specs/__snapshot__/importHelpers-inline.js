@@ -1,7 +1,7 @@
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {"importHelpers":"inline","dynamicImportPathRewrite":{"type":"custom","function":"(x, y) => y(x)"}}
 const __customImportHelper = (x, y) => y(x);
-__customImportHelper(x, __customDynamicImportHelper(__dynamicImportTransform, JSON.parse("{\"after\":true,\"importHelpers\":\"inline\",\"dynamicImportPathRewrite\":{\"type\":\"custom\",\"function\":\"(x, y) => y(x)\"}}"), __dynamicImportNative, __UMDBindCheck, moduleSpecifierTransform));
+__customImportHelper(x, __customDynamicImportHelper(__dynamicImportTransform, JSON.parse("{\"after\":true,\"importHelpers\":\"inline\",\"dynamicImportPathRewrite\":{\"type\":\"custom\",\"function\":\"(x, y) => y(x)\"}}"), __dynamicImportNative, _import, moduleSpecifierTransform));
 function __dynamicImportTransform(_path, config, dynamicImport, UMDBindCheck, _moduleSpecifierTransform) {
     if (typeof _path !== "string")
         _path = String(_path);
@@ -36,7 +36,7 @@ function __dynamicImportTransform(_path, config, dynamicImport, UMDBindCheck, _m
 function __dynamicImportNative(path) {
     return import(path);
 }
-function __UMDBindCheck(mod, bindings, path, mappedName, hasESModuleInterop) {
+function _import(mod, bindings, path, mappedName, hasESModuleInterop) {
     const head = `The requested module${path ? "" : ` '${path}' (mapped as ${mappedName})`}`;
     const extra = ` This is likely to be a mistake. Did you forget to set ${mappedName}?`;
     const umdInvalid = `${head} doesn't provides a valid export object.${mappedName ? extra : ""}`;
