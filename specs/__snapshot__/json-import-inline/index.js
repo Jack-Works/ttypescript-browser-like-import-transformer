@@ -15,4 +15,4 @@ function __dynamicImportNative(path, json) {
         return fetch(url).then((x) => x.ok ? x.text() : Promise.reject(new TypeError(`Failed to fetch dynamically imported module: ${url}`))).then(JSON.parse);
     }
 }
-import { __esModuleInterop as __esModuleInterop, __dynamicImportTransform as __dynamicImportTransform, _import as _import, moduleSpecifierTransform as moduleSpecifierTransform } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.1.2/es/ttsclib.min.js";
+import { __esModuleInterop as __esModuleInterop, __dynamicImportTransform as __dynamicImportTransform, _import as _import, moduleSpecifierTransform as moduleSpecifierTransform } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.2.0/es/ttsclib.min.js";

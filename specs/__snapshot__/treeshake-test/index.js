@@ -7,4 +7,4 @@ export { x_1 as x, y_1 as y, z_1 as z };
 console.log(a, c, d);
 "import \"3\" is eliminated because it expected to have no side effects in UMD transform.";
 "import \"4\" is eliminated because it expected to have no side effects in UMD transform.";
-import { _import as _import } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.1.2/es/ttsclib.min.js";
+import { _import as _import } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.2.0/es/ttsclib.min.js";

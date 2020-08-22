@@ -6,4 +6,4 @@ const y = _import(globalThis["lodash"], ["default"], "lodash", "globalThis.lodas
 import z from "https://unpkg.com/lodash-es?module";
 import w from "/web_modules/other.js";
 console.log(x, y, z, w, i);
-import { _import as _import } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.1.2/es/ttsclib.min.js";
+import { _import as _import } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.2.0/es/ttsclib.min.js";

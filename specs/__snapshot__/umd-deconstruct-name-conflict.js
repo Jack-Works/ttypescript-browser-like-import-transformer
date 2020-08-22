@@ -8,4 +8,4 @@ const { a: b_1 } = _import(globalThis["x"], ["a"], "x", "globalThis.x", false);
 export { b_1 as b };
 map();
 b();
-import { _import as _import } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.1.2/es/ttsclib.min.js";
+import { _import as _import } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.2.0/es/ttsclib.min.js";

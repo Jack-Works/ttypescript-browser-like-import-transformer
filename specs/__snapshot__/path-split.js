@@ -8,4 +8,4 @@ import "https://unpkg.com/lodash-es/oaoao?module";
 import p from "/web_modules/@jsenv/import-map/src.js";
 import w from "/web_modules/@jsenv/import-map.js";
 console.log(a, x, y, z, w, p);
-import { _import as _import } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.1.2/es/ttsclib.min.js";
+import { _import as _import } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.2.0/es/ttsclib.min.js";
