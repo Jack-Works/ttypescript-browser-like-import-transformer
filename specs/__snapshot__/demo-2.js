@@ -9,4 +9,4 @@ import fs from 'std:fs';
 import isarray from "/web_modules/isarray.js";
 import "/web_modules/other-polyfill.js";
 console.log(React, lodash, AsyncCall, fs, isarray, MUI, MUILab);
-import { __esModuleInterop as __esModuleInterop, _import as _import } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.2.0/es/ttsclib.min.js";
+import { __esModuleInterop as __esModuleInterop, _import as _import } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.3.0/es/ttsclib.min.js";
