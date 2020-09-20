@@ -1,11 +1,11 @@
 devDependencies:
-  '@microsoft/api-documenter': 7.8.34
-  '@microsoft/api-extractor': 7.9.10
-  '@types/node': 14.6.0
+  '@microsoft/api-documenter': 7.8.53
+  '@microsoft/api-extractor': 7.9.19
+  '@types/node': 14.11.1
   standard-version: 9.0.0
-  ts-node: 9.0.0_typescript@4.0.2
-  ttypescript: 1.5.10_ts-node@9.0.0+typescript@4.0.2
-  typescript: 4.0.2
+  ts-node: 9.0.0_typescript@4.0.3
+  ttypescript: 1.5.12_ts-node@9.0.0+typescript@4.0.3
+  typescript: 4.0.3
 lockfileVersion: 5.1
 optionalDependencies:
   '@jsenv/import-map': 6.7.4
@@ -35,32 +35,32 @@ packages:
     optional: true
     resolution:
       integrity: sha512-nLFrTEtqFd2AWRX2+0I3BFhwHrnc42AHayNTmjJwSxW2j9mnQAVQrT10oarQapPybygtIPy3YhedSjNb1/+4xQ==
-  /@microsoft/api-documenter/7.8.34:
+  /@microsoft/api-documenter/7.8.53:
     dependencies:
-      '@microsoft/api-extractor-model': 7.8.18
+      '@microsoft/api-extractor-model': 7.9.4
       '@microsoft/tsdoc': 0.12.19
-      '@rushstack/node-core-library': 3.29.1
-      '@rushstack/ts-command-line': 4.6.3
+      '@rushstack/node-core-library': 3.33.3
+      '@rushstack/ts-command-line': 4.6.7
       colors: 1.2.5
       js-yaml: 3.13.1
       resolve: 1.17.0
     dev: true
     hasBin: true
     resolution:
-      integrity: sha512-f0eIaELznP303LyDsyJMYyz8hEU+uiatpdDvWa1vhMKYoiVluRwT2jPZowIUSOaNOzcNKOR/cl09smDX/MBP9w==
-  /@microsoft/api-extractor-model/7.8.18:
+      integrity: sha512-Pf7FTvhhfurYmELY1PH65Pss1cwdbEGeyiceancRHrKDUS4vJi+V1h0Snc4xRS6/SGt2vBXd1gbh1jO0hzgSfA==
+  /@microsoft/api-extractor-model/7.9.4:
     dependencies:
       '@microsoft/tsdoc': 0.12.19
-      '@rushstack/node-core-library': 3.29.1
+      '@rushstack/node-core-library': 3.33.3
     dev: true
     resolution:
-      integrity: sha512-f/cotp4xvhhhpqAvnHd+M5xfaWIwokZfrezDcCEW4BFQMdjB7VhhXMA62Std/2E83B1YZ+/QsWoIZPaGuIcbBg==
-  /@microsoft/api-extractor/7.9.10:
+      integrity: sha512-54NM/bqoSVyzRvqDLZkITh0ZTNwIf9aFyYQHJ5LVI7cEqFgc71armtJnI3Gw4GQFhjOJhAccbY31tVUiBbjmgA==
+  /@microsoft/api-extractor/7.9.19:
     dependencies:
-      '@microsoft/api-extractor-model': 7.8.18
+      '@microsoft/api-extractor-model': 7.9.4
       '@microsoft/tsdoc': 0.12.19
-      '@rushstack/node-core-library': 3.29.1
-      '@rushstack/ts-command-line': 4.6.3
+      '@rushstack/node-core-library': 3.33.3
+      '@rushstack/ts-command-line': 4.6.7
       colors: 1.2.5
       lodash: 4.17.20
       resolve: 1.17.0
@@ -70,25 +70,26 @@ packages:
     dev: true
     hasBin: true
     resolution:
-      integrity: sha512-hN/iyFN7FRM6flSDmeb2RJGGeo1CF7CONlsjxgoiXU3cqx8601vWheJK06s8+aR8IrBtnV12ZVMii8syQw6AgA==
+      integrity: sha512-oYY5sgsS01NK5/fk34qv9V0tbX4KR9Hw9kVt2lwHMg6seDNq3cO9dcQdroybJfoWYRN0FFvHFVRlY2WqN4afMQ==
   /@microsoft/tsdoc/0.12.19:
     dev: true
     resolution:
       integrity: sha512-IpgPxHrNxZiMNUSXqR1l/gePKPkfAmIKoDRP9hp7OwjU29ZR8WCJsOJ8iBKgw0Qk+pFwR+8Y1cy8ImLY6e9m4A==
-  /@rushstack/node-core-library/3.29.1:
+  /@rushstack/node-core-library/3.33.3:
     dependencies:
       '@types/node': 10.17.13
       colors: 1.2.5
       fs-extra: 7.0.1
       import-lazy: 4.0.0
       jju: 1.4.0
+      resolve: 1.17.0
       semver: 7.3.2
       timsort: 0.3.0
       z-schema: 3.18.4
     dev: true
     resolution:
-      integrity: sha512-EHPZOy6/6lc9e1rfvB46sSXXsyaGMMfjBthGsRBqjmLedwUd6pFounlTtrGolugmW7DjRgs7wwvfYbsBcOW/vQ==
-  /@rushstack/ts-command-line/4.6.3:
+      integrity: sha512-4zQgVDMPiniTkRErUzUzW9gY+OeQW/pEccywUoVA9cUAOIkjdj3efwNUbCcVLsPm1uVT0ifgFEqh38pAqAAeZA==
+  /@rushstack/ts-command-line/4.6.7:
     dependencies:
       '@types/argparse': 1.0.38
       argparse: 1.0.10
@@ -96,7 +97,7 @@ packages:
       string-argv: 0.3.1
     dev: true
     resolution:
-      integrity: sha512-mSkUDnc88kxiC9dKDVCNm1d08Ih918vSpLZGi1XHy/gYiQy4JcEW/O4MlqGAY9vNRigtm0dg4iJTiae+FTIxfA==
+      integrity: sha512-UOEMp3cRPrrNF2yBHBM6uROmkJRrK9NfFS+tOq7jmJTjfoWSS7Esnn+XwFsnBOW7VVmQeLhL+4rKbx6EdXsejg==
   /@types/argparse/1.0.38:
     dev: true
     resolution:
@@ -113,10 +114,10 @@ packages:
     dev: true
     resolution:
       integrity: sha512-pMCcqU2zT4TjqYFrWtYHKal7Sl30Ims6ulZ4UFXxI4xbtQqK/qqKwkDoBFCfooRqqmRu9vY3xaJRwxSh673aYg==
-  /@types/node/14.6.0:
+  /@types/node/14.11.1:
     dev: true
     resolution:
-      integrity: sha512-mikldZQitV94akrc4sCcSjtJfsTKt4p+e/s0AGscVA6XArQ9kFclP+ZiYUMnq987rc6QlYxXv/EivqlfSLxpKA==
+      integrity: sha512-oTQgnd0hblfLsJ6BvJzzSL+Inogp3lq9fGgqRkMB/ziKMgEUaFl801OncOzUmalfzt14N0oPHMK47ipl+wbTIw==
   /@types/normalize-package-data/2.4.0:
     dev: true
     resolution:
@@ -298,7 +299,7 @@ packages:
   /compare-func/2.0.0:
     dependencies:
       array-ify: 1.0.0
-      dot-prop: 5.2.0
+      dot-prop: 5.3.0
     dev: true
     resolution:
       integrity: sha512-zHig5N+tPWARooBnb0Zx1MFcdfpyJrfTJ3Y5L+IFvUm8rM74hHz66z0gw0x4tijh5CorKkKUCnW82R2vmpeCRA==
@@ -433,7 +434,7 @@ packages:
       handlebars: 4.7.6
       json-stringify-safe: 5.0.1
       lodash: 4.17.20
-      meow: 7.1.0
+      meow: 7.1.1
       semver: 6.3.0
       split: 1.0.1
       through2: 3.0.2
@@ -475,7 +476,7 @@ packages:
       JSONStream: 1.3.5
       is-text-path: 1.0.1
       lodash: 4.17.20
-      meow: 7.1.0
+      meow: 7.1.1
       split2: 2.2.0
       through2: 3.0.2
       trim-off-newlines: 1.0.1
@@ -493,7 +494,7 @@ packages:
       conventional-commits-parser: 3.1.0
       git-raw-commits: 2.0.0
       git-semver-tags: 4.1.0
-      meow: 7.1.0
+      meow: 7.1.1
       q: 1.5.1
     dev: true
     engines:
@@ -558,14 +559,14 @@ packages:
       node: '>=0.3.1'
     resolution:
       integrity: sha512-58lmxKSA4BNyLz+HHMUzlOEpg09FV+ev6ZMe3vJihgdxzgcwZ8VoEEPmALCZG9LmqfVoNMMKpttIYTVG6uDY7A==
-  /dot-prop/5.2.0:
+  /dot-prop/5.3.0:
     dependencies:
       is-obj: 2.0.0
     dev: true
     engines:
       node: '>=8'
     resolution:
-      integrity: sha512-uEUyaDKoSQ1M4Oq8l45hSE26SnTxL6snNnqvK/VWx5wJhmff5z0FUVJDKDanor/6w3kzE3i7XZOk+7wC0EXr1A==
+      integrity: sha512-QM8q3zDe58hqUqjraQOmzZ1LIH9SWQJTlEKCH4kJ2oQvLZk7RbQXvtDM2XEq3fwkV9CCvvH4LA0AV+ogFsBM2Q==
   /dotgitignore/2.1.0:
     dependencies:
       find-up: 3.0.0
@@ -709,7 +710,7 @@ packages:
       integrity: sha1-UoJlna4hBxRaERJhEq0yFuxfpl8=
   /git-semver-tags/4.1.0:
     dependencies:
-      meow: 7.1.0
+      meow: 7.1.1
       semver: 6.3.0
     dev: true
     engines:
@@ -749,7 +750,7 @@ packages:
       node: '>=0.4.7'
     hasBin: true
     optionalDependencies:
-      uglify-js: 3.10.1
+      uglify-js: 3.10.4
     resolution:
       integrity: sha512-1f2BACcBfiwAfStCKZNrUCgqNZkGsAT7UM3kkYtXuLo0KnaVfjKOyf7PRzB6++aK9STyT1Pd2ZCPe3EGOXleXA==
   /hard-rejection/2.1.0:
@@ -879,6 +880,10 @@ packages:
     dev: true
     resolution:
       integrity: sha512-mrqyZKfX5EhL7hvqcV6WG1yYjnjeuYDzDhhcAAUrq8Po85NBQBJP+ZDUT75qZQ98IkUoBqdkExkukOU7Ts2wrw==
+  /json-parse-even-better-errors/2.3.1:
+    dev: true
+    resolution:
+      integrity: sha512-xyFwyhro/JEof6Ghe2iz2NcXoj2sloNsWr/XsERDK/oiPCfaNhl5ONfp+jQdAZRQQ0IJWNzH9zIZF7li91kh2w==
   /json-stringify-safe/5.0.1:
     dev: true
     resolution:
@@ -1051,7 +1056,7 @@ packages:
       node: '>=4'
     resolution:
       integrity: sha512-xcSBHD5Z86zaOc+781KrupuHAzeGXSLtiAOmBsiLDiPSaYSB6hdew2ng9EBAnZ62jagG9MHAOdxpDi/lWBFJ/A==
-  /meow/7.1.0:
+  /meow/7.1.1:
     dependencies:
       '@types/minimist': 1.2.0
       camelcase-keys: 6.2.2
@@ -1068,7 +1073,7 @@ packages:
     engines:
       node: '>=10'
     resolution:
-      integrity: sha512-kq5F0KVteskZ3JdfyQFivJEj2RaA8NFsS4+r9DaMKLcUHpk5OcHS3Q0XkCXONB1mZRPsu/Y/qImKri0nwSEZog==
+      integrity: sha512-GWHvA5QOcS412WCo8vwKDlTelGLsCGBVevQB5Kva961rmNfun0PCbv5+xta2kUMFJyR8/oWnn7ddeKdosbAPbA==
   /min-indent/1.0.1:
     dev: true
     engines:
@@ -1220,17 +1225,17 @@ packages:
       node: '>=4'
     resolution:
       integrity: sha1-vjX1Qlvh9/bHRxhPmKeIy5lHfuA=
-  /parse-json/5.0.1:
+  /parse-json/5.1.0:
     dependencies:
       '@babel/code-frame': 7.10.4
       error-ex: 1.3.2
-      json-parse-better-errors: 1.0.2
+      json-parse-even-better-errors: 2.3.1
       lines-and-columns: 1.1.6
     dev: true
     engines:
       node: '>=8'
     resolution:
-      integrity: sha512-ztoZ4/DYeXQq4E21v169sC8qWINGpcosGv9XhTDvg9/hWvx/zrFkc9BiWxR58OJLHGk28j5BL0SDLeV2WmFZlQ==
+      integrity: sha512-+mi/lmVVNKFNVyLXV31ERiy2CY5E1/F6QtJFEzoChPRwwngMNXRDQ9GJ5WdE2Z2P4AujsOi0/+2qHID68KwfIQ==
   /path-exists/2.1.0:
     dependencies:
       pinkie-promise: 2.0.1
@@ -1380,7 +1385,7 @@ packages:
     dependencies:
       '@types/normalize-package-data': 2.4.0
       normalize-package-data: 2.5.0
-      parse-json: 5.0.1
+      parse-json: 5.1.0
       type-fest: 0.6.0
     dev: true
     engines:
@@ -1528,7 +1533,7 @@ packages:
   /spdx-correct/3.1.1:
     dependencies:
       spdx-expression-parse: 3.0.1
-      spdx-license-ids: 3.0.5
+      spdx-license-ids: 3.0.6
     dev: true
     resolution:
       integrity: sha512-cOYcUWwhCuHCXi49RhFRCyJEK3iPj1Ziz9DpViV3tbZOwXD49QzIN3MpOLJNxh2qwq2lJJZaKMVw9qNi4jTC0w==
@@ -1539,14 +1544,14 @@ packages:
   /spdx-expression-parse/3.0.1:
     dependencies:
       spdx-exceptions: 2.3.0
-      spdx-license-ids: 3.0.5
+      spdx-license-ids: 3.0.6
     dev: true
     resolution:
       integrity: sha512-cbqHunsQWnJNE6KhVSMsMeH5H/L9EpymbzqTQ3uLwNCLZ1Q481oWaofqH7nO6V07xlXwY6PhQdQ2IedWx/ZK4Q==
-  /spdx-license-ids/3.0.5:
+  /spdx-license-ids/3.0.6:
     dev: true
     resolution:
-      integrity: sha512-J+FWzZoynJEXGphVIS+XEh3kFSjZX/1i9gFBaWQcB+/tmpe2qUsSBABpcxqxnAxFdiUFEgAX1bjYGQvIZmoz9Q==
+      integrity: sha512-+orQK83kyMva3WyPf59k1+Y525csj5JejicWut55zeTWANuN17qSiSLUXWtzHeNWORSvT7GLDJ/E/XiIWoXBTw==
   /split/1.0.1:
     dependencies:
       through: 2.3.8
@@ -1723,13 +1728,13 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha1-n5up2e+odkw4dpi8v+sshI8RrbM=
-  /ts-node/9.0.0_typescript@4.0.2:
+  /ts-node/9.0.0_typescript@4.0.3:
     dependencies:
       arg: 4.1.3
       diff: 4.0.2
       make-error: 1.3.6
       source-map-support: 0.5.19
-      typescript: 4.0.2
+      typescript: 4.0.3
       yn: 3.1.1
     dev: true
     engines:
@@ -1739,18 +1744,18 @@ packages:
       typescript: '>=2.7'
     resolution:
       integrity: sha512-/TqB4SnererCDR/vb4S/QvSZvzQMJN8daAslg7MeaiHvD8rDZsSfXmNeNumyZZzMned72Xoq/isQljYSt8Ynfg==
-  /ttypescript/1.5.10_ts-node@9.0.0+typescript@4.0.2:
+  /ttypescript/1.5.12_ts-node@9.0.0+typescript@4.0.3:
     dependencies:
       resolve: 1.17.0
-      ts-node: 9.0.0_typescript@4.0.2
-      typescript: 4.0.2
+      ts-node: 9.0.0_typescript@4.0.3
+      typescript: 4.0.3
     dev: true
     hasBin: true
     peerDependencies:
-      ts-node: ^8.0.2
-      typescript: ^3.2.2
+      ts-node: '>=8.0.2'
+      typescript: '>=3.2.2'
     resolution:
-      integrity: sha512-Hk7TRej1hM+p+Fo+Pyb/XK9pe9CAt3Sh5n5YRutxFS8hUgkh2u1Vd2K40kMcNP3WYhiVFBMqXwM/2E8O95Ep6g==
+      integrity: sha512-1ojRyJvpnmgN9kIHmUnQPlEV1gq+VVsxVYjk/NfvMlHSmYxjK5hEvOOU2MQASrbekTUiUM7pR/nXeCc8bzvMOQ==
   /type-fest/0.13.1:
     dev: true
     engines:
@@ -1780,21 +1785,21 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-BLbiRkiBzAwsjut4x/dsibSTB6yWpwT5qWmC2OfuCg3GgVQCSgMs4vEctYPhsaGtd0AeuuHMkjZ2h2WG8MSzRw==
-  /typescript/4.0.2:
+  /typescript/4.0.3:
     dev: true
     engines:
       node: '>=4.2.0'
     hasBin: true
     resolution:
-      integrity: sha512-e4ERvRV2wb+rRZ/IQeb3jm2VxBsirQLpQhdxplZ2MEzGvDkkMmPglecnNDfSUBivMjP93vRbngYYDQqQ/78bcQ==
-  /uglify-js/3.10.1:
+      integrity: sha512-tEu6DGxGgRJPb/mVPIZ48e69xCn2yRmCgYmDugAVwmJ6o+0u1RI18eO7E7WBTLYLaEVVOhwQmcdhQHweux/WPg==
+  /uglify-js/3.10.4:
     dev: true
     engines:
       node: '>=0.8.0'
     hasBin: true
     optional: true
     resolution:
-      integrity: sha512-RjxApKkrPJB6kjJxQS3iZlf///REXWYxYJxO/MpmlQzVkDWVI3PSnCBWezMecmTU/TRkNxrl8bmsfFQCp+LO+Q==
+      integrity: sha512-kBFT3U4Dcj4/pJ52vfjCSfyLyvG9VYYuGYPmrPvAxRw/i7xHiT4VvCev+uiEMcEEiu6UNB6KgWmGtSUYIWScbw==
   /universalify/0.1.2:
     dev: true
     engines:
@@ -1895,11 +1900,11 @@ packages:
     resolution:
       integrity: sha512-DUOKC/IhbkdLKKiV89gw9DUauTV8U/8yJl1sjf6MtDmzevLKOF2duNJ495S3MFVjqZarr+qNGCPbkg4mu4PpLw==
 specifiers:
-  '@jsenv/import-map': ^6.7.2
-  '@microsoft/api-documenter': ^7.8.34
-  '@microsoft/api-extractor': ^7.9.10
-  '@types/node': ^14.6.0
+  '@jsenv/import-map': ^6.7.4
+  '@microsoft/api-documenter': ^7.8.53
+  '@microsoft/api-extractor': ^7.9.19
+  '@types/node': ^14.11.1
   standard-version: ^9.0.0
   ts-node: ^9.0.0
   ttypescript: latest
-  typescript: ^4.0.2
+  typescript: ^4.0.3
