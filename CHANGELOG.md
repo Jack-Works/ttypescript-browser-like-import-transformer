@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.3.0](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/compare/v2.2.0...v2.3.0) (2020-09-20)
+
+
+### Features
+
+* update pika cdn url; add jspm ([4e32e0b](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/commit/4e32e0b8f07622993a63fb9b778afaf2a5fa7b30))
+
 ## [2.2.0](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/compare/v2.1.2...v2.2.0) (2020-07-18)
 
 
