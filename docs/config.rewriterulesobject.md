@@ -30,7 +30,9 @@ export type RewriteRulesObject = false | RewriteRulesSimple | RewriteRulesUMD | 
 
 - - `"unpkg"`<!-- -->: try to transform imports path to "https://unpkg.com/package<!-- -->@<!-- -->version/index.js?module"
 
-- - `"pikacdn"`<!-- -->: try to transform import path to "https://cdn.pika.dev/package<!-- -->@<!-- -->version"
+- - `"skypack"`<!-- -->: try to transform import path to "https://cdn.skypack.dev/package<!-- -->@<!-- -->version"
+
+- - `"jspm"`<!-- -->: try to transform import path to "https://jspm.dev/package<!-- -->@<!-- -->version"
 
 ## Example
 
@@ -39,8 +41,9 @@ Example for `Record<string, `[RewriteRulesObject](./config.rewriterulesobject.md
 ```jsonc
 {
    "my-pkg": "umd", // to globalThis.myPkg
-   "my-pkg2": "pikacdn", // to https://cdn.pika.dev/my-pkg2
+   "my-pkg2": "skypack", // to https://cdn.skypack.dev/my-pkg2
    "my-pkg3": "unpkg", // to https://unpkg.com/my-pkg3
+   "my-pkg4": "jspm", // to https://jspm.dev/my-pkg4
    "/my-pkg-(.+)/": {
        type: 'umd',
        target: 'getMyPkg("$1")'
@@ -117,16 +120,16 @@ Filename: `rules-pikacdn.js`
 // PluginConfig: {"rules":"pikacdn"}
 console.log('Should run after all imports', a, b, c2, d, e, c2);
 // Node style import
-import a from "https://cdn.pika.dev/a";
-import b, { c as c2, d } from "https://cdn.pika.dev/b";
-import * as e from "https://cdn.pika.dev/c";
-import "https://cdn.pika.dev/d";
+import a from "https://cdn.skypack.dev/a";
+import b, { c as c2, d } from "https://cdn.skypack.dev/b";
+import * as e from "https://cdn.skypack.dev/c";
+import "https://cdn.skypack.dev/d";
 const c = 1;
 const x = 1;
 export { x };
 // Node style export
-export { c, d } from "https://cdn.pika.dev/b";
-export * as e from "https://cdn.pika.dev/c";
+export { c, d } from "https://cdn.skypack.dev/b";
+export * as e from "https://cdn.skypack.dev/c";
 
 ```
 Filename: `rules-snowpack.js`

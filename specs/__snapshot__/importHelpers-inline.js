@@ -124,13 +124,21 @@ function moduleSpecifierTransform(context, opt) {
                 switch (e) {
                     case "snowpack": return ToRewrite(`${webModulePath !== null && webModulePath !== void 0 ? webModulePath : "/web_modules/"}${appendExt(path, expectedExtension)}`);
                     case "pikacdn":
+                    case "skypack":
+                    case "jspm":
                     case "unpkg": {
-                        const a = "https://cdn.pika.dev/$packageName$@$version$$subpath$";
-                        const b = "https://cdn.pika.dev/$packageName$$subpath$";
-                        const c = "https://unpkg.com/$packageName$@$version$$subpath$?module";
-                        const d = "https://unpkg.com/$packageName$$subpath$?module";
-                        const isPika = e === "pikacdn";
-                        return self(context, { type: "url", noVersion: isPika ? b : d, withVersion: isPika ? a : c });
+                        const URLs = {
+                            jspm: "jspm.dev", pikacdn: "cdn.skypack.dev", skypack: "cdn.skypack.dev", unpkg: "unpkg.com",
+                        };
+                        let withVersion = `https://${URLs[e]}/$packageName$@$version$$subpath$`;
+                        let noVersion = `https://${URLs[e]}/$packageName$$subpath$`;
+                        if (e === "unpkg") {
+                            withVersion += "?module";
+                            noVersion += "?module";
+                        }
+                        return self(context, {
+                            type: "url", noVersion, withVersion,
+                        });
                     }
                     case "umd":
                         const target = importPathToUMDName(path);

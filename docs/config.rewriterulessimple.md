@@ -9,7 +9,7 @@ Predefined rewrite rules
 <b>Signature:</b>
 
 ```typescript
-export type RewriteRulesSimple = 'snowpack' | 'umd' | 'unpkg' | 'pikacdn'
+export type RewriteRulesSimple = 'snowpack' | 'umd' | 'unpkg' | 'pikacdn' | 'skypack' | 'jspm'
 ```
 
 ## Remarks
@@ -20,7 +20,9 @@ export type RewriteRulesSimple = 'snowpack' | 'umd' | 'unpkg' | 'pikacdn'
 
 - unpkg: Rewrite to unpkg (a CDN)
 
-- pikacdn: Rewrite to pikacdn (another CDN)
+- skypack: Rewrite to skypack (another CDN)
+
+- jspm: Rewrite to jspm (another CDN)
 
 ## Example
 
@@ -67,23 +69,42 @@ export { x };
 import { _import as _import } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.2.0/es/ttsclib.min.js";
 
 ```
-Filename: `rules-pikacdn.js`
+Filename: `rules-skypack.js`
 
 ```js
 // CompilerOptions: {"module":"ESNext"}
-// PluginConfig: {"rules":"pikacdn"}
+// PluginConfig: {"rules":"skypack"}
 console.log('Should run after all imports', a, b, c2, d, e, c2);
 // Node style import
-import a from "https://cdn.pika.dev/a";
-import b, { c as c2, d } from "https://cdn.pika.dev/b";
-import * as e from "https://cdn.pika.dev/c";
-import "https://cdn.pika.dev/d";
+import a from "https://cdn.skypack.dev/a";
+import b, { c as c2, d } from "https://cdn.skypack.dev/b";
+import * as e from "https://cdn.skypack.dev/c";
+import "https://cdn.skypack.dev/d";
 const c = 1;
 const x = 1;
 export { x };
 // Node style export
-export { c, d } from "https://cdn.pika.dev/b";
-export * as e from "https://cdn.pika.dev/c";
+export { c, d } from "https://cdn.skypack.dev/b";
+export * as e from "https://cdn.skypack.dev/c";
+
+```
+Filename: `rules-jspm.js`
+
+```js
+// CompilerOptions: {"module":"ESNext"}
+// PluginConfig: {"rules":"jspm"}
+console.log('Should run after all imports', a, b, c2, d, e, c2);
+// Node style import
+import a from "https://jspm.dev/a";
+import b, { c as c2, d } from "https://jspm.dev/b";
+import * as e from "https://jspm.dev/c";
+import "https://jspm.dev/d";
+const c = 1;
+const x = 1;
+export { x };
+// Node style export
+export { c, d } from "https://jspm.dev/b";
+export * as e from "https://jspm.dev/c";
 
 ```
 Filename: `rules-snowpack.js`

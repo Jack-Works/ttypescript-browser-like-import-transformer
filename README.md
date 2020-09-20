@@ -14,7 +14,7 @@ This typescript transformer helps you to emit a browser compatible ESModule outp
 1. Add a ".js" after the local import
 1. Transform the node style dependencies (e.g. `import React from "react"`) to
     1. A global variable access (`const React = globalThis.React`)
-    1. A CDN (`import _ from "https://cdn.pika.dev/lodash-es@4.17.15"`)
+    1. A CDN (`import _ from "https://cdn.skypack.dev/lodash-es@4.17.15"`)
     1. Another CDN (`import _ from "https://unpkg.com/lodash-es@4.17.15?module"`)
     1. [Snowpack](https://www.snowpack.dev/) style import (`import _ from "/web_modules/lodash-es.js"`)
     1. **\[🧪Experimental\]** Read import rule from [Import Map](https://github.com/WICG/import-maps)
@@ -103,7 +103,7 @@ See the **TTypeScript Support** in the [Importing Packages by Name](https://www.
 
 ### Use with CDN
 
-[Pika CDN](https://www.pika.dev/cdn) and [unpkg](https://unpkg.com/#query-params) are two CDNs that friendly to ES Module dependencies. This transformer also supports CDN import. (e.g. Before `import _ from 'lodash-es'` After `import _ from 'https://cdn.pika.dev/lodash-es'`)
+[Skypack CDN](https://www.skypack.dev/) and [unpkg](https://unpkg.com/#query-params) are two CDNs that friendly to ES Module dependencies. This transformer also supports CDN import. (e.g. Before `import _ from 'lodash-es'` After `import _ from 'https://cdn.skypack.dev/lodash-es'`)
 
 ```jsonc
 /* tsconfig.json */
@@ -114,7 +114,7 @@ See the **TTypeScript Support** in the [Importing Packages by Name](https://www.
             {
                 "transform": "@magic-works/ttypescript-browser-like-import-transformer",
                 "after": true,
-                "rules": "pikacdn" // or "unpkg"
+                "rules": "skypack" // or "unpkg"
             }
         ]
     }

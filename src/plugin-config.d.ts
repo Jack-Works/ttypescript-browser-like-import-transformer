@@ -63,7 +63,7 @@ export interface PluginConfigs {
      * ```js
      * {rules: {
      *      react: "umd",
-     *      "lodash-es": "pikacdn",
+     *      "lodash-es": "skypack",
      *      "async-call-rpc": "unpkg",
      *      "std:fs": false,
      *      "isarray": "snowpack",
@@ -349,19 +349,22 @@ export interface ImportMapResolution {
  *
  * - unpkg: Rewrite to unpkg (a CDN)
  *
- * - pikacdn: Rewrite to pikacdn (another CDN)
+ * - skypack: Rewrite to skypack (another CDN)
+ *
+ * - jspm: Rewrite to jspm (another CDN)
  *
  * @example
  * Source code:
  * !src(rules-default.ts)
  * Outputs:
  * !out(rules-umd.js)
- * !out(rules-pikacdn.js)
+ * !out(rules-skypack.js)
+ * !out(rules-jspm.js)
  * !out(rules-snowpack.js)
  * !out(rules-unpkg.js)
  * @public
  */
-export type RewriteRulesSimple = 'snowpack' | 'umd' | 'unpkg' | 'pikacdn'
+export type RewriteRulesSimple = 'snowpack' | 'umd' | 'unpkg' | 'pikacdn' | 'skypack' | 'jspm'
 /**
  * Rewrite module to a UMD access
  * @example
@@ -449,15 +452,18 @@ export interface RewriteRulesURL {
  *
  * - - `"unpkg"`: try to transform imports path to "https://unpkg.com/package\@version/index.js?module"
  *
- * - - `"pikacdn"`: try to transform import path to "https://cdn.pika.dev/package\@version"
+ * - - `"skypack"`: try to transform import path to "https://cdn.skypack.dev/package\@version"
+ *
+ * - - `"jspm"`: try to transform import path to "https://jspm.dev/package\@version"
  *
  * @example
  * Example for `Record<string, `{@link RewriteRulesObject}`>`
  * ```jsonc
  * {
  *    "my-pkg": "umd", // to globalThis.myPkg
- *    "my-pkg2": "pikacdn", // to https://cdn.pika.dev/my-pkg2
+ *    "my-pkg2": "skypack", // to https://cdn.skypack.dev/my-pkg2
  *    "my-pkg3": "unpkg", // to https://unpkg.com/my-pkg3
+ *    "my-pkg4": "jspm", // to https://jspm.dev/my-pkg4
  *    "/my-pkg-(.+)/": {
  *        type: 'umd',
  *        target: 'getMyPkg("$1")'

@@ -1,5 +1,5 @@
 // CompilerOptions: {"module":"ESNext"}
-// PluginConfig: {"rules":"pikacdn"}
+// PluginConfig: {"rules":"skypack"}
 console.log('Should run after all imports', a, b, c2, d, e, c2);
 // Node style import
 import a from "https://cdn.skypack.dev/a";

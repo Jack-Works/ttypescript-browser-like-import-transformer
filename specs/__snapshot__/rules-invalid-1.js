@@ -1,1 +1,1 @@
-// When rules is a string, it must be the enum snowpack,umd,unpkg,pikacdn, but found unknown
+// When rules is a string, it must be the enum snowpack,umd,unpkg,pikacdn,skypack,jspm, but found unknown
