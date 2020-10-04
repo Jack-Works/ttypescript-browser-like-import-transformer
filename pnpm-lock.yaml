@@ -1,14 +1,14 @@
 devDependencies:
-  '@microsoft/api-documenter': 7.8.53
-  '@microsoft/api-extractor': 7.9.19
-  '@types/node': 14.11.1
+  '@microsoft/api-documenter': 7.9.4
+  '@microsoft/api-extractor': 7.10.1
+  '@types/node': 14.11.2
   standard-version: 9.0.0
   ts-node: 9.0.0_typescript@4.0.3
   ttypescript: 1.5.12_ts-node@9.0.0+typescript@4.0.3
   typescript: 4.0.3
 lockfileVersion: 5.1
 optionalDependencies:
-  '@jsenv/import-map': 6.7.4
+  '@jsenv/import-map': 6.8.0
 packages:
   /@babel/code-frame/7.10.4:
     dependencies:
@@ -28,39 +28,40 @@ packages:
     dev: true
     resolution:
       integrity: sha512-i6rgnR/YgPEQzZZnbTHHuZdlE8qyoBNalD6F+q4vAFlcMEcqmkoG+mPqJYJCo63qPf74+Y1UZsl3l6f7/RIkmA==
-  /@jsenv/import-map/6.7.4:
+  /@jsenv/import-map/6.8.0:
     dev: false
     engines:
       node: '>=12.8.0'
     optional: true
     resolution:
-      integrity: sha512-nLFrTEtqFd2AWRX2+0I3BFhwHrnc42AHayNTmjJwSxW2j9mnQAVQrT10oarQapPybygtIPy3YhedSjNb1/+4xQ==
-  /@microsoft/api-documenter/7.8.53:
+      integrity: sha512-f59eYb88EsEnWaHpZMHHT9A2q85sVBxNrdPqGjnzIZBlPbGRIzVTtFjF51u+twB64TUXkGWxvZzA+moiR3lv5A==
+  /@microsoft/api-documenter/7.9.4:
     dependencies:
-      '@microsoft/api-extractor-model': 7.9.4
+      '@microsoft/api-extractor-model': 7.10.1
       '@microsoft/tsdoc': 0.12.19
-      '@rushstack/node-core-library': 3.33.3
-      '@rushstack/ts-command-line': 4.6.7
+      '@rushstack/node-core-library': 3.34.1
+      '@rushstack/ts-command-line': 4.7.1
       colors: 1.2.5
       js-yaml: 3.13.1
       resolve: 1.17.0
     dev: true
     hasBin: true
     resolution:
-      integrity: sha512-Pf7FTvhhfurYmELY1PH65Pss1cwdbEGeyiceancRHrKDUS4vJi+V1h0Snc4xRS6/SGt2vBXd1gbh1jO0hzgSfA==
-  /@microsoft/api-extractor-model/7.9.4:
+      integrity: sha512-ghT/WZ2gutREUWl9JvyzTD/zCVn/JvAiXk8C8aDTlC7aDQDq/NFmTVB0kkpfdeJc2MD1hlqdNL+pDo1+ePSKyA==
+  /@microsoft/api-extractor-model/7.10.1:
     dependencies:
       '@microsoft/tsdoc': 0.12.19
-      '@rushstack/node-core-library': 3.33.3
+      '@rushstack/node-core-library': 3.34.1
     dev: true
     resolution:
-      integrity: sha512-54NM/bqoSVyzRvqDLZkITh0ZTNwIf9aFyYQHJ5LVI7cEqFgc71armtJnI3Gw4GQFhjOJhAccbY31tVUiBbjmgA==
-  /@microsoft/api-extractor/7.9.19:
+      integrity: sha512-9LpG6ICn7yfFMALOL0BjPwG8o7itb4MnIDn5OYYYU2qQOmMsX+B9ZcJ+VfUIUdCqhvEjoAiIO6qGT6xUFOazBA==
+  /@microsoft/api-extractor/7.10.1:
     dependencies:
-      '@microsoft/api-extractor-model': 7.9.4
+      '@microsoft/api-extractor-model': 7.10.1
       '@microsoft/tsdoc': 0.12.19
-      '@rushstack/node-core-library': 3.33.3
-      '@rushstack/ts-command-line': 4.6.7
+      '@rushstack/node-core-library': 3.34.1
+      '@rushstack/rig-package': 0.2.1
+      '@rushstack/ts-command-line': 4.7.1
       colors: 1.2.5
       lodash: 4.17.20
       resolve: 1.17.0
@@ -70,12 +71,12 @@ packages:
     dev: true
     hasBin: true
     resolution:
-      integrity: sha512-oYY5sgsS01NK5/fk34qv9V0tbX4KR9Hw9kVt2lwHMg6seDNq3cO9dcQdroybJfoWYRN0FFvHFVRlY2WqN4afMQ==
+      integrity: sha512-hJfwdaLXI/Crq4gH9yzLFwOY/uCwdXerqp3cBq27zxb773LXv88mhnhCehnce7eHMqhKXgPSPgVBf/Zfla9skw==
   /@microsoft/tsdoc/0.12.19:
     dev: true
     resolution:
       integrity: sha512-IpgPxHrNxZiMNUSXqR1l/gePKPkfAmIKoDRP9hp7OwjU29ZR8WCJsOJ8iBKgw0Qk+pFwR+8Y1cy8ImLY6e9m4A==
-  /@rushstack/node-core-library/3.33.3:
+  /@rushstack/node-core-library/3.34.1:
     dependencies:
       '@types/node': 10.17.13
       colors: 1.2.5
@@ -88,8 +89,16 @@ packages:
       z-schema: 3.18.4
     dev: true
     resolution:
-      integrity: sha512-4zQgVDMPiniTkRErUzUzW9gY+OeQW/pEccywUoVA9cUAOIkjdj3efwNUbCcVLsPm1uVT0ifgFEqh38pAqAAeZA==
-  /@rushstack/ts-command-line/4.6.7:
+      integrity: sha512-DX1xB9E2Xmi5auFxacftUXVuI2DUUyKrlGaecjesiS2YmV6pBnKzHHAaxWOQF2ajFNhXY2I1cGvDp45z3aJv5g==
+  /@rushstack/rig-package/0.2.1:
+    dependencies:
+      '@types/node': 10.17.13
+      resolve: 1.17.0
+      strip-json-comments: 3.1.1
+    dev: true
+    resolution:
+      integrity: sha512-B1JQ6lF8mg8MfRCki8XML6bs2qPCS0AX83enEZ3lSZdI8nVdFe7PumS03dpN3MXElbNiuqlJpECXo9sSKEzcyg==
+  /@rushstack/ts-command-line/4.7.1:
     dependencies:
       '@types/argparse': 1.0.38
       argparse: 1.0.10
@@ -97,7 +106,7 @@ packages:
       string-argv: 0.3.1
     dev: true
     resolution:
-      integrity: sha512-UOEMp3cRPrrNF2yBHBM6uROmkJRrK9NfFS+tOq7jmJTjfoWSS7Esnn+XwFsnBOW7VVmQeLhL+4rKbx6EdXsejg==
+      integrity: sha512-bpBByIKH1t3g2uCXspr5wsA2/XGA9qAaKVYkUnSVheAyH9OmAiUzgpcVswTnYrM3zEhIxGmo9Giqx/FCKubW0g==
   /@types/argparse/1.0.38:
     dev: true
     resolution:
@@ -114,10 +123,10 @@ packages:
     dev: true
     resolution:
       integrity: sha512-pMCcqU2zT4TjqYFrWtYHKal7Sl30Ims6ulZ4UFXxI4xbtQqK/qqKwkDoBFCfooRqqmRu9vY3xaJRwxSh673aYg==
-  /@types/node/14.11.1:
+  /@types/node/14.11.2:
     dev: true
     resolution:
-      integrity: sha512-oTQgnd0hblfLsJ6BvJzzSL+Inogp3lq9fGgqRkMB/ziKMgEUaFl801OncOzUmalfzt14N0oPHMK47ipl+wbTIw==
+      integrity: sha512-jiE3QIxJ8JLNcb1Ps6rDbysDhN4xa8DJJvuC9prr6w+1tIh+QAbYyNF3tyiZNLDBIuBCf4KEcV2UvQm/V60xfA==
   /@types/normalize-package-data/2.4.0:
     dev: true
     resolution:
@@ -1668,6 +1677,12 @@ packages:
       node: '>=8'
     resolution:
       integrity: sha512-laJTa3Jb+VQpaC6DseHhF7dXVqHTfJPCRDaEbid/drOhgitgYku/letMUqOXFoWV0zIIUbjpdH2t+tYj4bQMRQ==
+  /strip-json-comments/3.1.1:
+    dev: true
+    engines:
+      node: '>=8'
+    resolution:
+      integrity: sha512-6fPc+R4ihwqP6N/aIv2f1gMH8lOVtWQHoqC4yK6oSDVVocumAsfCqjkXnqiYMhmMwS/mEHLp7Vehlt3ql6lEig==
   /supports-color/5.5.0:
     dependencies:
       has-flag: 3.0.0
@@ -1900,10 +1915,10 @@ packages:
     resolution:
       integrity: sha512-DUOKC/IhbkdLKKiV89gw9DUauTV8U/8yJl1sjf6MtDmzevLKOF2duNJ495S3MFVjqZarr+qNGCPbkg4mu4PpLw==
 specifiers:
-  '@jsenv/import-map': ^6.7.4
-  '@microsoft/api-documenter': ^7.8.53
-  '@microsoft/api-extractor': ^7.9.19
-  '@types/node': ^14.11.1
+  '@jsenv/import-map': ^6.8.0
+  '@microsoft/api-documenter': ^7.9.4
+  '@microsoft/api-extractor': ^7.10.1
+  '@types/node': ^14.11.2
   standard-version: ^9.0.0
   ts-node: ^9.0.0
   ttypescript: latest
