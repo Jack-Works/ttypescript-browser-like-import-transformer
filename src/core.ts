@@ -196,8 +196,8 @@ function unreachable(_x: never): never {
     throw new Error('Unreachable case' + _x)
 }
 function parseRegExp(this: ts, s: string) {
-    const literal = parseJS(this, s, 'expression', this.isRegularExpressionLiteral)
-    if (literal.type !== 'ok') return null
+    const literal = parseJS(this, s, ParseHint.Expression, this.isRegularExpressionLiteral)
+    if (literal.type !== ParseResult.OK) return null
     try {
         return eval(literal.value.text)
     } catch {
@@ -241,24 +241,8 @@ function createThrowStatement(factory: NodeFactory, type: 'TypeError' | 'SyntaxE
         ]),
     )
 }
-function createThrowExpression(
-    ts: ts,
-    ...[factory, type, message]: Parameters<typeof createThrowStatement>
-): Expression {
-    return factory.createCallExpression(
-        factory.createParenthesizedExpression(
-            factory.createArrowFunction(
-                undefined,
-                undefined,
-                [],
-                undefined,
-                factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
-                factory.createBlock([createThrowStatement(factory, type, message)], true),
-            ),
-        ),
-        undefined,
-        [],
-    )
+function createThrowExpression(...[factory, ...args]: Parameters<typeof createThrowStatement>): Expression {
+    return factory.createImmediatelyInvokedArrowFunction([createThrowStatement(factory, ...args)])
 }
 function createJSONObject(factory: NodeFactory, string: string) {
     return factory.createCallExpression(factory.createIdentifier('JSON.parse'), void 0, [
@@ -286,6 +270,7 @@ function updateImportExportDeclaration(
     opt = ctx.config.rules,
 ): Statement[] {
     const { node, sourceFile, ts, ttsclib, context } = ctx
+    const { factory } = context
     const rewriteStrategy = ttsclib.moduleSpecifierTransform(
         {
             ...ctx,
@@ -298,22 +283,24 @@ function updateImportExportDeclaration(
     )
     switch (rewriteStrategy.type) {
         case 'error':
-            return [createThrowStatement(context.factory, 'SyntaxError', rewriteStrategy.message)]
+            return [createThrowStatement(factory, 'SyntaxError', rewriteStrategy.message)]
         case 'noop':
             return [node]
         case 'rewrite': {
-            const nextPath = context.factory.createStringLiteral(rewriteStrategy.nextPath)
+            const nextPath = factory.createStringLiteral(rewriteStrategy.nextPath)
             if (ts.isImportDeclaration(node))
-                return [ts.updateImportDeclaration(node, node.decorators, node.modifiers, node.importClause, nextPath)]
+                return [
+                    factory.updateImportDeclaration(node, node.decorators, node.modifiers, node.importClause, nextPath),
+                ]
             else
                 return [
-                    ts.updateExportDeclaration(
+                    factory.updateExportDeclaration(
                         node,
                         node.decorators,
                         node.modifiers,
+                        node.isTypeOnly,
                         node.exportClause,
                         nextPath,
-                        node.isTypeOnly,
                     ),
                 ]
         }
@@ -325,7 +312,7 @@ function updateImportExportDeclaration(
             if (!json) return [node]
             const t: ExprTarget = {
                 type: 'umd',
-                target: createJSONObject(context.factory, json),
+                target: createJSONObject(factory, json),
             }
             return umd(t, true)
         default:
@@ -342,14 +329,7 @@ function updateImportExportDeclaration(
         const clause = ts.isImportDeclaration(node) ? node.importClause : node.exportClause
         const { umdImportPath } = rewriteStrategy
         const umdImport = umdImportPath
-            ? [
-                  context.factory.createImportDeclaration(
-                      void 0,
-                      void 0,
-                      void 0,
-                      context.factory.createStringLiteral(umdImportPath),
-                  ),
-              ]
+            ? [factory.createImportDeclaration(void 0, void 0, void 0, factory.createStringLiteral(umdImportPath))]
             : []
         // ? if it have no clause, it must be an ImportDeclaration
         if (!clause) {
@@ -357,7 +337,7 @@ function updateImportExportDeclaration(
             const text = `import "${
                 (node.moduleSpecifier as StringLiteral).text
             }" is eliminated because it expected to have no side effects in UMD transform.`
-            return [context.factory.createExpressionStatement(context.factory.createStringLiteral(text))]
+            return [factory.createExpressionStatement(factory.createStringLiteral(text))]
         }
         const { statements } = importOrExportClauseToUMD(nextPath, _with(ctx, clause), globalObject, noImportCheck)
         writeSourceFileMeta(sourceFile, hoistUMDImportDeclaration, new Set<Statement>(), (_) => {
@@ -383,7 +363,7 @@ function importOrExportClauseToUMD(
     noImportCheck = false,
 ): { variableNames: Identifier[]; statements: Statement[] } {
     const { node, ts, path, context, ttsclib } = ctx
-    const factory = context.factory
+    const { factory } = context
     const {
         config: { umdCheckCompact },
     } = ctx
@@ -561,15 +541,15 @@ function getUMDExpressionForModule(
         : parseJS(
               ts,
               `${globalObject}.${umdName}`,
-              'expression',
+              ParseHint.Expression,
               function (node): node is CallExpression | PropertyAccessExpression {
                   return ts.isCallExpression(node) || ts.isPropertyAccessExpression(node)
               },
               sourceFile.fileName,
-          ).type === 'syntax error'
+          ).type === ParseResult.SyntaxError
     if (isSyntaxError)
         return [
-            createThrowExpression(ts, factory, 'SyntaxError', 'Invalid source text after transform: ' + umdName),
+            createThrowExpression(factory, 'SyntaxError', 'Invalid source text after transform: ' + umdName),
             globalIdentifier.text,
         ]
     return [umdAccess, globalIdentifier.text]
@@ -579,7 +559,7 @@ const moreThan1ArgumentDynamicImportErrorMessage =
     "Transform rule for this dependencies found, but this dynamic import has more than 1 argument, transformer don't know how to transform that and keep it untouched."
 function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args: Expression[]): Expression[] {
     const { ts, config, node, sourceFile, ttsclib, configParser } = ctx
-    const factory = ctx.context.factory
+    const { factory } = ctx.context
     const [first, ...rest] = args
     if (ts.isStringLiteralLike(first)) {
         const rewriteStrategy = ttsclib.moduleSpecifierTransform({
@@ -653,8 +633,8 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
         const opt = config.dynamicImportPathRewrite
         if (opt === false) return node
         const source = ttsclib.moduleSpecifierTransform.toString()
-        const moduleSpecifierTransform_ = parseJS(ts, source, 'statement', ts.isFunctionDeclaration)
-        if (moduleSpecifierTransform_.type !== 'ok') {
+        const moduleSpecifierTransform_ = parseJS(ts, source, ParseHint.Statement, ts.isFunctionDeclaration)
+        if (moduleSpecifierTransform_.type !== ParseResult.OK) {
             debugger
             throw new Error('Invalid state' + source)
         }
@@ -676,8 +656,8 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
              */
             return createDynamicImportTransform(first, ...helperArgs)
         }
-        const f = parseJS(ts, opt.function, 'expression', ts.isArrowFunction, sourceFile.fileName)
-        if (f.type !== 'ok')
+        const f = parseJS(ts, opt.function, ParseHint.Expression, ts.isArrowFunction, sourceFile.fileName)
+        if (f.type !== ParseResult.OK)
             throw new configParser.ConfigError(
                 'Unable to parse the function. It must be an ArrowFunction. Get: ' + opt.function,
             )
@@ -742,11 +722,12 @@ function createTopLevelScopedHelper<F extends string | ((...args: any[]) => any)
     helper: F | string,
 ): readonly [Identifier, (...args: CastArray<LevelUpArgs<Parameters<CastFunction<F>>>>) => Expression] {
     const { config, ts, sourceFile, ttsclib, queryPackageVersion } = context
-    const factory = context.context.factory
+    const { factory } = context.context
     const result = topLevelScopedHelperMap.get(sourceFile)?.get(helper)
     if (result) return [result[0], (...args: any) => factory.createCallExpression(result[0], void 0, args)] as const
-    const parseResult = parseJS(ts, helper.toString(), 'statement', ts.isFunctionDeclaration)
-    if (parseResult.type !== 'ok') throw new Error('helper must be a function declaration, found ' + parseResult.error)
+    const parseResult = parseJS(ts, helper.toString(), ParseHint.Statement, ts.isFunctionDeclaration)
+    if (parseResult.type !== ParseResult.OK)
+        throw new Error('helper must be a function declaration, found ' + parseResult.error)
     const parsedFunction = parseResult.value
     const fnName = parsedFunction.name!.text
     const uniqueName = factory.createUniqueName(fnName)
@@ -783,15 +764,15 @@ function createTopLevelScopedHelper<F extends string | ((...args: any[]) => any)
             const uniqueName = [...idSet.values()].find((x) => x.text === fnName)!
             return [uniqueName, (...args: any) => factory.createCallExpression(uniqueName, void 0, args)] as const
         }
-        importDec = ts.updateImportDeclaration(
+        importDec = factory.updateImportDeclaration(
             importDec,
             void 0,
             void 0,
-            ts.updateImportClause(
+            factory.updateImportClause(
                 importClause,
-                void 0,
-                ts.updateNamedImports(importBindings, [...importBindings.elements, importBind]),
                 false,
+                undefined,
+                factory.updateNamedImports(importBindings, [...importBindings.elements, importBind]),
             ),
             importDec.moduleSpecifier,
         )
@@ -799,7 +780,7 @@ function createTopLevelScopedHelper<F extends string | ((...args: any[]) => any)
         ttsclibImportMap.set(sourceFile, [importDec, idSet])
         return returnValue
     }
-    const f = ts.updateFunctionDeclaration(
+    const f = factory.updateFunctionDeclaration(
         parsedFunction,
         void 0,
         parsedFunction.modifiers,
@@ -816,19 +797,27 @@ function createTopLevelScopedHelper<F extends string | ((...args: any[]) => any)
     return returnValue
 }
 
+const enum ParseResult {
+    OK,
+    SyntaxError,
+}
+const enum ParseHint {
+    Expression,
+    Statement,
+}
 function parseJS<T extends Node = Node>(
     ts: ts,
     source: string,
-    kind: 'expression' | 'statement',
+    kind: ParseHint,
     typeGuard: (node: Node) => node is T = (_node): _node is T => true,
     fileName: string = '_internal_.js',
-): { type: 'syntax error'; error: string } | { type: 'ok'; value: T } {
+): { type: ParseResult.SyntaxError; error: string } | { type: ParseResult.OK; value: T } {
     // force parse in JS mode
     fileName += '.js'
     const diagnostics = ts.transpileModule(source, { reportDiagnostics: true, fileName }).diagnostics || []
     if (diagnostics.length > 0) {
         return {
-            type: 'syntax error',
+            type: ParseResult.SyntaxError,
             error: ts.formatDiagnostics(diagnostics, {
                 getCanonicalFileName: () => '',
                 getCurrentDirectory: () => '/tmp',
@@ -838,15 +827,15 @@ function parseJS<T extends Node = Node>(
     }
     const sf = ts.createSourceFile(fileName, source, ts.ScriptTarget.ESNext, false, ts.ScriptKind.JS)
     if (sf.statements.filter((x) => !ts.isEmptyStatement(x)).length !== 1)
-        return { type: 'syntax error', error: 'Unexpected statement count ' + sf.statements.length }
+        return { type: ParseResult.SyntaxError, error: 'Unexpected statement count ' + sf.statements.length }
     const [firstStatement] = sf.statements
-    if (kind === 'expression') {
+    if (kind === ParseHint.Expression) {
         if (ts.isExpressionStatement(firstStatement) && typeGuard(firstStatement.expression))
-            return { type: 'ok', value: firstStatement.expression }
+            return { type: ParseResult.OK, value: firstStatement.expression }
     } else if (typeGuard(firstStatement)) {
-        return { type: 'ok', value: firstStatement }
+        return { type: ParseResult.OK, value: firstStatement }
     }
-    return { type: 'syntax error', error: 'Unexpected SyntaxKind: ' + ts.SyntaxKind[firstStatement.kind] }
+    return { type: ParseResult.SyntaxError, error: 'Unexpected SyntaxKind: ' + ts.SyntaxKind[firstStatement.kind] }
 }
 
 function writeSourceFileMeta<T, E extends T, Q>(
