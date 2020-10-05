@@ -99,14 +99,14 @@ Filename: `json-import-auto/index.js`
 
 ```js
 const file = JSON.parse("{\n    \"json\": true\n}\n");
-const file2 = __esModuleInterop(JSON.parse("{\n    \"json\": true\n}\n")).default;
+const file2 = __esModuleInterop_1(JSON.parse("{\n    \"json\": true\n}\n")).default;
 const { json: b } = JSON.parse("{\n    \"json\": true\n}\n");
 console.log('ns import', file);
 console.log('default import', file2);
 console.log('named import', b);
 Promise.resolve(JSON.parse("{\n    \"json\": true\n}\n")).then((x) => console.log('Deterministic dynamic import', x));
-__dynamicImportTransform(`./file${''}.json`, JSON.parse("{\"jsonImport\":true}"), __dynamicImportNative, _import, moduleSpecifierTransform).then((x) => console.log('Nondeterministic dynamic import', x));
-function __dynamicImportNative(path, json) {
+__dynamicImportTransform_1(`./file${''}.json`, JSON.parse("{\"jsonImport\":true}"), __dynamicImportNative_1, _import_1, moduleSpecifierTransform_1).then((x) => console.log('Nondeterministic dynamic import', x));
+function __dynamicImportNative_1(path, json) {
     if (json)
         return dynamicImportWithJSONHelper(json, import.meta);
     return import(path);
@@ -115,7 +115,7 @@ function __dynamicImportNative(path, json) {
         return fetch(url).then((x) => x.ok ? x.text() : Promise.reject(new TypeError(`Failed to fetch dynamically imported module: ${url}`))).then(JSON.parse);
     }
 }
-import { __esModuleInterop as __esModuleInterop, __dynamicImportTransform as __dynamicImportTransform, _import as _import, moduleSpecifierTransform as moduleSpecifierTransform } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.3.0/es/ttsclib.min.js";
+import { __esModuleInterop as __esModuleInterop_1, __dynamicImportTransform as __dynamicImportTransform_1, _import as _import_1, moduleSpecifierTransform as moduleSpecifierTransform_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.3.0/es/ttsclib.min.js";
 
 ```
 Filename: `json-import-auto/import-failed.js`
@@ -132,11 +132,11 @@ Filename: `json-import-auto/dyn-import-failed.js`
 
 ```js
 // @ts-ignore
-__dynamicImportTransform('./not-found.json', JSON.parse("{\"jsonImport\":true}"), __dynamicImportNative, _import, moduleSpecifierTransform).then(console.log, console.error);
+__dynamicImportTransform_1('./not-found.json', JSON.parse("{\"jsonImport\":true}"), __dynamicImportNative_1, _import_1, moduleSpecifierTransform_1).then(console.log, console.error);
 // @ts-ignore
-__dynamicImportTransform('https://raw.githubusercontent.com/angular/angular-cli/master/packages/angular/cli/lib/config/schema.json', JSON.parse("{\"jsonImport\":true}"), __dynamicImportNative, _import, moduleSpecifierTransform).then(console.log, console.error);
+__dynamicImportTransform_1('https://raw.githubusercontent.com/angular/angular-cli/master/packages/angular/cli/lib/config/schema.json', JSON.parse("{\"jsonImport\":true}"), __dynamicImportNative_1, _import_1, moduleSpecifierTransform_1).then(console.log, console.error);
 // @ts-ignore
-function __dynamicImportNative(path, json) {
+function __dynamicImportNative_1(path, json) {
     if (json)
         return dynamicImportWithJSONHelper(json, import.meta);
     return import(path);
@@ -145,7 +145,7 @@ function __dynamicImportNative(path, json) {
         return fetch(url).then((x) => x.ok ? x.text() : Promise.reject(new TypeError(`Failed to fetch dynamically imported module: ${url}`))).then(JSON.parse);
     }
 }
-import { __dynamicImportTransform as __dynamicImportTransform, _import as _import, moduleSpecifierTransform as moduleSpecifierTransform } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.3.0/es/ttsclib.min.js";
+import { __dynamicImportTransform as __dynamicImportTransform_1, _import as _import_1, moduleSpecifierTransform as moduleSpecifierTransform_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.3.0/es/ttsclib.min.js";
 
 ```
 "data"
@@ -199,8 +199,8 @@ console.log('ns import', file);
 console.log('default import', file2);
 console.log('named import', b);
 import("data:text/javascript,export default JSON.parse(\"{\\n    \\\"json\\\": true\\n}\\n\")").then((x) => console.log('Deterministic dynamic import', x));
-__dynamicImportTransform(`./file${''}.json`, JSON.parse("{\"jsonImport\":\"data\"}"), __dynamicImportNative, _import, moduleSpecifierTransform).then((x) => console.log('Nondeterministic dynamic import', x));
-function __dynamicImportNative(path, json) {
+__dynamicImportTransform_1(`./file${''}.json`, JSON.parse("{\"jsonImport\":\"data\"}"), __dynamicImportNative_1, _import_1, moduleSpecifierTransform_1).then((x) => console.log('Nondeterministic dynamic import', x));
+function __dynamicImportNative_1(path, json) {
     if (json)
         return dynamicImportWithJSONHelper(json, import.meta);
     return import(path);
@@ -209,7 +209,7 @@ function __dynamicImportNative(path, json) {
         return fetch(url).then((x) => x.ok ? x.text() : Promise.reject(new TypeError(`Failed to fetch dynamically imported module: ${url}`))).then(JSON.parse);
     }
 }
-import { __dynamicImportTransform as __dynamicImportTransform, _import as _import, moduleSpecifierTransform as moduleSpecifierTransform } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.3.0/es/ttsclib.min.js";
+import { __dynamicImportTransform as __dynamicImportTransform_1, _import as _import_1, moduleSpecifierTransform as moduleSpecifierTransform_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.3.0/es/ttsclib.min.js";
 
 ```
 Filename: `json-import-data/import-failed.js`
@@ -226,11 +226,11 @@ Filename: `json-import-data/dyn-import-failed.js`
 
 ```js
 // @ts-ignore
-__dynamicImportTransform('./not-found.json', JSON.parse("{\"jsonImport\":\"data\"}"), __dynamicImportNative, _import, moduleSpecifierTransform).then(console.log, console.error);
+__dynamicImportTransform_1('./not-found.json', JSON.parse("{\"jsonImport\":\"data\"}"), __dynamicImportNative_1, _import_1, moduleSpecifierTransform_1).then(console.log, console.error);
 // @ts-ignore
-__dynamicImportTransform('https://raw.githubusercontent.com/angular/angular-cli/master/packages/angular/cli/lib/config/schema.json', JSON.parse("{\"jsonImport\":\"data\"}"), __dynamicImportNative, _import, moduleSpecifierTransform).then(console.log, console.error);
+__dynamicImportTransform_1('https://raw.githubusercontent.com/angular/angular-cli/master/packages/angular/cli/lib/config/schema.json', JSON.parse("{\"jsonImport\":\"data\"}"), __dynamicImportNative_1, _import_1, moduleSpecifierTransform_1).then(console.log, console.error);
 // @ts-ignore
-function __dynamicImportNative(path, json) {
+function __dynamicImportNative_1(path, json) {
     if (json)
         return dynamicImportWithJSONHelper(json, import.meta);
     return import(path);
@@ -239,7 +239,7 @@ function __dynamicImportNative(path, json) {
         return fetch(url).then((x) => x.ok ? x.text() : Promise.reject(new TypeError(`Failed to fetch dynamically imported module: ${url}`))).then(JSON.parse);
     }
 }
-import { __dynamicImportTransform as __dynamicImportTransform, _import as _import, moduleSpecifierTransform as moduleSpecifierTransform } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.3.0/es/ttsclib.min.js";
+import { __dynamicImportTransform as __dynamicImportTransform_1, _import as _import_1, moduleSpecifierTransform as moduleSpecifierTransform_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.3.0/es/ttsclib.min.js";
 
 ```
 

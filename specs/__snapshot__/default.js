@@ -1,12 +1,12 @@
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {}
-const a = _import(globalThis["a"], ["default"], "a", "globalThis.a", false).default;
-const b = _import(globalThis["b"], ["default"], "b", "globalThis.b", false).default;
-const { c, d } = _import(globalThis["b"], ["c", "d"], "b", "globalThis.b", false);
-const e = _import(globalThis["c"], [], "c", "globalThis.c", false);
-const { c: c_1, d: d_1 } = _import(globalThis["b"], ["c", "d"], "b", "globalThis.b", false);
+const a = _import_1(globalThis["a"], ["default"], "a", "globalThis.a", false).default;
+const b = _import_1(globalThis["b"], ["default"], "b", "globalThis.b", false).default;
+const { c, d } = _import_1(globalThis["b"], ["c", "d"], "b", "globalThis.b", false);
+const e = _import_1(globalThis["c"], [], "c", "globalThis.c", false);
+const { c: c_1, d: d_1 } = _import_1(globalThis["b"], ["c", "d"], "b", "globalThis.b", false);
 export { c_1 as c, d_1 as d };
-const e_1 = _import(globalThis["c"], [], "c", "globalThis.c", false);
+const e_1 = _import_1(globalThis["c"], [], "c", "globalThis.c", false);
 export { e_1 as e };
 console.log('Should run after all imports', a, b, c, d, e, a1, b1, c1, d1, e1, a2, b2, c2, d2, e2);
 "import \"d\" is eliminated because it expected to have no side effects in UMD transform.";
@@ -28,4 +28,4 @@ export * as e1 from "./c.js";
 // browser style import
 export { c2, d2 } from 'http://example.com/';
 export * as e2 from 'http://example.com/';
-import { _import as _import } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.3.0/es/ttsclib.min.js";
+import { _import as _import_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.3.0/es/ttsclib.min.js";

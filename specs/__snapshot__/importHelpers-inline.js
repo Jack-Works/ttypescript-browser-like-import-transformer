@@ -1,8 +1,8 @@
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {"importHelpers":"inline","dynamicImportPathRewrite":{"type":"custom","function":"(x, y) => y(x)"}}
-const __customImportHelper = (x, y) => y(x);
-__customImportHelper(x, __customDynamicImportHelper(__dynamicImportTransform, JSON.parse("{\"after\":true,\"importHelpers\":\"inline\",\"dynamicImportPathRewrite\":{\"type\":\"custom\",\"function\":\"(x, y) => y(x)\"}}"), __dynamicImportNative, _import, moduleSpecifierTransform));
-function __dynamicImportTransform(_path, config, dynamicImport, UMDBindCheck, _moduleSpecifierTransform) {
+const __customImportHelper_1 = (x, y) => y(x);
+__customImportHelper_1(x, __customDynamicImportHelper_1(__dynamicImportTransform_1, JSON.parse("{\"after\":true,\"importHelpers\":\"inline\",\"dynamicImportPathRewrite\":{\"type\":\"custom\",\"function\":\"(x, y) => y(x)\"}}"), __dynamicImportNative_1, _import_1, moduleSpecifierTransform_1));
+function __dynamicImportTransform_1(_path, config, dynamicImport, UMDBindCheck, _moduleSpecifierTransform) {
     if (typeof _path !== "string")
         _path = String(_path);
     const path = _path;
@@ -33,10 +33,10 @@ function __dynamicImportTransform(_path, config, dynamicImport, UMDBindCheck, _m
         throw new Error("Unreachable case" + _x);
     }
 }
-function __dynamicImportNative(path) {
+function __dynamicImportNative_1(path) {
     return import(path);
 }
-function _import(mod, bindings, path, mapped, ESModuleInterop) {
+function _import_1(mod, bindings, path, mapped, ESModuleInterop) {
     const head = `The requested module${path ? "" : ` '${path}' (mapped as ${mapped})`}`;
     const umdInvalid = `${head} doesn't provides a valid export object.${mapped ? ` This is likely to be a mistake. Did you forget to set ${mapped}?` : ""}`;
     if (mod === undefined) {
@@ -57,7 +57,7 @@ function _import(mod, bindings, path, mapped, ESModuleInterop) {
     }
     return mod;
 }
-function moduleSpecifierTransform(context, opt) {
+function moduleSpecifierTransform_1(context, opt) {
     const { queryWellknownUMD } = context;
     const packageNameRegExp = /\$packageName\$/g;
     const versionRegExp = /\$version\$/g;
@@ -291,6 +291,6 @@ function moduleSpecifierTransform(context, opt) {
         return x.replace(/(?:^\w|[A-Z]|\b\w)/g, (letter, index) => index == 0 ? letter.toLowerCase() : letter.toUpperCase()).replace(/\s+/g, "");
     }
 }
-function __customDynamicImportHelper(_, c, d, u, m) {
+function __customDynamicImportHelper_1(_, c, d, u, m) {
     return (p) => _(p, c, d, u, m);
 }

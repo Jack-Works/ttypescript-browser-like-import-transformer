@@ -26,6 +26,7 @@ import type {
     PropertyAccessExpression,
     NamedImports,
     CompilerOptions,
+    NodeFactory,
 } from 'typescript'
 import type { PluginConfigs, ImportMapFunctionOpts, RewriteRulesUMD } from './plugin-config'
 import type { NormalizedPluginConfig } from './config-parser'
@@ -123,7 +124,7 @@ export default function createTransformer(
                 const languageHoistableDeclarations = hoistedHelper.filter(isLanguageHoistable)
                 const languageNotHoistableDeclarations = hoistedHelper.filter((x) => !isLanguageHoistable(x))
                 const hoistedUMDImport = Array.from(hoistUMDImportDeclaration.get(sourceFile)?.values() || [])
-                visitedSourceFile = ts.updateSourceFileNode(
+                visitedSourceFile = context.factory.updateSourceFile(
                     visitedSourceFile,
                     Array.from(
                         new Set([
@@ -233,32 +234,39 @@ function getImportedItems(ts: ts, node: ImportDeclaration | ExportDeclaration): 
     return result
 }
 const runtimeMessageHeader = '@magic-works/ttypescript-browser-like-import-transformer: '
-function createThrowStatement(ts: ts, type: 'TypeError' | 'SyntaxError', message: string): Statement {
-    return ts.createThrow(
-        ts.createNew(ts.createIdentifier(type), void 0, [ts.createLiteral(runtimeMessageHeader + message)]),
+function createThrowStatement(factory: NodeFactory, type: 'TypeError' | 'SyntaxError', message: string): Statement {
+    return factory.createThrowStatement(
+        factory.createNewExpression(factory.createIdentifier(type), void 0, [
+            factory.createStringLiteral(runtimeMessageHeader + message),
+        ]),
     )
 }
-function createThrowExpression(...[ts, type, message]: Parameters<typeof createThrowStatement>): Expression {
-    return ts.createCall(
-        ts.createParen(
-            ts.createArrowFunction(
+function createThrowExpression(
+    ts: ts,
+    ...[factory, type, message]: Parameters<typeof createThrowStatement>
+): Expression {
+    return factory.createCallExpression(
+        factory.createParenthesizedExpression(
+            factory.createArrowFunction(
                 undefined,
                 undefined,
                 [],
                 undefined,
-                ts.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
-                ts.createBlock([createThrowStatement(ts, type, message)], true),
+                factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
+                factory.createBlock([createThrowStatement(factory, type, message)], true),
             ),
         ),
         undefined,
         [],
     )
 }
-function createJSONObject(ts: ts, string: string) {
-    return ts.createCall(ts.createIdentifier('JSON.parse'), void 0, [ts.createStringLiteral(string)])
+function createJSONObject(factory: NodeFactory, string: string) {
+    return factory.createCallExpression(factory.createIdentifier('JSON.parse'), void 0, [
+        factory.createStringLiteral(string),
+    ])
 }
-function createPromiseResolve(ts: ts, ...args: Expression[]) {
-    return ts.createCall(ts.createIdentifier('Promise.resolve'), undefined, args)
+function createPromiseResolve(factory: NodeFactory, ...args: Expression[]) {
+    return factory.createCallExpression(factory.createIdentifier('Promise.resolve'), undefined, args)
 }
 //#endregion
 //#region Transformers
@@ -274,13 +282,13 @@ function createPromiseResolve(ts: ts, ...args: Expression[]) {
  */
 const hoistUMDImportDeclaration = new Map<SourceFile, Set<Statement>>()
 function updateImportExportDeclaration(
-    context: Context<ImportDeclaration | ExportDeclaration>,
-    opt = context.config.rules,
+    ctx: Context<ImportDeclaration | ExportDeclaration>,
+    opt = ctx.config.rules,
 ): Statement[] {
-    const { node, sourceFile, ts, ttsclib } = context
+    const { node, sourceFile, ts, ttsclib, context } = ctx
     const rewriteStrategy = ttsclib.moduleSpecifierTransform(
         {
-            ...context,
+            ...ctx,
             parseRegExp: parseRegExp.bind(ts),
             accessingImports: getImportedItems(ts, node),
             currentFile: sourceFile.fileName,
@@ -290,11 +298,11 @@ function updateImportExportDeclaration(
     )
     switch (rewriteStrategy.type) {
         case 'error':
-            return [createThrowStatement(ts, 'SyntaxError', rewriteStrategy.message)]
+            return [createThrowStatement(context.factory, 'SyntaxError', rewriteStrategy.message)]
         case 'noop':
             return [node]
         case 'rewrite': {
-            const nextPath = ts.createLiteral(rewriteStrategy.nextPath)
+            const nextPath = context.factory.createStringLiteral(rewriteStrategy.nextPath)
             if (ts.isImportDeclaration(node))
                 return [ts.updateImportDeclaration(node, node.decorators, node.modifiers, node.importClause, nextPath)]
             else
@@ -317,7 +325,7 @@ function updateImportExportDeclaration(
             if (!json) return [node]
             const t: ExprTarget = {
                 type: 'umd',
-                target: createJSONObject(ts, json),
+                target: createJSONObject(context.factory, json),
             }
             return umd(t, true)
         default:
@@ -334,7 +342,14 @@ function updateImportExportDeclaration(
         const clause = ts.isImportDeclaration(node) ? node.importClause : node.exportClause
         const { umdImportPath } = rewriteStrategy
         const umdImport = umdImportPath
-            ? [ts.createImportDeclaration(void 0, void 0, void 0, ts.createLiteral(umdImportPath))]
+            ? [
+                  context.factory.createImportDeclaration(
+                      void 0,
+                      void 0,
+                      void 0,
+                      context.factory.createStringLiteral(umdImportPath),
+                  ),
+              ]
             : []
         // ? if it have no clause, it must be an ImportDeclaration
         if (!clause) {
@@ -342,9 +357,9 @@ function updateImportExportDeclaration(
             const text = `import "${
                 (node.moduleSpecifier as StringLiteral).text
             }" is eliminated because it expected to have no side effects in UMD transform.`
-            return [ts.createExpressionStatement(ts.createLiteral(text))]
+            return [context.factory.createExpressionStatement(context.factory.createStringLiteral(text))]
         }
-        const { statements } = importOrExportClauseToUMD(nextPath, _with(context, clause), globalObject, noImportCheck)
+        const { statements } = importOrExportClauseToUMD(nextPath, _with(ctx, clause), globalObject, noImportCheck)
         writeSourceFileMeta(sourceFile, hoistUMDImportDeclaration, new Set<Statement>(), (_) => {
             statements.forEach((x) => _.add(x))
         })
@@ -368,6 +383,7 @@ function importOrExportClauseToUMD(
     noImportCheck = false,
 ): { variableNames: Identifier[]; statements: Statement[] } {
     const { node, ts, path, context, ttsclib } = ctx
+    const factory = context.factory
     const {
         config: { umdCheckCompact },
     } = ctx
@@ -395,29 +411,33 @@ function importOrExportClauseToUMD(
         return { variableNames: ids, statements: statements }
     } else if (ts.isNamedExports(node)) {
         const ghostBindings = new Map<ExportSpecifier, Identifier>()
-        const ghostImportDeclaration = ts.createImportDeclaration(
+        const ghostImportDeclaration = factory.createImportDeclaration(
             undefined,
             undefined,
-            ts.createImportClause(
+            factory.createImportClause(
+                false,
                 undefined,
-                ts.createNamedImports(
+                factory.createNamedImports(
                     node.elements.map<ImportSpecifier>((x) => {
-                        const id = ts.createFileLevelUniqueName(x.name.text)
+                        const id = factory.createUniqueName(x.name.text)
                         ghostBindings.set(x, id)
-                        return ts.createImportSpecifier(x.propertyName || ts.createIdentifier(x.name.text), id)
+                        return factory.createImportSpecifier(
+                            x.propertyName || factory.createIdentifier(x.name.text),
+                            id,
+                        )
                     }),
                 ),
             ),
-            ts.createLiteral(path),
+            factory.createStringLiteral(path),
         )
         const updatedGhost = updateImportExportDeclaration(_with(ctx, ghostImportDeclaration))
-        const exportDeclaration = ts.createExportDeclaration(
+        const exportDeclaration = factory.createExportDeclaration(
+            undefined,
             void 0,
-            void 0,
-            ts.createNamedExports(
-                Array.from(ghostBindings).map(([key, value]) => ts.createExportSpecifier(value, key.name)),
+            false,
+            factory.createNamedExports(
+                Array.from(ghostBindings).map(([key, value]) => factory.createExportSpecifier(value, key.name)),
             ),
-            void 0,
             void 0,
         )
         statements.push(...updatedGhost)
@@ -425,19 +445,19 @@ function importOrExportClauseToUMD(
         return { statements, variableNames: ids }
         // New function since ts 3.8
     } else if (ts.isNamespaceExport?.(node)) {
-        const ghostBinding = ts.createFileLevelUniqueName(node.name.text)
-        const ghostImportDeclaration = ts.createImportDeclaration(
+        const ghostBinding = factory.createUniqueName(node.name.text)
+        const ghostImportDeclaration = factory.createImportDeclaration(
             undefined,
             undefined,
-            ts.createImportClause(undefined, ts.createNamespaceImport(ghostBinding)),
-            ts.createLiteral(path),
+            factory.createImportClause(false, undefined, factory.createNamespaceImport(ghostBinding)),
+            factory.createStringLiteral(path),
         )
         const updatedGhost = updateImportExportDeclaration(_with(ctx, ghostImportDeclaration))
-        const exportDeclaration = ts.createExportDeclaration(
+        const exportDeclaration = factory.createExportDeclaration(
             void 0,
             void 0,
-            ts.createNamedExports([ts.createExportSpecifier(ghostBinding, node.name.text)]),
-            void 0,
+            false,
+            factory.createNamedExports([factory.createExportSpecifier(ghostBinding, node.name.text)]),
             void 0,
         )
         statements.push(...updatedGhost)
@@ -457,36 +477,42 @@ function importOrExportClauseToUMD(
         let umdAccess: Expression
         if (esModuleInterop) {
             const [, createESModuleInteropCall] = createTopLevelScopedHelper(ctx, ttsclib.__esModuleInterop)
-            umdAccess = createCheckedUMDAccess(createESModuleInteropCall, ts.createLiteral('default'))
+            umdAccess = createCheckedUMDAccess(createESModuleInteropCall, factory.createStringLiteral('default'))
         } else {
-            umdAccess = createCheckedUMDAccess((x) => x, ts.createLiteral('default'))
+            umdAccess = createCheckedUMDAccess((x) => x, factory.createStringLiteral('default'))
         }
         // ? const defaultImportIdentifier = __importBindingCheck(value, name, path, mappedName)
-        return getAssignment(defaultImport, ts.createPropertyAccess(umdAccess, 'default'))
+        return getAssignment(defaultImport, factory.createPropertyAccessExpression(umdAccess, 'default'))
     }
     /** const _id_ = _target_ */
     function getAssignment(id: Identifier, target: Expression) {
-        return ts.createVariableStatement(
+        return factory.createVariableStatement(
             undefined,
-            ts.createVariableDeclarationList([ts.createVariableDeclaration(id, undefined, target)], ts.NodeFlags.Const),
+            factory.createVariableDeclarationList(
+                [factory.createVariableDeclaration(id, undefined, undefined, target)],
+                ts.NodeFlags.Const,
+            ),
         )
     }
     function transformNamedImportExport(namedImport: NamedImportsOrExports, modifiers: Modifier[] = []) {
         const elements: Array<ImportSpecifier | ExportSpecifier> = []
         namedImport.elements.forEach((y: typeof elements[0]) => elements.push(y))
         // ? const { a: b, c: d } = _import(value, name, path, mappedName)
-        return ts.createVariableStatement(
+        return factory.createVariableStatement(
             modifiers,
-            ts.createVariableDeclarationList(
+            factory.createVariableDeclarationList(
                 [
-                    ts.createVariableDeclaration(
-                        ts.createObjectBindingPattern(
-                            elements.map((x) => ts.createBindingElement(undefined, x.propertyName, x.name, undefined)),
+                    factory.createVariableDeclaration(
+                        factory.createObjectBindingPattern(
+                            elements.map((x) =>
+                                factory.createBindingElement(undefined, x.propertyName, x.name, undefined),
+                            ),
                         ),
+                        undefined,
                         undefined,
                         createCheckedUMDAccess(
                             (x) => x,
-                            ...elements.map((x) => ts.createLiteral(x.propertyName?.text ?? x.name.text)),
+                            ...elements.map((x) => factory.createStringLiteral(x.propertyName?.text ?? x.name.text)),
                         ),
                     ),
                 ],
@@ -499,10 +525,12 @@ function importOrExportClauseToUMD(
         const [, createImportCheck] = createTopLevelScopedHelper(ctx, ttsclib._import)
         return createImportCheck(
             wrapper(umdExpression),
-            ts.createArrayLiteral(names),
-            umdCheckCompact ? ts.createLiteral('') : ts.createLiteral(path),
-            umdCheckCompact ? ts.createLiteral('') : ts.createLiteral(globalIdentifier + '.' + umdName),
-            ts.createLiteral(!!esModuleInterop),
+            factory.createArrayLiteralExpression(names),
+            umdCheckCompact ? factory.createStringLiteral('') : factory.createStringLiteral(path),
+            umdCheckCompact
+                ? factory.createStringLiteral('')
+                : factory.createStringLiteral(globalIdentifier + '.' + umdName),
+            !!esModuleInterop ? factory.createTrue() : factory.createFalse(),
         )
     }
 }
@@ -519,13 +547,14 @@ function getUMDExpressionForModule(
         ts,
         sourceFile,
         config: { safeAccess = true },
+        context: { factory },
     } = ctx
-    const globalIdentifier = ts.createIdentifier(globalObject === undefined ? 'globalThis' : globalObject)
+    const globalIdentifier = factory.createIdentifier(globalObject === undefined ? 'globalThis' : globalObject)
     const umdAccess =
         typeof umdName === 'string'
             ? safeAccess
-                ? ts.createElementAccess(globalIdentifier, ts.createLiteral(umdName))
-                : ts.createPropertyAccess(globalIdentifier, umdName)
+                ? factory.createElementAccessExpression(globalIdentifier, factory.createStringLiteral(umdName))
+                : factory.createPropertyAccessExpression(globalIdentifier, umdName)
             : umdName
     const isSyntaxError = safeAccess
         ? false
@@ -540,7 +569,7 @@ function getUMDExpressionForModule(
           ).type === 'syntax error'
     if (isSyntaxError)
         return [
-            createThrowExpression(ts, 'SyntaxError', 'Invalid source text after transform: ' + umdName),
+            createThrowExpression(ts, factory, 'SyntaxError', 'Invalid source text after transform: ' + umdName),
             globalIdentifier.text,
         ]
     return [umdAccess, globalIdentifier.text]
@@ -550,6 +579,7 @@ const moreThan1ArgumentDynamicImportErrorMessage =
     "Transform rule for this dependencies found, but this dynamic import has more than 1 argument, transformer don't know how to transform that and keep it untouched."
 function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args: Expression[]): Expression[] {
     const { ts, config, node, sourceFile, ttsclib, configParser } = ctx
+    const factory = ctx.context.factory
     const [first, ...rest] = args
     if (ts.isStringLiteralLike(first)) {
         const rewriteStrategy = ttsclib.moduleSpecifierTransform({
@@ -563,18 +593,23 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
         switch (rewriteStrategy.type) {
             case 'error':
                 const [id] = createTopLevelScopedHelper(ctx, dynamicImportFailedHelper(args))
-                return [ts.createCall(id, void 0, [ts.createLiteral(rewriteStrategy.message), ...args])]
+                return [
+                    factory.createCallExpression(id, void 0, [
+                        factory.createStringLiteral(rewriteStrategy.message),
+                        ...args,
+                    ]),
+                ]
             case 'noop':
                 return [node]
             case 'rewrite': {
-                return [createDynamicImport(ts.createLiteral(rewriteStrategy.nextPath), ...rest)]
+                return [createDynamicImport(factory.createStringLiteral(rewriteStrategy.nextPath), ...rest)]
             }
             case 'umd': {
                 if (rest.length !== 0) {
                     const [id] = createTopLevelScopedHelper(ctx, dynamicImportFailedHelper(args))
                     return [
-                        ts.createCall(id, void 0, [
-                            ts.createLiteral(moreThan1ArgumentDynamicImportErrorMessage),
+                        factory.createCallExpression(id, void 0, [
+                            factory.createStringLiteral(moreThan1ArgumentDynamicImportErrorMessage),
                             ...args,
                         ]),
                     ]
@@ -584,17 +619,17 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
                     runtimeMessageHeader +
                     "umdImportPath doesn't work for dynamic import. You must load it by yourself. Found config: " +
                     umdImportPath
-                const warningCall = ts.createCall(ts.createIdentifier('console.warn'), void 0, [
-                    ts.createLiteral(warning),
+                const warningCall = factory.createCallExpression(factory.createIdentifier('console.warn'), void 0, [
+                    factory.createStringLiteral(warning),
                 ])
                 const [umdAccess] = getUMDExpressionForModule(rewriteStrategy.target, globalObject, ctx)
                 const param = [umdAccess]
                 if (umdImportPath) param.push(warningCall)
-                return [createPromiseResolve(ts, ...param)]
+                return [createPromiseResolve(factory, ...param)]
             }
             case 'json': {
                 const val = rewriteStrategy.json
-                if (val) return [createPromiseResolve(ts, createJSONObject(ts, val))]
+                if (val) return [createPromiseResolve(factory, createJSONObject(factory, val))]
                 return [createNondeterministicDynamicImport()]
             }
             default: {
@@ -604,7 +639,12 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
     } else {
         if (rest.length !== 0) {
             const [id] = createTopLevelScopedHelper(ctx, dynamicImportFailedHelper(args))
-            return [ts.createCall(id, void 0, [ts.createLiteral(moreThan1ArgumentDynamicImportErrorMessage), ...args])]
+            return [
+                factory.createCallExpression(id, void 0, [
+                    factory.createStringLiteral(moreThan1ArgumentDynamicImportErrorMessage),
+                    ...args,
+                ]),
+            ]
         }
         return [createNondeterministicDynamicImport()]
     }
@@ -622,7 +662,7 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
             ctx,
             ttsclib.__dynamicImportTransform,
         )
-        const stringifiedConfig = createJSONObject(ts, JSON.stringify(config))
+        const stringifiedConfig = createJSONObject(factory, JSON.stringify(config))
         const [dynamicImportNative] = createTopLevelScopedHelper(
             ctx,
             config.jsonImport ? dynamicImportNativeWithJSONString : dynamicImportNativeString,
@@ -643,12 +683,12 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
             )
         const customFunction =
             topLevelScopedHelperMap.get(sourceFile)?.get('__customImportHelper')?.[0] ||
-            ts.createFileLevelUniqueName('__customImportHelper')
+            factory.createUniqueName('__customImportHelper')
         if (!topLevelScopedHelperMap.get(sourceFile)?.has('__customImportHelper')) {
-            const decl = ts.createVariableStatement(
+            const decl = factory.createVariableStatement(
                 undefined,
-                ts.createVariableDeclarationList(
-                    [ts.createVariableDeclaration(customFunction, undefined, f.value)],
+                factory.createVariableDeclarationList(
+                    [factory.createVariableDeclaration(customFunction, undefined, undefined, f.value)],
                     ts.NodeFlags.Const,
                 ),
             )
@@ -668,14 +708,14 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
          *     __customDynamicImportHelper(__dynamicImportTransform, config, dynamicImportNative, _import)
          * )
          */
-        return ts.createCall(customFunction, undefined, [
+        return factory.createCallExpression(customFunction, undefined, [
             first,
             createCustomImportHelper(dynamicImportTransformIdentifier, ...helperArgs),
         ])
     }
 
     function createDynamicImport(...args: Expression[]) {
-        return ts.createCall(ts.createToken(ts.SyntaxKind.ImportKeyword) as any, void 0, args)
+        return factory.createCallExpression(factory.createToken(ts.SyntaxKind.ImportKeyword) as any, void 0, args)
     }
 }
 //#endregion
@@ -698,18 +738,19 @@ type CastFunction<T> = T extends (...a: any[]) => any ? T : (...a: never[]) => a
 const topLevelScopedHelperMap = new Map<SourceFile, Map<string | ((...args: any) => void), [Identifier, Statement]>>()
 const ttsclibImportMap = new Map<SourceFile, [ImportDeclaration, Set<Identifier>]>()
 function createTopLevelScopedHelper<F extends string | ((...args: any[]) => any)>(
-    context: Pick<Context<any>, 'ts' | 'sourceFile' | 'config' | 'ttsclib' | 'queryPackageVersion'>,
+    context: Pick<Context<any>, 'ts' | 'sourceFile' | 'config' | 'ttsclib' | 'queryPackageVersion' | 'context'>,
     helper: F | string,
 ): readonly [Identifier, (...args: CastArray<LevelUpArgs<Parameters<CastFunction<F>>>>) => Expression] {
     const { config, ts, sourceFile, ttsclib, queryPackageVersion } = context
+    const factory = context.context.factory
     const result = topLevelScopedHelperMap.get(sourceFile)?.get(helper)
-    if (result) return [result[0], (...args: any) => ts.createCall(result[0], void 0, args)] as const
+    if (result) return [result[0], (...args: any) => factory.createCallExpression(result[0], void 0, args)] as const
     const parseResult = parseJS(ts, helper.toString(), 'statement', ts.isFunctionDeclaration)
     if (parseResult.type !== 'ok') throw new Error('helper must be a function declaration, found ' + parseResult.error)
     const parsedFunction = parseResult.value
     const fnName = parsedFunction.name!.text
-    const uniqueName = ts.createFileLevelUniqueName(fnName)
-    const returnValue = [uniqueName, (...args: any) => ts.createCall(uniqueName, void 0, args)] as const
+    const uniqueName = factory.createUniqueName(fnName)
+    const returnValue = [uniqueName, (...args: any) => factory.createCallExpression(uniqueName, void 0, args)] as const
     // ? if the function name is in the ttsclib, return a import declaration
     const { importHelpers = 'auto' } = config
     if (fnName in ttsclib && importHelpers !== 'inline') {
@@ -721,11 +762,11 @@ function createTopLevelScopedHelper<F extends string | ((...args: any[]) => any)
         else if (importHelpers === 'node') url = node
         else url = importHelpers
         let [importDec, idSet] = ttsclibImportMap.get(sourceFile) || [
-            ts.createImportDeclaration(
+            factory.createImportDeclaration(
                 void 0,
                 void 0,
-                ts.createImportClause(void 0, ts.createNamedImports([])),
-                ts.createLiteral(
+                factory.createImportClause(false, void 0, factory.createNamedImports([])),
+                factory.createStringLiteral(
                     url.replace(
                         '$version$',
                         queryPackageVersion('@magic-works/ttypescript-browser-like-import-transformer') || 'latest',
@@ -735,12 +776,12 @@ function createTopLevelScopedHelper<F extends string | ((...args: any[]) => any)
             new Set([]),
         ]
         // ? import { __helperName as uniqueName } from 'url'
-        const importBind = ts.createImportSpecifier(uniqueName, ts.createIdentifier(fnName))
+        const importBind = factory.createImportSpecifier(factory.createIdentifier(fnName), uniqueName)
         const importClause = importDec.importClause!
         const importBindings = importClause.namedBindings! as NamedImports
         if (importBindings.elements.find((x) => x.name.text === fnName)) {
             const uniqueName = [...idSet.values()].find((x) => x.text === fnName)!
-            return [uniqueName, (...args: any) => ts.createCall(uniqueName, void 0, args)] as const
+            return [uniqueName, (...args: any) => factory.createCallExpression(uniqueName, void 0, args)] as const
         }
         importDec = ts.updateImportDeclaration(
             importDec,

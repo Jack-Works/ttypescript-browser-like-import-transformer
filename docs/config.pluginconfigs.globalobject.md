@@ -37,9 +37,9 @@ Filename: `globalObject-undefined.js`
 ```js
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {}
-const R = _import(globalThis["React"], ["default"], "react", "globalThis.React", false).default;
+const R = _import_1(globalThis["React"], ["default"], "react", "globalThis.React", false).default;
 console.log(R);
-import { _import as _import } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.3.0/es/ttsclib.min.js";
+import { _import as _import_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.3.0/es/ttsclib.min.js";
 
 ```
 Filename: `globalObject-string.js`
@@ -47,9 +47,9 @@ Filename: `globalObject-string.js`
 ```js
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {"globalObject":"global"}
-const R = _import(global["React"], ["default"], "react", "global.React", false).default;
+const R = _import_1(global["React"], ["default"], "react", "global.React", false).default;
 console.log(R);
-import { _import as _import } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.3.0/es/ttsclib.min.js";
+import { _import as _import_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.3.0/es/ttsclib.min.js";
 
 ```
 Filename: `globalObject-window.js`
@@ -57,9 +57,9 @@ Filename: `globalObject-window.js`
 ```js
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {"globalObject":"window"}
-const R = _import(window["React"], ["default"], "react", "window.React", false).default;
+const R = _import_1(window["React"], ["default"], "react", "window.React", false).default;
 console.log(R);
-import { _import as _import } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.3.0/es/ttsclib.min.js";
+import { _import as _import_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.3.0/es/ttsclib.min.js";
 
 ```
 

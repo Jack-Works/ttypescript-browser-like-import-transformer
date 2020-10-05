@@ -1,8 +1,8 @@
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {"dynamicImportPathRewrite":{"type":"custom","function":"(path, defaultImpl) => defaultImpl(path).then(mod => new Proxy(mod, {}))"}}
-const __customImportHelper = (path, defaultImpl) => defaultImpl(path).then(mod => new Proxy(mod, {}));
-__customImportHelper('react' + x, __customDynamicImportHelper(__dynamicImportTransform, JSON.parse("{\"after\":true,\"dynamicImportPathRewrite\":{\"type\":\"custom\",\"function\":\"(path, defaultImpl) => defaultImpl(path).then(mod => new Proxy(mod, {}))\"}}"), __dynamicImportNative, _import, moduleSpecifierTransform));
-function __dynamicImportNative(path) {
+const __customImportHelper_1 = (path, defaultImpl) => defaultImpl(path).then(mod => new Proxy(mod, {}));
+__customImportHelper_1('react' + x, __customDynamicImportHelper_1(__dynamicImportTransform_1, JSON.parse("{\"after\":true,\"dynamicImportPathRewrite\":{\"type\":\"custom\",\"function\":\"(path, defaultImpl) => defaultImpl(path).then(mod => new Proxy(mod, {}))\"}}"), __dynamicImportNative_1, _import_1, moduleSpecifierTransform_1));
+function __dynamicImportNative_1(path) {
     return import(path);
 }
-import { __dynamicImportTransform as __dynamicImportTransform, _import as _import, moduleSpecifierTransform as moduleSpecifierTransform, __customDynamicImportHelper as __customDynamicImportHelper } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.3.0/es/ttsclib.min.js";
+import { __dynamicImportTransform as __dynamicImportTransform_1, _import as _import_1, moduleSpecifierTransform as moduleSpecifierTransform_1, __customDynamicImportHelper as __customDynamicImportHelper_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.3.0/es/ttsclib.min.js";

@@ -34,9 +34,9 @@ Filename: `umdCheckCompact-default.js`
 ```js
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {}
-const { useState: useState_1 } = _import(globalThis["React"], ["useState"], "react", "globalThis.React", false);
+const { useState: useState_1 } = _import_1(globalThis["React"], ["useState"], "react", "globalThis.React", false);
 export { useState_1 as useState };
-import { _import as _import } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.3.0/es/ttsclib.min.js";
+import { _import as _import_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.3.0/es/ttsclib.min.js";
 
 ```
 true:
@@ -46,9 +46,9 @@ Filename: `umdCheckCompact-true.js`
 ```js
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {"umdCheckCompact":true}
-const { useState: useState_1 } = _import(globalThis["React"], ["useState"], "", "", false);
+const { useState: useState_1 } = _import_1(globalThis["React"], ["useState"], "", "", false);
 export { useState_1 as useState };
-import { _import as _import } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.3.0/es/ttsclib.min.js";
+import { _import as _import_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.3.0/es/ttsclib.min.js";
 
 ```
 false:
@@ -58,9 +58,9 @@ Filename: `umdCheckCompact-false.js`
 ```js
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {"umdCheckCompact":false}
-const { useState: useState_1 } = _import(globalThis["React"], ["useState"], "react", "globalThis.React", false);
+const { useState: useState_1 } = _import_1(globalThis["React"], ["useState"], "react", "globalThis.React", false);
 export { useState_1 as useState };
-import { _import as _import } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.3.0/es/ttsclib.min.js";
+import { _import as _import_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.3.0/es/ttsclib.min.js";
 
 ```
 
