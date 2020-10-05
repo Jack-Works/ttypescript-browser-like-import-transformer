@@ -1,7 +1,7 @@
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {"dynamicImportPathRewrite":{"type":"custom","function":"(path, defaultImpl) => defaultImpl(path).then(mod => new Proxy(mod, {}))"}}
-const __customImportHelper_1 = (path, defaultImpl) => defaultImpl(path).then(mod => new Proxy(mod, {}));
-__customImportHelper_1('react' + x, __customDynamicImportHelper_1(__dynamicImportTransform_1, JSON.parse("{\"after\":true,\"dynamicImportPathRewrite\":{\"type\":\"custom\",\"function\":\"(path, defaultImpl) => defaultImpl(path).then(mod => new Proxy(mod, {}))\"}}"), __dynamicImportNative_1, _import_1, moduleSpecifierTransform_1));
+const _a = (path, defaultImpl) => defaultImpl(path).then(mod => new Proxy(mod, {}));
+_a('react' + x, __customDynamicImportHelper_1(__dynamicImportTransform_1, JSON.parse("{\"after\":true,\"dynamicImportPathRewrite\":{\"type\":\"custom\",\"function\":\"(path, defaultImpl) => defaultImpl(path).then(mod => new Proxy(mod, {}))\"}}"), __dynamicImportNative_1, _import_1, moduleSpecifierTransform_1));
 function __dynamicImportNative_1(path) {
     return import(path);
 }

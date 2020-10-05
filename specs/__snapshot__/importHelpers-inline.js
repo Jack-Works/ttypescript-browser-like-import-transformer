@@ -1,7 +1,7 @@
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {"importHelpers":"inline","dynamicImportPathRewrite":{"type":"custom","function":"(x, y) => y(x)"}}
-const __customImportHelper_1 = (x, y) => y(x);
-__customImportHelper_1(x, __customDynamicImportHelper_1(__dynamicImportTransform_1, JSON.parse("{\"after\":true,\"importHelpers\":\"inline\",\"dynamicImportPathRewrite\":{\"type\":\"custom\",\"function\":\"(x, y) => y(x)\"}}"), __dynamicImportNative_1, _import_1, moduleSpecifierTransform_1));
+const _a = (x, y) => y(x);
+_a(x, __customDynamicImportHelper_1(__dynamicImportTransform_1, JSON.parse("{\"after\":true,\"importHelpers\":\"inline\",\"dynamicImportPathRewrite\":{\"type\":\"custom\",\"function\":\"(x, y) => y(x)\"}}"), __dynamicImportNative_1, _import_1, moduleSpecifierTransform_1));
 function __dynamicImportTransform_1(_path, config, dynamicImport, UMDBindCheck, _moduleSpecifierTransform) {
     if (typeof _path !== "string")
         _path = String(_path);

@@ -4,10 +4,10 @@ const a = _import_1(globalThis["a"], ["default"], "a", "globalThis.a", false).de
 const b = _import_1(globalThis["b"], ["default"], "b", "globalThis.b", false).default;
 const { c, d } = _import_1(globalThis["b"], ["c", "d"], "b", "globalThis.b", false);
 const e = _import_1(globalThis["c"], [], "c", "globalThis.c", false);
-const { c: c_1, d: d_1 } = _import_1(globalThis["b"], ["c", "d"], "b", "globalThis.b", false);
-export { c_1 as c, d_1 as d };
-const e_1 = _import_1(globalThis["c"], [], "c", "globalThis.c", false);
-export { e_1 as e };
+const { c: _a, d: _b } = _import_1(globalThis["b"], ["c", "d"], "b", "globalThis.b", false);
+export { _a as c, _b as d };
+const _c = _import_1(globalThis["c"], [], "c", "globalThis.c", false);
+export { _c as e };
 console.log('Should run after all imports', a, b, c, d, e, a1, b1, c1, d1, e1, a2, b2, c2, d2, e2);
 "import \"d\" is eliminated because it expected to have no side effects in UMD transform.";
 // relative import without ext name

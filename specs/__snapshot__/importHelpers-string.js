@@ -1,7 +1,7 @@
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {"importHelpers":"/polyfill/ttsc-helper.js","dynamicImportPathRewrite":{"type":"custom","function":"(x, y) => y(x)"}}
-const __customImportHelper_1 = (x, y) => y(x);
-__customImportHelper_1(x, __customDynamicImportHelper_1(__dynamicImportTransform_1, JSON.parse("{\"after\":true,\"importHelpers\":\"/polyfill/ttsc-helper.js\",\"dynamicImportPathRewrite\":{\"type\":\"custom\",\"function\":\"(x, y) => y(x)\"}}"), __dynamicImportNative_1, _import_1, moduleSpecifierTransform_1));
+const _a = (x, y) => y(x);
+_a(x, __customDynamicImportHelper_1(__dynamicImportTransform_1, JSON.parse("{\"after\":true,\"importHelpers\":\"/polyfill/ttsc-helper.js\",\"dynamicImportPathRewrite\":{\"type\":\"custom\",\"function\":\"(x, y) => y(x)\"}}"), __dynamicImportNative_1, _import_1, moduleSpecifierTransform_1));
 function __dynamicImportNative_1(path) {
     return import(path);
 }

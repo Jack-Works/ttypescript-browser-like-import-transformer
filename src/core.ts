@@ -30,18 +30,19 @@ import type {
 } from 'typescript'
 import type { PluginConfigs, ImportMapFunctionOpts, RewriteRulesUMD } from './plugin-config'
 import type { NormalizedPluginConfig } from './config-parser'
+import type { moduleSpecifierTransform } from './ttsclib'
 type ts = typeof import('typescript')
-
 export interface CustomTransformationContext<T extends Node> {
     ts: ts
-    /**
-     * The current visiting path
-     */
+    /** The current visiting module specifier */
     path: string
     sourceFile: SourceFile
     config: NormalizedPluginConfig
+    /** The original TypeScript TransformationContext */
     context: TransformationContext
+    /** Current transforming Node */
     node: T
+    /** Given a path, this function should return its UMD name */
     queryWellknownUMD: (path: string) => string | null
     importMapResolve: (opt: ImportMapFunctionOpts) => string | null
     queryPackageVersion: (pkg: string) => string | null
@@ -58,26 +59,28 @@ export interface CustomTransformationContext<T extends Node> {
     ttsclib: typeof import('./ttsclib')
 }
 type Context<T extends Node> = CustomTransformationContext<T>
-const _with = <T extends Node>(ctx: Context<any>, node: T) => ({ ...ctx, node } as Context<T>)
+function _with<T extends Node>(ctx: Context<any>, node: T): Context<T> {
+    return { ...ctx, node }
+}
 /**
  * Create the Transformer
  * This file should not use any value import so the Typescript runtime is given from the environment
  */
 export default function createTransformer(
-    core: Pick<
+    io: Pick<
         Context<any>,
-        | 'queryWellknownUMD'
+        | 'ts'
         | 'ttsclib'
+        | 'configParser'
+        | 'queryWellknownUMD'
         | 'queryPackageVersion'
         | 'importMapResolve'
-        | 'configParser'
-        | 'ts'
         | 'treeshakeProvider'
         | 'resolveJSONImport'
         | 'resolveFolderImport'
     >,
 ) {
-    const { ts, configParser, importMapResolve } = core
+    const { ts, configParser, importMapResolve } = io
     // ? Don't rely on the ts.Program because don't want to create on during the test.
     return function (_program: Partial<Pick<Program, 'getCurrentDirectory'>>, configRaw: PluginConfigs) {
         return (context: TransformationContext) => {
@@ -85,15 +88,15 @@ export default function createTransformer(
             const config = configParser.normalizePluginConfig(configRaw)
             return (sourceFile: SourceFile) => {
                 const ttsclib = {
-                    ...core.ttsclib,
-                    moduleSpecifierTransform: new Proxy(core.ttsclib.moduleSpecifierTransform, {
+                    ...io.ttsclib,
+                    moduleSpecifierTransform: new Proxy(io.ttsclib.moduleSpecifierTransform, {
                         get(t, k) {
-                            if (k === 'toString') return () => core.ttsclib.moduleSpecifierTransform.toString()
+                            if (k === 'toString') return () => io.ttsclib.moduleSpecifierTransform.toString()
                             // @ts-ignore
                             return t[k]
                         },
                         apply(t, _, [ctx, opt]: Parameters<typeof import('./ttsclib').moduleSpecifierTransform>) {
-                            if (!configRaw.importMap) return core.ttsclib.moduleSpecifierTransform(ctx, opt)
+                            if (!configRaw.importMap) return t(ctx, opt)
                             const comp = context.getCompilerOptions()
                             const result = importMapResolve({
                                 config: configRaw,
@@ -101,10 +104,9 @@ export default function createTransformer(
                                 moduleSpecifier: ctx.path,
                                 rootDir: comp.rootDir!,
                                 tsconfigPath: (comp.configFilePath as string) || _program.getCurrentDirectory?.()!,
-                                // project: comp.project as string,
                             })
                             if (result) return { type: 'rewrite', nextPath: result }
-                            return core.ttsclib.moduleSpecifierTransform(ctx, opt)
+                            return t(ctx, opt)
                         },
                     }),
                 }
@@ -160,7 +162,7 @@ export default function createTransformer(
                         context,
                         node,
                         sourceFile,
-                        ...core,
+                        ...io,
                         ttsclib,
                         getCompilerOptions: () => context.getCompilerOptions(),
                     } as const
@@ -229,7 +231,7 @@ function getImportedItems(ts: ts, node: ImportDeclaration | ExportDeclaration): 
         if (ts.isNamedExports(clause)) {
             clause.elements.forEach((x) => result.add((x.propertyName || x.name).text))
         }
-        if (ts?.isNamespaceExport(clause)) result.add('*')
+        if (ts.isNamespaceExport(clause)) result.add('*')
     }
     return result
 }
@@ -244,14 +246,17 @@ function createThrowStatement(factory: NodeFactory, type: 'TypeError' | 'SyntaxE
 function createThrowExpression(...[factory, ...args]: Parameters<typeof createThrowStatement>): Expression {
     return factory.createImmediatelyInvokedArrowFunction([createThrowStatement(factory, ...args)])
 }
-function createJSONObject(factory: NodeFactory, string: string) {
-    return factory.createCallExpression(factory.createIdentifier('JSON.parse'), void 0, [
-        factory.createStringLiteral(string),
-    ])
+function createTypedCallExpressionFactory<F>(callee: (factory: NodeFactory) => Expression) {
+    return (factory: NodeFactory, ...args: CastArray<LevelUpArgs<Parameters<CastFunction<F>>>>) => {
+        return factory.createCallExpression(callee(factory), void 0, args)
+    }
 }
-function createPromiseResolve(factory: NodeFactory, ...args: Expression[]) {
-    return factory.createCallExpression(factory.createIdentifier('Promise.resolve'), undefined, args)
-}
+const createJSONParse = createTypedCallExpressionFactory<typeof JSON.parse>((fac) =>
+    fac.createPropertyAccessExpression(fac.createIdentifier('JSON'), 'parse'),
+)
+const createPromiseResolve = createTypedCallExpressionFactory<typeof Promise.resolve>((fac) =>
+    fac.createPropertyAccessExpression(fac.createIdentifier('Promise'), 'resolve'),
+)
 //#endregion
 //#region Transformers
 /**
@@ -312,7 +317,7 @@ function updateImportExportDeclaration(
             if (!json) return [node]
             const t: ExprTarget = {
                 type: 'umd',
-                target: createJSONObject(factory, json),
+                target: createJSONParse(factory, factory.createStringLiteral(json)),
             }
             return umd(t, true)
         default:
@@ -399,11 +404,9 @@ function importOrExportClauseToUMD(
                 undefined,
                 factory.createNamedImports(
                     node.elements.map<ImportSpecifier>((x) => {
-                        const id = factory.createUniqueName(x.name.text)
-                        ghostBindings.set(x, id)
                         return factory.createImportSpecifier(
                             x.propertyName || factory.createIdentifier(x.name.text),
-                            id,
+                            factory.createTempVariable((id) => ghostBindings.set(x, id)),
                         )
                     }),
                 ),
@@ -423,9 +426,8 @@ function importOrExportClauseToUMD(
         statements.push(...updatedGhost)
         statements.push(exportDeclaration)
         return { statements, variableNames: ids }
-        // New function since ts 3.8
-    } else if (ts.isNamespaceExport?.(node)) {
-        const ghostBinding = factory.createUniqueName(node.name.text)
+    } else if (ts.isNamespaceExport(node)) {
+        const ghostBinding = factory.createTempVariable(() => {})
         const ghostImportDeclaration = factory.createImportDeclaration(
             undefined,
             undefined,
@@ -603,13 +605,14 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
                     factory.createStringLiteral(warning),
                 ])
                 const [umdAccess] = getUMDExpressionForModule(rewriteStrategy.target, globalObject, ctx)
-                const param = [umdAccess]
-                if (umdImportPath) param.push(warningCall)
-                return [createPromiseResolve(factory, ...param)]
+                const expr = createPromiseResolve(factory, umdAccess)
+                if (umdImportPath) return [factory.createComma(warningCall, expr)]
+                return [expr]
             }
             case 'json': {
                 const val = rewriteStrategy.json
-                if (val) return [createPromiseResolve(factory, createJSONObject(factory, val))]
+                if (val)
+                    return [createPromiseResolve(factory, createJSONParse(factory, factory.createStringLiteral(val)))]
                 return [createNondeterministicDynamicImport()]
             }
             default: {
@@ -642,7 +645,7 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
             ctx,
             ttsclib.__dynamicImportTransform,
         )
-        const stringifiedConfig = createJSONObject(factory, JSON.stringify(config))
+        const stringifiedConfig = createJSONParse(factory, factory.createStringLiteral(JSON.stringify(config)))
         const [dynamicImportNative] = createTopLevelScopedHelper(
             ctx,
             config.jsonImport ? dynamicImportNativeWithJSONString : dynamicImportNativeString,
@@ -663,7 +666,7 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
             )
         const customFunction =
             topLevelScopedHelperMap.get(sourceFile)?.get('__customImportHelper')?.[0] ||
-            factory.createUniqueName('__customImportHelper')
+            factory.createTempVariable(() => {})
         if (!topLevelScopedHelperMap.get(sourceFile)?.has('__customImportHelper')) {
             const decl = factory.createVariableStatement(
                 undefined,

@@ -104,10 +104,10 @@ Filename: `treeshake-test/index.js`
 ```js
 const { a, b: c } = _import_1(dependencies["1"], ["a", "b"], "1", "dependencies.1", false);
 const d = _import_1(dependencies["2"], [], "2", "dependencies.2", false);
-const e_1 = _import_1(dependencies["5"], [], "5", "dependencies.5", false);
-export { e_1 as e };
-const { x: x_1, y: y_1, z: z_1 } = _import_1(dependencies["6"], ["x", "y", "z"], "6", "dependencies.6", false);
-export { x_1 as x, y_1 as y, z_1 as z };
+const _a = _import_1(dependencies["5"], [], "5", "dependencies.5", false);
+export { _a as e };
+const { x: _b, y: _c, z: _d } = _import_1(dependencies["6"], ["x", "y", "z"], "6", "dependencies.6", false);
+export { _b as x, _c as y, _d as z };
 console.log(a, c, d);
 "import \"3\" is eliminated because it expected to have no side effects in UMD transform.";
 "import \"4\" is eliminated because it expected to have no side effects in UMD transform.";
