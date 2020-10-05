@@ -84,9 +84,11 @@ export default function createTransformer(
     // ? Don't rely on the ts.Program because don't want to create on during the test.
     return function (_program: Partial<Pick<Program, 'getCurrentDirectory'>>, configRaw: PluginConfigs) {
         return (context: TransformationContext) => {
+            const { factory } = context
             configParser.validateConfig(configRaw, context.getCompilerOptions())
             const config = configParser.normalizePluginConfig(configRaw)
             return (sourceFile: SourceFile) => {
+                if (sourceFile.isDeclarationFile) return sourceFile
                 const ttsclib = {
                     ...io.ttsclib,
                     moduleSpecifierTransform: new Proxy(io.ttsclib.moduleSpecifierTransform, {
@@ -95,7 +97,7 @@ export default function createTransformer(
                             // @ts-ignore
                             return t[k]
                         },
-                        apply(t, _, [ctx, opt]: Parameters<typeof import('./ttsclib').moduleSpecifierTransform>) {
+                        apply(t, _, [ctx, opt]: Parameters<typeof moduleSpecifierTransform>) {
                             if (!configRaw.importMap) return t(ctx, opt)
                             const comp = context.getCompilerOptions()
                             const result = importMapResolve({
@@ -111,8 +113,16 @@ export default function createTransformer(
                     }),
                 }
 
-                let visitedSourceFile = ts.visitEachChild(sourceFile, visitor, context)
-                // ? hoistedHelper and hoistedUMDImport will be added ^ in the visitor
+                let visitedSourceFile = factory.updateSourceFile(
+                    sourceFile,
+                    ts.visitLexicalEnvironment(sourceFile.statements, visitor, context),
+                    // ? hoistedHelper and hoistedUMDImport will be   ^ added in the visitor
+                    false,
+                    sourceFile.referencedFiles,
+                    sourceFile.typeReferenceDirectives,
+                    sourceFile.hasNoDefaultLib,
+                    sourceFile.libReferenceDirectives,
+                )
                 const hoistedHelper = Array.from(topLevelScopedHelperMap.get(sourceFile)?.values() || []).map(
                     (x) => x[1],
                 )
@@ -142,7 +152,7 @@ export default function createTransformer(
                             ...languageHoistableDeclarations,
                         ]),
                     ),
-                    visitedSourceFile.isDeclarationFile,
+                    false,
                     visitedSourceFile.referencedFiles,
                     visitedSourceFile.typeReferenceDirectives,
                     visitedSourceFile.hasNoDefaultLib,
@@ -559,7 +569,7 @@ function getUMDExpressionForModule(
 const moreThan1ArgumentDynamicImportErrorMessage =
     runtimeMessageHeader +
     "Transform rule for this dependencies found, but this dynamic import has more than 1 argument, transformer don't know how to transform that and keep it untouched."
-function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args: Expression[]): Expression[] {
+function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args: Expression[]): Expression {
     const { ts, config, node, sourceFile, ttsclib, configParser } = ctx
     const { factory } = ctx.context
     const [first, ...rest] = args
@@ -575,26 +585,22 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
         switch (rewriteStrategy.type) {
             case 'error':
                 const [id] = createTopLevelScopedHelper(ctx, dynamicImportFailedHelper(args))
-                return [
-                    factory.createCallExpression(id, void 0, [
-                        factory.createStringLiteral(rewriteStrategy.message),
-                        ...args,
-                    ]),
-                ]
+                return factory.createCallExpression(id, void 0, [
+                    factory.createStringLiteral(rewriteStrategy.message),
+                    ...args,
+                ])
             case 'noop':
-                return [node]
+                return node
             case 'rewrite': {
-                return [createDynamicImport(factory.createStringLiteral(rewriteStrategy.nextPath), ...rest)]
+                return createDynamicImport(factory.createStringLiteral(rewriteStrategy.nextPath), ...rest)
             }
             case 'umd': {
                 if (rest.length !== 0) {
                     const [id] = createTopLevelScopedHelper(ctx, dynamicImportFailedHelper(args))
-                    return [
-                        factory.createCallExpression(id, void 0, [
-                            factory.createStringLiteral(moreThan1ArgumentDynamicImportErrorMessage),
-                            ...args,
-                        ]),
-                    ]
+                    return factory.createCallExpression(id, void 0, [
+                        factory.createStringLiteral(moreThan1ArgumentDynamicImportErrorMessage),
+                        ...args,
+                    ])
                 }
                 const { globalObject, umdImportPath } = rewriteStrategy
                 const warning =
@@ -606,14 +612,14 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
                 ])
                 const [umdAccess] = getUMDExpressionForModule(rewriteStrategy.target, globalObject, ctx)
                 const expr = createPromiseResolve(factory, umdAccess)
-                if (umdImportPath) return [factory.createComma(warningCall, expr)]
-                return [expr]
+                if (umdImportPath) return factory.createComma(warningCall, expr)
+                return expr
             }
             case 'json': {
                 const val = rewriteStrategy.json
                 if (val)
-                    return [createPromiseResolve(factory, createJSONParse(factory, factory.createStringLiteral(val)))]
-                return [createNondeterministicDynamicImport()]
+                    return createPromiseResolve(factory, createJSONParse(factory, factory.createStringLiteral(val)))
+                return createNondeterministicDynamicImport()
             }
             default: {
                 return unreachable(rewriteStrategy)
@@ -622,14 +628,12 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
     } else {
         if (rest.length !== 0) {
             const [id] = createTopLevelScopedHelper(ctx, dynamicImportFailedHelper(args))
-            return [
-                factory.createCallExpression(id, void 0, [
-                    factory.createStringLiteral(moreThan1ArgumentDynamicImportErrorMessage),
-                    ...args,
-                ]),
-            ]
+            return factory.createCallExpression(id, void 0, [
+                factory.createStringLiteral(moreThan1ArgumentDynamicImportErrorMessage),
+                ...args,
+            ])
         }
-        return [createNondeterministicDynamicImport()]
+        return createNondeterministicDynamicImport()
     }
 
     function createNondeterministicDynamicImport(): Expression {
@@ -851,6 +855,7 @@ function writeSourceFileMeta<T, E extends T, Q>(
     return val(map.get(sf)!)
 }
 //#endregion
+//#region dynamic import helper
 const dynamicImportFailedHelper = (args: Expression[]) => `function __dynamicImport${args.length}Ary(reason, ...args) {
     console.warn(reason, ...args)
     return import(${args.map((_, i) => `args[${i}]`).join(', ')});
@@ -874,3 +879,4 @@ const dynamicImportNativeWithJSONString = `function __dynamicImportNative(path, 
     return import(path);
     ${dynamicImportWithJSONHelper.toString()}
 };`
+//#endregion
