@@ -118,6 +118,8 @@ enum RewriteRulesSimpleEnumLocal {
     skypack = 'skypack',
     /** @see https://jspm.org/jspm-dev-release */
     jspm = 'jspm',
+    jsdelivr = 'jsdelivr',
+    'esm.run' = 'esm.run',
 }
 const RewriteRulesSimple: RewriteRulesSimpleEnum = RewriteRulesSimpleEnumLocal
 type RewriteRulesSimpleEnum = {

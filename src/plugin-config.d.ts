@@ -364,7 +364,7 @@ export interface ImportMapResolution {
  * !out(rules-unpkg.js)
  * @public
  */
-export type RewriteRulesSimple = 'snowpack' | 'umd' | 'unpkg' | 'pikacdn' | 'skypack' | 'jspm'
+export type RewriteRulesSimple = 'snowpack' | 'umd' | 'unpkg' | 'pikacdn' | 'skypack' | 'jspm' | 'jsdelivr' | 'esm.run'
 /**
  * Rewrite module to a UMD access
  * @example

@@ -28,11 +28,11 @@ Source code:
 Filename: `rules-default.ts`
 
 ```ts
-console.log('Should run after all imports', a, b, c2, d, e, c2)
+console.log('Should run after all imports', a, b, c2, d, e, c2, ts, ts2)
 // Node style import
 import a from 'a'
 import b, { c as c2, d } from 'b'
-import * as e from 'c'
+import * as e from 'c/subpath'
 import 'd'
 
 const c = 1
@@ -42,6 +42,9 @@ export { x }
 export { c, d } from 'b'
 export * as e from 'c'
 
+import * as ts from 'typescript'
+import * as ts2 from 'typescript/lib/typescriptServices'
+
 ```
 Output:
 
@@ -50,7 +53,7 @@ Filename: `rules-url.js`
 ```js
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {"rules":{"type":"url","withVersion":"std:$packageName$@$version$","noVersion":"std:$packageName$"}}
-console.log('Should run after all imports', a, b, c2, d, e, c2);
+console.log('Should run after all imports', a, b, c2, d, e, c2, ts, ts2);
 // Node style import
 import a from "std:a";
 import b, { c as c2, d } from "std:b";
@@ -62,6 +65,8 @@ export { x };
 // Node style export
 export { c, d } from "std:b";
 export * as e from "std:c";
+import * as ts from "std:typescript@4.1.0-dev.20201004";
+import * as ts2 from "std:typescript@4.1.0-dev.20201004";
 
 ```
 

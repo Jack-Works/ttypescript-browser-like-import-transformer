@@ -211,21 +211,24 @@ function moduleSpecifierTransform_1(context, opt) {
                 const e = opt.enum;
                 switch (e) {
                     case "snowpack": return ToRewrite(`${webModulePath !== null && webModulePath !== void 0 ? webModulePath : "/web_modules/"}${appendExt(path, expectedExtension)}`);
+                    case "esm.run":
+                    case "jsdelivr":
                     case "pikacdn":
                     case "skypack":
                     case "jspm":
                     case "unpkg": {
-                        const URLs = {
-                            jspm: "jspm.dev", pikacdn: "cdn.skypack.dev", skypack: "cdn.skypack.dev", unpkg: "unpkg.com",
-                        };
-                        let withVersion = `https://${URLs[e]}/$packageName$@$version$$subpath$`;
-                        let noVersion = `https://${URLs[e]}/$packageName$$subpath$`;
-                        if (e === "unpkg") {
-                            withVersion += "?module";
-                            noVersion += "?module";
+                        function getURL(domain) {
+                            return {
+                                noVersion: `https://${domain}/$packageName$$subpath$`, withVersion: `https://${domain}/$packageName$@$version$$subpath$`,
+                            };
                         }
+                        const URLs = {
+                            jspm: getURL("jspm.dev"), "esm.run": getURL("esm.run"), pikacdn: getURL("cdn.skypack.dev"), skypack: getURL("cdn.skypack.dev"), unpkg: getURL("unpkg.com"), jsdelivr: getURL("cdn.jsdelivr.net"),
+                        };
+                        URLs.unpkg.noVersion += "?module";
+                        URLs.unpkg.withVersion += "?module";
                         return self(context, {
-                            type: "url", noVersion, withVersion,
+                            type: "url", ...URLs[e],
                         });
                     }
                     case "umd":

@@ -56,11 +56,11 @@ Source code:
 Filename: `rules-default.ts`
 
 ```ts
-console.log('Should run after all imports', a, b, c2, d, e, c2)
+console.log('Should run after all imports', a, b, c2, d, e, c2, ts, ts2)
 // Node style import
 import a from 'a'
 import b, { c as c2, d } from 'b'
-import * as e from 'c'
+import * as e from 'c/subpath'
 import 'd'
 
 const c = 1
@@ -70,6 +70,9 @@ export { x }
 export { c, d } from 'b'
 export * as e from 'c'
 
+import * as ts from 'typescript'
+import * as ts2 from 'typescript/lib/typescriptServices'
+
 ```
 Outputs:
 
@@ -78,11 +81,11 @@ Filename: `rules-false.js`
 ```js
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {"rules":false}
-console.log('Should run after all imports', a, b, c2, d, e, c2);
+console.log('Should run after all imports', a, b, c2, d, e, c2, ts, ts2);
 // Node style import
 import a from 'a';
 import b, { c as c2, d } from 'b';
-import * as e from 'c';
+import * as e from 'c/subpath';
 import 'd';
 const c = 1;
 const x = 1;
@@ -90,6 +93,8 @@ export { x };
 // Node style export
 export { c, d } from 'b';
 export * as e from 'c';
+import * as ts from 'typescript';
+import * as ts2 from 'typescript/lib/typescriptServices';
 
 ```
 Filename: `rules-umd.js`
@@ -100,12 +105,14 @@ Filename: `rules-umd.js`
 const a = _import_1(globalThis["a"], ["default"], "a", "globalThis.a", false).default;
 const b = _import_1(globalThis["b"], ["default"], "b", "globalThis.b", false).default;
 const { c: c2, d } = _import_1(globalThis["b"], ["c", "d"], "b", "globalThis.b", false);
-const e = _import_1(globalThis["c"], [], "c", "globalThis.c", false);
+const e = _import_1(globalThis["c.subpath"], [], "c/subpath", "globalThis.c.subpath", false);
 const { c: _a, d: _b } = _import_1(globalThis["b"], ["c", "d"], "b", "globalThis.b", false);
 export { _a as c, _b as d };
 const _c = _import_1(globalThis["c"], [], "c", "globalThis.c", false);
 export { _c as e };
-console.log('Should run after all imports', a, b, c2, d, e, c2);
+const ts = _import_1(globalThis["typescript"], [], "typescript", "globalThis.typescript", false);
+const ts2 = _import_1(globalThis["typescript.lib.typescriptServices"], [], "typescript/lib/typescriptServices", "globalThis.typescript.lib.typescriptServices", false);
+console.log('Should run after all imports', a, b, c2, d, e, c2, ts, ts2);
 "import \"d\" is eliminated because it expected to have no side effects in UMD transform.";
 const c = 1;
 const x = 1;
@@ -118,11 +125,11 @@ Filename: `rules-pikacdn.js`
 ```js
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {"rules":"pikacdn"}
-console.log('Should run after all imports', a, b, c2, d, e, c2);
+console.log('Should run after all imports', a, b, c2, d, e, c2, ts, ts2);
 // Node style import
 import a from "https://cdn.skypack.dev/a";
 import b, { c as c2, d } from "https://cdn.skypack.dev/b";
-import * as e from "https://cdn.skypack.dev/c";
+import * as e from "https://cdn.skypack.dev/c/subpath";
 import "https://cdn.skypack.dev/d";
 const c = 1;
 const x = 1;
@@ -130,6 +137,8 @@ export { x };
 // Node style export
 export { c, d } from "https://cdn.skypack.dev/b";
 export * as e from "https://cdn.skypack.dev/c";
+import * as ts from "https://cdn.skypack.dev/typescript@4.1.0-dev.20201004";
+import * as ts2 from "https://cdn.skypack.dev/typescript@4.1.0-dev.20201004/lib/typescriptServices";
 
 ```
 Filename: `rules-snowpack.js`
@@ -137,11 +146,11 @@ Filename: `rules-snowpack.js`
 ```js
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {"rules":"snowpack"}
-console.log('Should run after all imports', a, b, c2, d, e, c2);
+console.log('Should run after all imports', a, b, c2, d, e, c2, ts, ts2);
 // Node style import
 import a from "/web_modules/a.js";
 import b, { c as c2, d } from "/web_modules/b.js";
-import * as e from "/web_modules/c.js";
+import * as e from "/web_modules/c/subpath.js";
 import "/web_modules/d.js";
 const c = 1;
 const x = 1;
@@ -149,6 +158,8 @@ export { x };
 // Node style export
 export { c, d } from "/web_modules/b.js";
 export * as e from "/web_modules/c.js";
+import * as ts from "/web_modules/typescript.js";
+import * as ts2 from "/web_modules/typescript/lib/typescriptServices.js";
 
 ```
 Filename: `rules-unpkg.js`
@@ -156,11 +167,11 @@ Filename: `rules-unpkg.js`
 ```js
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {"rules":"unpkg"}
-console.log('Should run after all imports', a, b, c2, d, e, c2);
+console.log('Should run after all imports', a, b, c2, d, e, c2, ts, ts2);
 // Node style import
 import a from "https://unpkg.com/a?module";
 import b, { c as c2, d } from "https://unpkg.com/b?module";
-import * as e from "https://unpkg.com/c?module";
+import * as e from "https://unpkg.com/c/subpath?module";
 import "https://unpkg.com/d?module";
 const c = 1;
 const x = 1;
@@ -168,6 +179,8 @@ export { x };
 // Node style export
 export { c, d } from "https://unpkg.com/b?module";
 export * as e from "https://unpkg.com/c?module";
+import * as ts from "https://unpkg.com/typescript@4.1.0-dev.20201004?module";
+import * as ts2 from "https://unpkg.com/typescript@4.1.0-dev.20201004/lib/typescriptServices?module";
 
 ```
 Filename: `rules-url.js`
@@ -175,7 +188,7 @@ Filename: `rules-url.js`
 ```js
 // CompilerOptions: {"module":"ESNext"}
 // PluginConfig: {"rules":{"type":"url","withVersion":"std:$packageName$@$version$","noVersion":"std:$packageName$"}}
-console.log('Should run after all imports', a, b, c2, d, e, c2);
+console.log('Should run after all imports', a, b, c2, d, e, c2, ts, ts2);
 // Node style import
 import a from "std:a";
 import b, { c as c2, d } from "std:b";
@@ -187,6 +200,8 @@ export { x };
 // Node style export
 export { c, d } from "std:b";
 export * as e from "std:c";
+import * as ts from "std:typescript@4.1.0-dev.20201004";
+import * as ts2 from "std:typescript@4.1.0-dev.20201004";
 
 ```
 Complex example:
