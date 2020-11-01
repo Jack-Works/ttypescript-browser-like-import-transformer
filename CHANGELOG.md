@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.0.0](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/compare/v2.3.0...v3.0.0) (2020-11-01)
+
+
+### ⚠ BREAKING CHANGES
+
+* minimal ts version require 4.1
+
+### Features
+
+* migrate to ts factory API ([a04c1ad](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/commit/a04c1ad8f03ffd3061245053a01c666d9d3b7a59))
+* minimal ts version require 4.1 ([7249ecf](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/commit/7249ecf14f6d2b850fa9771e440a9bee4834b6b9))
+* support jsdelivr and esm.run ([1a99da0](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/commit/1a99da00915535c3de5be74ce6489441503935b9))
+* use temp var in re-export ([95e746b](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/commit/95e746ba395e52431a06630822dd7673643c6b9b))
+
 ## [2.3.0](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/compare/v2.2.0...v2.3.0) (2020-09-20)
 
 
