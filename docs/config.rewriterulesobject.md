@@ -117,7 +117,7 @@ console.log('Should run after all imports', a, b, c2, d, e, c2, ts, ts2);
 const c = 1;
 const x = 1;
 export { x };
-import { _import as _import_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.3.0/es/ttsclib.min.js";
+import { _import as _import_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@3.0.0/es/ttsclib.min.js";
 
 ```
 Filename: `rules-pikacdn.js`
@@ -232,7 +232,7 @@ const y = _import_1(globalThis["lodash"], ["default"], "lodash", "globalThis.lod
 import z from "https://unpkg.com/lodash-es?module";
 import w from "/web_modules/other.js";
 console.log(x, y, z, w, i);
-import { _import as _import_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@2.3.0/es/ttsclib.min.js";
+import { _import as _import_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@3.0.0/es/ttsclib.min.js";
 
 ```
 
