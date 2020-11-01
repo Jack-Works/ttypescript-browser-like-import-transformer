@@ -17,9 +17,9 @@
         "doc": "node ./build-doc.js"
     },
     "devDependencies": {
-        "@microsoft/api-documenter": "^7.9.4",
-        "@microsoft/api-extractor": "^7.10.1",
-        "@types/node": "^14.11.2",
+        "@microsoft/api-documenter": "^7.9.22",
+        "@microsoft/api-extractor": "^7.11.2",
+        "@types/node": "^14.14.6",
         "standard-version": "^9.0.0",
         "ts-node": "^9.0.0",
         "ttypescript": "latest",
@@ -31,7 +31,7 @@
         "typescript": "^4.1.0-beta"
     },
     "optionalDependencies": {
-        "@jsenv/import-map": "^6.8.0"
+        "@jsenv/import-map": "^6.9.0"
     },
     "files": [
         "src",
