@@ -41,7 +41,6 @@ A complex example:
      },
      "/(.+)/g": "snowpack"
 }}
-
 ```
 Filename: `demo-2.ts`
 
@@ -58,7 +57,6 @@ import * as MUILab from '@material-ui/labs'
 import 'other-polyfill'
 
 console.log(React, lodash, AsyncCall, fs, isarray, MUI, MUILab)
-
 ```
 Output:
 
@@ -77,6 +75,5 @@ import isarray from "/web_modules/isarray.js";
 import "/web_modules/other-polyfill.js";
 console.log(React, lodash, AsyncCall, fs, isarray, MUI, MUILab);
 import { __esModuleInterop as __esModuleInterop_1, _import as _import_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@3.0.0/es/ttsclib.min.js";
-
 ```
 

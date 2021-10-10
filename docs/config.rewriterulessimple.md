@@ -47,7 +47,6 @@ export * as e from 'c'
 
 import * as ts from 'typescript'
 import * as ts2 from 'typescript/lib/typescriptServices'
-
 ```
 Outputs:
 
@@ -72,7 +71,6 @@ const c = 1;
 const x = 1;
 export { x };
 import { _import as _import_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@3.0.0/es/ttsclib.min.js";
-
 ```
 Filename: `rules-skypack.js`
 
@@ -91,9 +89,8 @@ export { x };
 // Node style export
 export { c, d } from "https://cdn.skypack.dev/b";
 export * as e from "https://cdn.skypack.dev/c";
-import * as ts from "https://cdn.skypack.dev/typescript@4.1.0-dev.20201004";
-import * as ts2 from "https://cdn.skypack.dev/typescript@4.1.0-dev.20201004/lib/typescriptServices";
-
+import * as ts from "https://cdn.skypack.dev/typescript@4.4.3";
+import * as ts2 from "https://cdn.skypack.dev/typescript@4.4.3/lib/typescriptServices";
 ```
 Filename: `rules-jspm.js`
 
@@ -112,9 +109,8 @@ export { x };
 // Node style export
 export { c, d } from "https://jspm.dev/b";
 export * as e from "https://jspm.dev/c";
-import * as ts from "https://jspm.dev/typescript@4.1.0-dev.20201004";
-import * as ts2 from "https://jspm.dev/typescript@4.1.0-dev.20201004/lib/typescriptServices";
-
+import * as ts from "https://jspm.dev/typescript@4.4.3";
+import * as ts2 from "https://jspm.dev/typescript@4.4.3/lib/typescriptServices";
 ```
 Filename: `rules-snowpack.js`
 
@@ -135,7 +131,6 @@ export { c, d } from "/web_modules/b.js";
 export * as e from "/web_modules/c.js";
 import * as ts from "/web_modules/typescript.js";
 import * as ts2 from "/web_modules/typescript/lib/typescriptServices.js";
-
 ```
 Filename: `rules-unpkg.js`
 
@@ -154,8 +149,7 @@ export { x };
 // Node style export
 export { c, d } from "https://unpkg.com/b?module";
 export * as e from "https://unpkg.com/c?module";
-import * as ts from "https://unpkg.com/typescript@4.1.0-dev.20201004?module";
-import * as ts2 from "https://unpkg.com/typescript@4.1.0-dev.20201004/lib/typescriptServices?module";
-
+import * as ts from "https://unpkg.com/typescript@4.4.3?module";
+import * as ts2 from "https://unpkg.com/typescript@4.4.3/lib/typescriptServices?module";
 ```
 

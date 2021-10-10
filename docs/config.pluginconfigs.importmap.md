@@ -27,7 +27,6 @@ Folder:
 /src/ # your source code
 /dist/ # your output
 tsconfig.json # tsconfig at here
-
 ```
 You must set `rootDir` when using importMap.
 
@@ -56,7 +55,6 @@ Filename: `snowpack/tsconfig.json`
         "moduleResolution": "node"
     }
 }
-
 ```
 Source:
 
@@ -67,7 +65,6 @@ Filename: `snowpack/src/index.ts`
 import * as _ from 'lodash-es'
 console.log(_)
 import './another'
-
 ```
 Output:
 
@@ -78,6 +75,5 @@ Filename: `snowpack/index.js`
 import * as _ from "/web_modules/lodash-es.js?rev=806d1b9f78";
 console.log(_);
 import "./another.js";
-
 ```
 

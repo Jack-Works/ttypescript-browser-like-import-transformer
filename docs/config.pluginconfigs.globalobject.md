@@ -28,7 +28,6 @@ Filename: `globalObject-default.ts`
 /// {}
 import R from 'react'
 console.log(R)
-
 ```
 Outputs:
 
@@ -40,7 +39,6 @@ Filename: `globalObject-undefined.js`
 const R = _import_1(globalThis["React"], ["default"], "react", "globalThis.React", false).default;
 console.log(R);
 import { _import as _import_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@3.0.0/es/ttsclib.min.js";
-
 ```
 Filename: `globalObject-string.js`
 
@@ -50,7 +48,6 @@ Filename: `globalObject-string.js`
 const R = _import_1(global["React"], ["default"], "react", "global.React", false).default;
 console.log(R);
 import { _import as _import_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@3.0.0/es/ttsclib.min.js";
-
 ```
 Filename: `globalObject-window.js`
 
@@ -60,6 +57,5 @@ Filename: `globalObject-window.js`
 const R = _import_1(window["React"], ["default"], "react", "window.React", false).default;
 console.log(R);
 import { _import as _import_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@3.0.0/es/ttsclib.min.js";
-
 ```
 

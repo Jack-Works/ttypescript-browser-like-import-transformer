@@ -15,6 +15,7 @@ export type ImportMapFunctionOpts = {
     tsconfigPath: string
 }
 ```
+<b>References:</b> [PluginConfigs](./config.pluginconfigs.md)
 
 ## Remarks
 

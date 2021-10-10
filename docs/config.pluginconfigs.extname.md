@@ -30,7 +30,6 @@ Filename: `extName-default.ts`
 import './local-file'
 import '/local-file'
 import 'http://remote/file'
-
 ```
 Outputs:
 
@@ -42,7 +41,6 @@ Filename: `extName-false.js`
 import './local-file';
 import '/local-file';
 import 'http://remote/file';
-
 ```
 Filename: `extName-true.js`
 
@@ -52,7 +50,6 @@ Filename: `extName-true.js`
 import "./local-file.js";
 import "/local-file.js";
 import 'http://remote/file';
-
 ```
 Filename: `extName-string.js`
 
@@ -62,6 +59,5 @@ Filename: `extName-string.js`
 import "./local-file.ts";
 import "/local-file.ts";
 import 'http://remote/file';
-
 ```
 

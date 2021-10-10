@@ -25,7 +25,6 @@ Filename: `umdCheckCompact-default.ts`
 ```ts
 /// {}
 export { useState } from 'react'
-
 ```
 Default (undefined):
 
@@ -37,7 +36,6 @@ Filename: `umdCheckCompact-default.js`
 const { useState: _a } = _import_1(globalThis["React"], ["useState"], "react", "globalThis.React", false);
 export { _a as useState };
 import { _import as _import_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@3.0.0/es/ttsclib.min.js";
-
 ```
 true:
 
@@ -49,7 +47,6 @@ Filename: `umdCheckCompact-true.js`
 const { useState: _a } = _import_1(globalThis["React"], ["useState"], "", "", false);
 export { _a as useState };
 import { _import as _import_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@3.0.0/es/ttsclib.min.js";
-
 ```
 false:
 
@@ -61,6 +58,5 @@ Filename: `umdCheckCompact-false.js`
 const { useState: _a } = _import_1(globalThis["React"], ["useState"], "react", "globalThis.React", false);
 export { _a as useState };
 import { _import as _import_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@3.0.0/es/ttsclib.min.js";
-
 ```
 

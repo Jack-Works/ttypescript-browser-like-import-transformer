@@ -56,7 +56,6 @@ Filename: `json-import-auto/tsconfig.json`
         "rootDir": "./"
     }
 }
-
 ```
 Filename: `json-import-auto/index.ts`
 
@@ -69,7 +68,6 @@ console.log('default import', file2)
 console.log('named import', b)
 import('./file.json').then((x) => console.log('Deterministic dynamic import', x))
 import(`./file${''}.json`).then((x) => console.log('Nondeterministic dynamic import', x))
-
 ```
 Filename: `json-import-auto/import-failed.ts`
 
@@ -79,7 +77,6 @@ import x from './not-found.json'
 // @ts-ignore
 import y from 'https://raw.githubusercontent.com/angular/angular-cli/master/packages/angular/cli/lib/config/schema.json'
 console.log(x, y)
-
 ```
 Filename: `json-import-auto/dyn-import-failed.ts`
 
@@ -91,7 +88,6 @@ import('https://raw.githubusercontent.com/angular/angular-cli/master/packages/an
     console.log,
     console.error,
 )
-
 ```
 Output:
 
@@ -116,7 +112,6 @@ function __dynamicImportNative_1(path, json) {
     }
 }
 import { __esModuleInterop as __esModuleInterop_1, __dynamicImportTransform as __dynamicImportTransform_1, _import as _import_1, moduleSpecifierTransform as moduleSpecifierTransform_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@3.0.0/es/ttsclib.min.js";
-
 ```
 Filename: `json-import-auto/import-failed.js`
 
@@ -126,7 +121,6 @@ import x from './not-found.json';
 // @ts-ignore
 import y from 'https://raw.githubusercontent.com/angular/angular-cli/master/packages/angular/cli/lib/config/schema.json';
 console.log(x, y);
-
 ```
 Filename: `json-import-auto/dyn-import-failed.js`
 
@@ -146,7 +140,6 @@ function __dynamicImportNative_1(path, json) {
     }
 }
 import { __dynamicImportTransform as __dynamicImportTransform_1, _import as _import_1, moduleSpecifierTransform as moduleSpecifierTransform_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@3.0.0/es/ttsclib.min.js";
-
 ```
 "data"
 
@@ -163,7 +156,6 @@ console.log('default import', file2)
 console.log('named import', b)
 import('./file.json').then((x) => console.log('Deterministic dynamic import', x))
 import(`./file${''}.json`).then((x) => console.log('Nondeterministic dynamic import', x))
-
 ```
 Filename: `json-import-data/import-failed.ts`
 
@@ -173,7 +165,6 @@ import x from './not-found.json'
 // @ts-ignore
 import y from 'https://raw.githubusercontent.com/angular/angular-cli/master/packages/angular/cli/lib/config/schema.json'
 console.log(x, y)
-
 ```
 Filename: `json-import-data/dyn-import-failed.ts`
 
@@ -185,7 +176,6 @@ import('https://raw.githubusercontent.com/angular/angular-cli/master/packages/an
     console.log,
     console.error,
 )
-
 ```
 Output:
 
@@ -210,7 +200,6 @@ function __dynamicImportNative_1(path, json) {
     }
 }
 import { __dynamicImportTransform as __dynamicImportTransform_1, _import as _import_1, moduleSpecifierTransform as moduleSpecifierTransform_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@3.0.0/es/ttsclib.min.js";
-
 ```
 Filename: `json-import-data/import-failed.js`
 
@@ -220,7 +209,6 @@ import x from './not-found.json';
 // @ts-ignore
 import y from 'https://raw.githubusercontent.com/angular/angular-cli/master/packages/angular/cli/lib/config/schema.json';
 console.log(x, y);
-
 ```
 Filename: `json-import-data/dyn-import-failed.js`
 
@@ -240,6 +228,5 @@ function __dynamicImportNative_1(path, json) {
     }
 }
 import { __dynamicImportTransform as __dynamicImportTransform_1, _import as _import_1, moduleSpecifierTransform as moduleSpecifierTransform_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@3.0.0/es/ttsclib.min.js";
-
 ```
 

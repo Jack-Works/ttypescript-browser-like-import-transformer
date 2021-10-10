@@ -18,7 +18,6 @@ The function in the `function` should have the signature of:
 
 ```ts
 (path: string, defaultImpl: (path: string) => Promise<unknown>) => Promise<unknown>
-
 ```
 where the `defaultImpl` is the transformer's default runtime helper.
 
@@ -32,7 +31,6 @@ The function must be an ArrowFunctionExpression on the syntax level.
      type: 'custom',
      function: "(path, defaultImpl) => defaultImpl('std:' + path)"
 }
-
 ```
 
 ## Properties

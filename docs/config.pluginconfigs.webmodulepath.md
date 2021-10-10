@@ -61,7 +61,6 @@ export * as e1 from './c'
 // browser style import
 export { c2, d2 } from 'http://example.com/'
 export * as e2 from 'http://example.com/'
-
 ```
 Outputs:
 
@@ -97,7 +96,6 @@ export * as e1 from "./c.js";
 // browser style import
 export { c2, d2 } from 'http://example.com/';
 export * as e2 from 'http://example.com/';
-
 ```
 Filename: `webModulePath-undefined.js`
 
@@ -131,6 +129,5 @@ export * as e1 from "./c.js";
 // browser style import
 export { c2, d2 } from 'http://example.com/';
 export * as e2 from 'http://example.com/';
-
 ```
 

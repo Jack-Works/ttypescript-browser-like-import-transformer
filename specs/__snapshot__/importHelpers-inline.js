@@ -8,7 +8,17 @@ function __dynamicImportTransform_1(_path, config, dynamicImport, UMDBindCheck, 
     const path = _path;
     const nullResult = () => null;
     const result = _moduleSpecifierTransform({
-        config, path, queryWellknownUMD: nullResult, parseRegExp: nullResult, queryPackageVersion: nullResult, resolveJSONImport: nullResult, resolveFolderImport: nullResult, getCompilerOptions: () => ({}), accessingImports: new Set("*"), currentFile: null, runtime: true,
+        config,
+        path,
+        queryWellknownUMD: nullResult,
+        parseRegExp: nullResult,
+        queryPackageVersion: nullResult,
+        resolveJSONImport: nullResult,
+        resolveFolderImport: nullResult,
+        getCompilerOptions: () => ({}),
+        accessingImports: new Set("*"),
+        currentFile: null,
+        runtime: true,
     });
     const header = `ttypescript-browser-like-import-transformer: Runtime transform error:`;
     switch (result.type) {
@@ -64,7 +74,10 @@ function moduleSpecifierTransform_1(context, opt) {
     const umdNameRegExp = /\$umdName\$/g;
     const subpathRegExp = /\$subpath\$/g;
     const message = {
-        [392859]: "Failed to transform the path \"{0}\" to UMD import declaration.", [392861]: "Failed to query the package version of import \"{0}\".", [392860]: "Failed to transform the path \"{0}\" to UMD import declaration. After applying the rule \"{1}\", the result is an empty string.", [392862]: "Invalid path \"{0}\".{1}",
+        [392859]: "Failed to transform the path \"{0}\" to UMD import declaration.",
+        [392861]: "Failed to query the package version of import \"{0}\".",
+        [392860]: "Failed to transform the path \"{0}\" to UMD import declaration. After applying the rule \"{1}\", the result is an empty string.",
+        [392862]: "Invalid path \"{0}\".{1}",
     };
     const noop = { type: "noop" };
     return self(context, opt);
@@ -131,16 +144,23 @@ function moduleSpecifierTransform_1(context, opt) {
                     case "unpkg": {
                         function getURL(domain) {
                             return {
-                                noVersion: `https://${domain}/$packageName$$subpath$`, withVersion: `https://${domain}/$packageName$@$version$$subpath$`,
+                                noVersion: `https://${domain}/$packageName$$subpath$`,
+                                withVersion: `https://${domain}/$packageName$@$version$$subpath$`,
                             };
                         }
                         const URLs = {
-                            jspm: getURL("jspm.dev"), "esm.run": getURL("esm.run"), pikacdn: getURL("cdn.skypack.dev"), skypack: getURL("cdn.skypack.dev"), unpkg: getURL("unpkg.com"), jsdelivr: getURL("cdn.jsdelivr.net"),
+                            jspm: getURL("jspm.dev"),
+                            "esm.run": getURL("esm.run"),
+                            pikacdn: getURL("cdn.skypack.dev"),
+                            skypack: getURL("cdn.skypack.dev"),
+                            unpkg: getURL("unpkg.com"),
+                            jsdelivr: getURL("cdn.jsdelivr.net"),
                         };
                         URLs.unpkg.noVersion += "?module";
                         URLs.unpkg.withVersion += "?module";
                         return self(context, {
-                            type: "url", ...URLs[e],
+                            type: "url",
+                            ...URLs[e],
                         });
                     }
                     case "umd":
@@ -148,7 +168,10 @@ function moduleSpecifierTransform_1(context, opt) {
                         if (!target)
                             return ToError(392859, path, "");
                         const nextOpt = {
-                            type: "umd", target, globalObject, umdImportPath: undefined,
+                            type: "umd",
+                            target,
+                            globalObject,
+                            umdImportPath: undefined,
                         };
                         return self(context, nextOpt);
                     default: return unreachable("simple type", e);
@@ -225,7 +248,10 @@ function moduleSpecifierTransform_1(context, opt) {
     }
     function ToError(type, arg0, arg1) {
         return {
-            type: "error", message: message[type].replace("{0}", arg0).replace("{1}", arg1), code: type, key: type.toString(),
+            type: "error",
+            message: message[type].replace("{0}", arg0).replace("{1}", arg1),
+            code: type,
+            key: type.toString(),
         };
     }
     function unreachable(str, val) {

@@ -12,5 +12,5 @@ export { x };
 // Node style export
 export { c, d } from "std:b";
 export * as e from "std:c";
-import * as ts from "std:typescript@4.1.0-dev.20201004";
-import * as ts2 from "std:typescript@4.1.0-dev.20201004";
+import * as ts from "std:typescript@4.4.3";
+import * as ts2 from "std:typescript@4.4.3";

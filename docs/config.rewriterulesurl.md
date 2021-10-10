@@ -21,7 +21,6 @@ export interface RewriteRulesURL
     "withVersion": "https://cdn.example.com/$packageName$/v$version$""
     "noVersion": "https://cdn.example.com/$packageName$/latest"
 }
-
 ```
 Source code:
 
@@ -44,7 +43,6 @@ export * as e from 'c'
 
 import * as ts from 'typescript'
 import * as ts2 from 'typescript/lib/typescriptServices'
-
 ```
 Output:
 
@@ -65,16 +63,15 @@ export { x };
 // Node style export
 export { c, d } from "std:b";
 export * as e from "std:c";
-import * as ts from "std:typescript@4.1.0-dev.20201004";
-import * as ts2 from "std:typescript@4.1.0-dev.20201004";
-
+import * as ts from "std:typescript@4.4.3";
+import * as ts2 from "std:typescript@4.4.3";
 ```
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [noVersion](./config.rewriterulesurl.noversion.md) | string | Rewrite to this URL if the transformer can't read the version of the package |
+|  [noVersion?](./config.rewriterulesurl.noversion.md) | string | <i>(Optional)</i> Rewrite to this URL if the transformer can't read the version of the package |
 |  [type](./config.rewriterulesurl.type.md) | 'url' |  |
-|  [withVersion](./config.rewriterulesurl.withversion.md) | string | Rewrite to this URL if the transformer can read the version of the package |
+|  [withVersion?](./config.rewriterulesurl.withversion.md) | string | <i>(Optional)</i> Rewrite to this URL if the transformer can read the version of the package |
 

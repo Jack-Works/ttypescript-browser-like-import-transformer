@@ -12,5 +12,5 @@ export { x };
 // Node style export
 export { c, d } from "https://esm.run/b";
 export * as e from "https://esm.run/c";
-import * as ts from "https://esm.run/typescript@4.1.0-dev.20201004";
-import * as ts2 from "https://esm.run/typescript@4.1.0-dev.20201004/lib/typescriptServices";
+import * as ts from "https://esm.run/typescript@4.4.3";
+import * as ts2 from "https://esm.run/typescript@4.4.3/lib/typescriptServices";

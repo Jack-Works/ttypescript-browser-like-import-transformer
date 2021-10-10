@@ -17,7 +17,6 @@ export interface RewriteRulesUMD
 
 ```json
 { "type": "umd", target: "mylib", globalObject: "window" }
-
 ```
 Filename: `rules-complex.ts`
 
@@ -30,7 +29,6 @@ import y from 'lodash'
 import z from 'lodash-es'
 import w from 'other'
 console.log(x, y, z, w, i)
-
 ```
 Output:
 
@@ -46,7 +44,6 @@ import z from "https://unpkg.com/lodash-es?module";
 import w from "/web_modules/other.js";
 console.log(x, y, z, w, i);
 import { _import as _import_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@3.0.0/es/ttsclib.min.js";
-
 ```
 This option also support treeshake.
 
@@ -78,7 +75,6 @@ Filename: `treeshake-test/tsconfig.json`
         "moduleResolution": "node"
     }
 }
-
 ```
 Filename: `treeshake-test/src/index.ts`
 
@@ -95,7 +91,6 @@ export * from '4'
 export * as e from '5'
 // @ts-ignore
 export { x, y, z } from '6'
-
 ```
 Output:
 
@@ -112,7 +107,6 @@ console.log(a, c, d);
 "import \"3\" is eliminated because it expected to have no side effects in UMD transform.";
 "import \"4\" is eliminated because it expected to have no side effects in UMD transform.";
 import { _import as _import_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@3.0.0/es/ttsclib.min.js";
-
 ```
 Extra file: (Therefore you can feed this file to Webpack / Rollup and get treeshaked.)
 
@@ -152,16 +146,15 @@ function createESModuleInterop(x) {
                 },
             });
         };
-
 ```
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [globalObject](./config.rewriterulesumd.globalobject.md) | string | When using UMD import, this option indicates what global object will be used to find the UMD variables. |
+|  [globalObject?](./config.rewriterulesumd.globalobject.md) | string | <i>(Optional)</i> When using UMD import, this option indicates what global object will be used to find the UMD variables. |
 |  [target](./config.rewriterulesumd.target.md) | string | Rewrite the matching import statement to specified global variable |
-|  [treeshake](./config.rewriterulesumd.treeshake.md) | { out: string } |  |
+|  [treeshake?](./config.rewriterulesumd.treeshake.md) | { out: string } | <i>(Optional)</i> |
 |  [type](./config.rewriterulesumd.type.md) | 'umd' |  |
-|  [umdImportPath](./config.rewriterulesumd.umdimportpath.md) | string | should be a URL. Will use a <code>import 'umdImportPath'</code> to load the UMD then deconstruct from it. |
+|  [umdImportPath?](./config.rewriterulesumd.umdimportpath.md) | string | <i>(Optional)</i> should be a URL. Will use a <code>import 'umdImportPath'</code> to load the UMD then deconstruct from it. |
 
