@@ -1,13 +1,14 @@
 /**
  * In this file there some host helper functions that must run in node
  */
-import creatTransform from './core'
 import * as ts from 'typescript'
-import * as ttsclib from './ttsclib'
-import * as configParser from './config-parser'
-import { queryWellknownUMD } from './well-known-umd'
 import { readFileSync, writeFileSync, existsSync } from 'fs'
 import { join, relative, posix } from 'path'
+import creatTransform from './core.js'
+import * as ttsclib from './ttsclib.js'
+import * as configParser from './config-parser.js'
+import { queryWellknownUMD } from './well-known-umd.js'
+
 import type { ImportMapFunctionOpts, RewriteRulesUMD } from './plugin-config'
 export default creatTransform({
     ts,
