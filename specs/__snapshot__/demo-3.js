@@ -5,4 +5,4 @@ _a('react' + x, __customDynamicImportHelper_1(__dynamicImportTransform_1, JSON.p
 function __dynamicImportNative_1(path) {
     return import(path);
 }
-import { __dynamicImportTransform as __dynamicImportTransform_1, _import as _import_1, moduleSpecifierTransform as moduleSpecifierTransform_1, __customDynamicImportHelper as __customDynamicImportHelper_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@3.0.1/es/ttsclib.min.js";
+import { __dynamicImportTransform as __dynamicImportTransform_1, _import as _import_1, moduleSpecifierTransform as moduleSpecifierTransform_1, __customDynamicImportHelper as __customDynamicImportHelper_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@3.0.2/es/ttsclib.min.js";

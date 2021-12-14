@@ -8,4 +8,4 @@ export { _a as React };
 const { useState: _b } = _import_1(globalThis["React"], ["useState"], "react", "globalThis.React", false);
 export { _b as useState };
 console.log(x, useState, React);
-import { _import as _import_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@3.0.1/es/ttsclib.min.js";
+import { _import as _import_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@3.0.2/es/ttsclib.min.js";
