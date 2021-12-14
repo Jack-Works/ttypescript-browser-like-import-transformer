@@ -305,7 +305,14 @@ function updateImportExportDeclaration(
             const nextPath = factory.createStringLiteral(rewriteStrategy.nextPath)
             if (ts.isImportDeclaration(node))
                 return [
-                    factory.updateImportDeclaration(node, node.decorators, node.modifiers, node.importClause, nextPath),
+                    factory.updateImportDeclaration(
+                        node,
+                        node.decorators,
+                        node.modifiers,
+                        node.importClause,
+                        nextPath,
+                        node.assertClause,
+                    ),
                 ]
             else
                 return [
@@ -316,6 +323,7 @@ function updateImportExportDeclaration(
                         node.isTypeOnly,
                         node.exportClause,
                         nextPath,
+                        node.assertClause,
                     ),
                 ]
         }
@@ -414,10 +422,14 @@ function importOrExportClauseToUMD(
                 undefined,
                 factory.createNamedImports(
                     node.elements.map<ImportSpecifier>((x) => {
-                        return factory.createImportSpecifier(
+                        const args = [
                             x.propertyName || factory.createIdentifier(x.name.text),
                             factory.createTempVariable((id) => ghostBindings.set(x, id)),
-                        )
+                        ] as const
+                        // before TS 4.5
+                        if (factory.createImportSpecifier.length === 2)
+                            return (factory.createImportSpecifier as any)(...args)
+                        return factory.createImportSpecifier(false, ...args)
                     }),
                 ),
             ),
@@ -429,7 +441,12 @@ function importOrExportClauseToUMD(
             void 0,
             false,
             factory.createNamedExports(
-                Array.from(ghostBindings).map(([key, value]) => factory.createExportSpecifier(value, key.name)),
+                Array.from(ghostBindings).map(([key, value]) => {
+                    // Before TS 4.5
+                    if (factory.createExportSpecifier.length === 2)
+                        return (factory.createExportSpecifier as any)(value, key.name)
+                    return factory.createExportSpecifier(false, value, key.name)
+                }),
             ),
             void 0,
         )
@@ -449,7 +466,12 @@ function importOrExportClauseToUMD(
             void 0,
             void 0,
             false,
-            factory.createNamedExports([factory.createExportSpecifier(ghostBinding, node.name.text)]),
+            factory.createNamedExports([
+                factory.createExportSpecifier.length === 2
+                    ? // Before TS 4.5
+                      (factory.createExportSpecifier as any)(ghostBinding, node.name.text)
+                    : factory.createExportSpecifier(false, ghostBinding, node.name.text),
+            ]),
             void 0,
         )
         statements.push(...updatedGhost)
@@ -764,7 +786,11 @@ function createTopLevelScopedHelper<F extends string | ((...args: any[]) => any)
             new Set([]),
         ]
         // ? import { __helperName as uniqueName } from 'url'
-        const importBind = factory.createImportSpecifier(factory.createIdentifier(fnName), uniqueName)
+        const importBind =
+            factory.createImportSpecifier.length === 2
+            // Before TS 4.5
+                ? (factory.createImportSpecifier as any)(factory.createIdentifier(fnName), uniqueName)
+                : factory.createImportSpecifier(false, factory.createIdentifier(fnName), uniqueName)
         const importClause = importDec.importClause!
         const importBindings = importClause.namedBindings! as NamedImports
         if (importBindings.elements.find((x) => x.name.text === fnName)) {
@@ -782,6 +808,7 @@ function createTopLevelScopedHelper<F extends string | ((...args: any[]) => any)
                 factory.updateNamedImports(importBindings, [...importBindings.elements, importBind]),
             ),
             importDec.moduleSpecifier,
+            importDec.assertClause,
         )
         idSet.add(uniqueName)
         ttsclibImportMap.set(sourceFile, [importDec, idSet])

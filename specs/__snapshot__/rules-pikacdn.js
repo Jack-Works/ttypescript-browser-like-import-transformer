@@ -12,5 +12,5 @@ export { x };
 // Node style export
 export { c, d } from "https://cdn.skypack.dev/b";
 export * as e from "https://cdn.skypack.dev/c";
-import * as ts from "https://cdn.skypack.dev/typescript@4.4.3";
-import * as ts2 from "https://cdn.skypack.dev/typescript@4.4.3/lib/typescriptServices";
+import * as ts from "https://cdn.skypack.dev/typescript@4.5.4";
+import * as ts2 from "https://cdn.skypack.dev/typescript@4.5.4/lib/typescriptServices";

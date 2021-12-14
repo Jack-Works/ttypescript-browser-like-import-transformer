@@ -42,7 +42,7 @@ __dynamicImportTransform_1(x, JSON.parse("{\"after\":true,\"importHelpers\":\"au
 function __dynamicImportNative_1(path) {
     return import(path);
 }
-import { __dynamicImportTransform as __dynamicImportTransform_1, _import as _import_1, moduleSpecifierTransform as moduleSpecifierTransform_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@3.0.0/es/ttsclib.min.js";
+import { __dynamicImportTransform as __dynamicImportTransform_1, _import as _import_1, moduleSpecifierTransform as moduleSpecifierTransform_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@3.0.1/es/ttsclib.min.js";
 ```
 Filename: `importHelpers-string.js`
 
@@ -65,7 +65,7 @@ __dynamicImportTransform_1(x, JSON.parse("{\"after\":true,\"importHelpers\":\"cd
 function __dynamicImportNative_1(path) {
     return import(path);
 }
-import { __dynamicImportTransform as __dynamicImportTransform_1, _import as _import_1, moduleSpecifierTransform as moduleSpecifierTransform_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@3.0.0/es/ttsclib.min.js";
+import { __dynamicImportTransform as __dynamicImportTransform_1, _import as _import_1, moduleSpecifierTransform as moduleSpecifierTransform_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@3.0.1/es/ttsclib.min.js";
 ```
 Filename: `importHelpers-node.js`
 

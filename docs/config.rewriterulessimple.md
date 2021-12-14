@@ -70,7 +70,7 @@ console.log('Should run after all imports', a, b, c2, d, e, c2, ts, ts2);
 const c = 1;
 const x = 1;
 export { x };
-import { _import as _import_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@3.0.0/es/ttsclib.min.js";
+import { _import as _import_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@3.0.1/es/ttsclib.min.js";
 ```
 Filename: `rules-skypack.js`
 
@@ -89,8 +89,8 @@ export { x };
 // Node style export
 export { c, d } from "https://cdn.skypack.dev/b";
 export * as e from "https://cdn.skypack.dev/c";
-import * as ts from "https://cdn.skypack.dev/typescript@4.4.3";
-import * as ts2 from "https://cdn.skypack.dev/typescript@4.4.3/lib/typescriptServices";
+import * as ts from "https://cdn.skypack.dev/typescript@4.5.4";
+import * as ts2 from "https://cdn.skypack.dev/typescript@4.5.4/lib/typescriptServices";
 ```
 Filename: `rules-jspm.js`
 
@@ -109,8 +109,8 @@ export { x };
 // Node style export
 export { c, d } from "https://jspm.dev/b";
 export * as e from "https://jspm.dev/c";
-import * as ts from "https://jspm.dev/typescript@4.4.3";
-import * as ts2 from "https://jspm.dev/typescript@4.4.3/lib/typescriptServices";
+import * as ts from "https://jspm.dev/typescript@4.5.4";
+import * as ts2 from "https://jspm.dev/typescript@4.5.4/lib/typescriptServices";
 ```
 Filename: `rules-snowpack.js`
 
@@ -149,7 +149,7 @@ export { x };
 // Node style export
 export { c, d } from "https://unpkg.com/b?module";
 export * as e from "https://unpkg.com/c?module";
-import * as ts from "https://unpkg.com/typescript@4.4.3?module";
-import * as ts2 from "https://unpkg.com/typescript@4.4.3/lib/typescriptServices?module";
+import * as ts from "https://unpkg.com/typescript@4.5.4?module";
+import * as ts2 from "https://unpkg.com/typescript@4.5.4/lib/typescriptServices?module";
 ```
 

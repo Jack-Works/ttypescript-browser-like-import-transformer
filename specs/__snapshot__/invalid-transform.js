@@ -5,4 +5,4 @@ const x = _import_1((() => {
 })(), ["default"], "0123", "globalThis.0123", false).default;
 throw new SyntaxError("@magic-works/ttypescript-browser-like-import-transformer: Failed to transform the path \"())\" to UMD import declaration.");
 console.log(x, y);
-import { _import as _import_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@3.0.0/es/ttsclib.min.js";
+import { _import as _import_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@3.0.1/es/ttsclib.min.js";
