@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.0.2](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/compare/v3.0.1...v3.0.2) (2021-12-14)
+
+
+### Bug Fixes
+
+* support ts 4.5 ([790b298](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/commit/790b298913d10e749f51bc90f7f1d208e434542c))
+
 ### [3.0.1](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/compare/v3.0.0...v3.0.1) (2021-10-10)
 
 ## [3.0.0](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/compare/v2.3.0...v3.0.0) (2020-11-01)
