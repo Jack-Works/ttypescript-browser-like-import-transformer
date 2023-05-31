@@ -166,7 +166,7 @@ function moduleSpecifierTransform_1(context, opt) {
     return self(context, opt);
     function self(...[context, opt = context.config.rules || { type: "simple", enum: "umd" }]) {
         const { path, config, parseRegExp, queryPackageVersion, currentFile, accessingImports, getCompilerOptions, resolveFolderImport, resolveJSONImport, runtime, treeshakeProvider, } = context;
-        const { jsonImport, folderImport, extName, appendExtensionName, extNameRemote, appendExtensionNameForRemote, webModulePath, globalObject, } = config;
+        const { jsonImport, folderImport, extName, appendExtensionName, extNameRemote, appendExtensionNameForRemote, globalObject, } = config;
         const conf = extName !== null && extName !== void 0 ? extName : appendExtensionName;
         const expectedExtension = conf === true ? ".js" : conf !== null && conf !== void 0 ? conf : ".js";
         if (opt.type === "noop")
@@ -218,7 +218,6 @@ function moduleSpecifierTransform_1(context, opt) {
             case "simple": {
                 const e = opt.enum;
                 switch (e) {
-                    case "snowpack": return ToRewrite(`${webModulePath !== null && webModulePath !== void 0 ? webModulePath : "/web_modules/"}${appendExt(path, expectedExtension)}`);
                     case "esm.run":
                     case "jsdelivr":
                     case "pikacdn":

@@ -30,5 +30,4 @@ export interface PluginConfigs
 |  [rules?](./config.pluginconfigs.rules.md) | Exclude&lt;[RewriteRulesObject](./config.rewriterulesobject.md)<!-- -->, [RewriteRulesUMD](./config.rewriterulesumd.md)<!-- -->&gt; &amp; Record&lt;string, [RewriteRulesObject](./config.rewriterulesobject.md)<!-- -->&gt; | <i>(Optional)</i> The transformation rule. Specify how this transformer will handle your imports. |
 |  [safeAccess?](./config.pluginconfigs.safeaccess.md) | string | <i>(Optional)</i> Use property access syntax to access UMD variable |
 |  [umdCheckCompact](./config.pluginconfigs.umdcheckcompact.md) | boolean | Make \_import cleaner. |
-|  [webModulePath?](./config.pluginconfigs.webmodulepath.md) | string | <i>(Optional)</i> Used in snowpack. web\_modules module path |
 

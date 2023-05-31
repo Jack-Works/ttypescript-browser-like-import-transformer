@@ -1,2 +1,0 @@
-/// { rules: 'snowpack' }
-//@ default.ts

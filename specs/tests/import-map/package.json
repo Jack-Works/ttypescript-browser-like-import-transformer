@@ -1,11 +1,9 @@
 {
-  "name": "snowpack-demo",
+  "name": "import-map-demo",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "lodash-es": "^4.17.21",
-    "snowpack": "^1.4.0"
   },
   "devDependencies": {},
   "scripts": {

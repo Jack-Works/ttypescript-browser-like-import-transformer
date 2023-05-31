@@ -25,8 +25,6 @@ export type RewriteRulesObject = false | RewriteRulesSimple | RewriteRulesUMD | 
 
 - Enum [RewriteRulesSimple](./config.rewriterulessimple.md)<!-- -->:
 
-- - `"snowpack"`<!-- -->: if you are using [snowpack](https://github.com/pikapkg/snowpack)
-
 - - `"umd"`<!-- -->: make your `import a from 'b'` to `const a = globalThis.b`
 
 - - `"unpkg"`<!-- -->: try to transform imports path to "https://unpkg.com/package<!-- -->@<!-- -->version/index.js?module"
@@ -137,26 +135,6 @@ export * as e from "https://cdn.skypack.dev/c";
 import * as ts from "https://cdn.skypack.dev/typescript@4.5.4";
 import * as ts2 from "https://cdn.skypack.dev/typescript@4.5.4/lib/typescriptServices";
 ```
-Filename: `rules-snowpack.js`
-
-```js
-// CompilerOptions: {"module":"ESNext"}
-// PluginConfig: {"rules":"snowpack"}
-console.log('Should run after all imports', a, b, c2, d, e, c2, ts, ts2);
-// Node style import
-import a from "/web_modules/a.js";
-import b, { c as c2, d } from "/web_modules/b.js";
-import * as e from "/web_modules/c/subpath.js";
-import "/web_modules/d.js";
-const c = 1;
-const x = 1;
-export { x };
-// Node style export
-export { c, d } from "/web_modules/b.js";
-export * as e from "/web_modules/c.js";
-import * as ts from "/web_modules/typescript.js";
-import * as ts2 from "/web_modules/typescript/lib/typescriptServices.js";
-```
 Filename: `rules-unpkg.js`
 
 ```js
@@ -202,7 +180,7 @@ Complex example:
 Filename: `rules-complex.ts`
 
 ```ts
-/// { rules: { "/@material-ui\\/(.+)/": {type: "umd", target: "MaterialUI.$1"}, "lodash": "umd", "jquery": "pikacdn", "lodash-es": "unpkg", "/.+/": "snowpack" } }
+/// { rules: { "/@material-ui\\/(.+)/": {type: "umd", target: "MaterialUI.$1"}, "lodash": "umd", "jquery": "pikacdn", "lodash-es": "unpkg", "/.+/": "unpkg" } }
 
 import x from '@material-ui/core'
 import i from '@material-ui/icons'
@@ -217,12 +195,12 @@ Filename: `rules-complex.js`
 
 ```js
 // CompilerOptions: {"module":"ESNext"}
-// PluginConfig: {"rules":{"/@material-ui\\/(.+)/":{"type":"umd","target":"MaterialUI.$1"},"lodash":"umd","jquery":"pikacdn","lodash-es":"unpkg","/.+/":"snowpack"}}
+// PluginConfig: {"rules":{"/@material-ui\\/(.+)/":{"type":"umd","target":"MaterialUI.$1"},"lodash":"umd","jquery":"pikacdn","lodash-es":"unpkg","/.+/":"unpkg"}}
 const x = _import_1(globalThis["MaterialUI.core"], ["default"], "@material-ui/core", "globalThis.MaterialUI.core", false).default;
 const i = _import_1(globalThis["MaterialUI.icons"], ["default"], "@material-ui/icons", "globalThis.MaterialUI.icons", false).default;
 const y = _import_1(globalThis["lodash"], ["default"], "lodash", "globalThis.lodash", false).default;
 import z from "https://unpkg.com/lodash-es?module";
-import w from "/web_modules/other.js";
+import w from "https://unpkg.com/other?module";
 console.log(x, y, z, w, i);
 import { _import as _import_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@3.0.2/es/ttsclib.min.js";
 ```

@@ -16,7 +16,6 @@ This typescript transformer helps you to emit a browser compatible ESModule outp
     1. A global variable access (`const React = globalThis.React`)
     1. A CDN (`import _ from "https://cdn.skypack.dev/lodash-es@4.17.15"`)
     1. Another CDN (`import _ from "https://unpkg.com/lodash-es@4.17.15?module"`)
-    1. [Snowpack](https://www.snowpack.dev/) style import (`import _ from "/web_modules/lodash-es.js"`)
     1. **\[🧪Experimental\]** Read import rule from [Import Map](https://github.com/WICG/import-maps)
 
 ### Input
@@ -81,26 +80,6 @@ The default config of this transformer is "UMD" mode. All bare imports will be t
 
 Here is [a template repo](https://github.com/Jack-Works/ttsc-browser-import-template) to help you use this transformer with Webpack. In this repo, all node style import is imported in [a single file](https://github.com/Jack-Works/ttsc-browser-import-template/blob/master/dependencies.js) and packed by Webpack. The rest of the source code never gets handled by Webpack but emitted by [ttypescript](https://github.com/cevek/ttypescript) (an enhanced typescript cli that allows you to specify transformer programmatically).
 
-### Use with Snowpack
-
-See the **TTypeScript Support** in the [Importing Packages by Name](https://www.snowpack.dev/#importing-packages-by-name) section.
-
-```jsonc
-/* tsconfig.json */
-{
-    "compilerOptions": {
-        "module": "es2015",
-        "plugins": [
-            {
-                "transform": "@magic-works/ttypescript-browser-like-import-transformer",
-                "after": true,
-                "rules": "snowpack"
-            }
-        ]
-    }
-}
-```
-
 ### Use with CDN
 
 [Skypack CDN](https://www.skypack.dev/) and [unpkg](https://unpkg.com/#query-params) are two CDNs that friendly to ES Module dependencies. This transformer also supports CDN import. (e.g. Before `import _ from 'lodash-es'` After `import _ from 'https://cdn.skypack.dev/lodash-es'`)
@@ -125,7 +104,7 @@ See the **TTypeScript Support** in the [Importing Packages by Name](https://www.
 
 Nowadays most of the codes in our codebase are ESModules. You can emit browser executable JS files by `tsc` directly but you have to add the annoying `.js` extension to the end. (Related: [PR: New --emitExtension and --noImplicitExtensionName compiler options](https://github.com/microsoft/TypeScript/pull/35148))
 
-On the other hand, it is hard to run ES Module codes with Node style dependencies, there're some solutions to this including [Snowpack](https://www.snowpack.dev/) but Snowpack also has its limits.
+On the other hand, it is hard to run ES Module codes with Node style dependencies, there're some solutions to this including ESM CDN.
 
 ## Options
 

@@ -9,12 +9,10 @@ Predefined rewrite rules
 <b>Signature:</b>
 
 ```typescript
-export type RewriteRulesSimple = 'snowpack' | 'umd' | 'unpkg' | 'pikacdn' | 'skypack' | 'jspm' | 'jsdelivr' | 'esm.run'
+export type RewriteRulesSimple = 'umd' | 'unpkg' | 'pikacdn' | 'skypack' | 'jspm' | 'jsdelivr' | 'esm.run'
 ```
 
 ## Remarks
-
-- snowpack: Rewrite to snowpack (/web\_modules) (deprecated: should use import map)
 
 - umd: Rewrite to UMD import
 
@@ -111,26 +109,6 @@ export { c, d } from "https://jspm.dev/b";
 export * as e from "https://jspm.dev/c";
 import * as ts from "https://jspm.dev/typescript@4.5.4";
 import * as ts2 from "https://jspm.dev/typescript@4.5.4/lib/typescriptServices";
-```
-Filename: `rules-snowpack.js`
-
-```js
-// CompilerOptions: {"module":"ESNext"}
-// PluginConfig: {"rules":"snowpack"}
-console.log('Should run after all imports', a, b, c2, d, e, c2, ts, ts2);
-// Node style import
-import a from "/web_modules/a.js";
-import b, { c as c2, d } from "/web_modules/b.js";
-import * as e from "/web_modules/c/subpath.js";
-import "/web_modules/d.js";
-const c = 1;
-const x = 1;
-export { x };
-// Node style export
-export { c, d } from "/web_modules/b.js";
-export * as e from "/web_modules/c.js";
-import * as ts from "/web_modules/typescript.js";
-import * as ts2 from "/web_modules/typescript/lib/typescriptServices.js";
 ```
 Filename: `rules-unpkg.js`
 

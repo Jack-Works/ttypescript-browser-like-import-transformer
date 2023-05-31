@@ -19,7 +19,6 @@ export function validateConfig(config: PluginConfigs, options: CompilerOptions) 
     type('rules', ['boolean', 'string', 'object'])
     type('dynamicImportPathRewrite', ['boolean', 'string', 'object'])
     type('globalObject', ['string'])
-    type('webModulePath', ['string'])
     type('importHelpers', ['string'])
     type('jsonImport', ['string', 'boolean'])
     type('importMap', ['object'])
@@ -27,7 +26,6 @@ export function validateConfig(config: PluginConfigs, options: CompilerOptions) 
     if (config.importMap && !options.rootDir) throw new ConfigError('When using importMap, rootDir must be set')
 
     length('globalObject')
-    length('webModulePath')
     length('importHelpers')
 
     enumCheck('dynamicImportPathRewrite', ['auto'])
@@ -109,7 +107,6 @@ export function normalizePluginConfig(config: PluginConfigs): NormalizedPluginCo
 }
 
 enum RewriteRulesSimpleEnumLocal {
-    snowpack = 'snowpack',
     umd = 'umd',
     unpkg = 'unpkg',
     /** @deprecated PikaCDN has renamed to Skypack */

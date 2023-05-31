@@ -231,7 +231,6 @@ export function moduleSpecifierTransform(
             appendExtensionName,
             extNameRemote,
             appendExtensionNameForRemote,
-            webModulePath,
             globalObject,
         } = config
         const conf = extName ?? appendExtensionName
@@ -279,8 +278,6 @@ export function moduleSpecifierTransform(
             case 'simple': {
                 const e = opt.enum
                 switch (e) {
-                    case 'snowpack':
-                        return ToRewrite(`${webModulePath ?? '/web_modules/'}${appendExt(path, expectedExtension)}`)
                     case 'esm.run':
                     case 'jsdelivr':
                     case 'pikacdn':
