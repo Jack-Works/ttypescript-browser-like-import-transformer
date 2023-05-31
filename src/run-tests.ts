@@ -1,32 +1,33 @@
-import { statSync, readdirSync, readFileSync, writeFileSync } from 'fs'
-import { join } from 'path'
-import { isMainThread, workerData, Worker } from 'worker_threads'
-import { execSync } from 'child_process'
-import { ConfigError } from './config-parser'
-import { cwd } from 'process'
+import { statSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { join } from 'node:path'
+import { isMainThread, workerData, Worker } from 'node:worker_threads'
+import { execSync } from 'node:child_process'
+import { ConfigError } from './config-parser.js'
+import { cwd } from 'node:process'
+import { fileURLToPath } from 'node:url'
 
-const dir = join(__dirname, '../specs/tests/')
+const dir = new URL('../specs/tests/', import.meta.url)
 // "/// {}"
 const pluginConfigRegExp = /\/\/\/(.+)\n/
 // "//@ filename.ts"
 const referenceFileRegExp = /\/\/@ (.+)/
 // "//! {}"
 const compilerOptionsRegExp = /\/\/! (.+)/
-const snapshotDir = join(__dirname, '../specs/__snapshot__/')
+const snapshotDir = new URL('../specs/__snapshot__/', import.meta.url)
 const filter = process.argv[2]
 
 if (isMainThread) {
     for (const testFile of readdirSync(dir)) {
         if (filter !== undefined && !testFile.toLowerCase().match(filter)) continue
         if (filter) {
-            worker({ path: join(dir, testFile), filename: testFile }).catch((x) => {
+            worker({ path: fileURLToPath(new URL(testFile, dir)), filename: testFile }).catch((x) => {
                 debugger
                 console.error(x)
                 process.exit(1)
             })
         } else {
-            const worker = new Worker(__filename, {
-                workerData: { path: join(dir, testFile), filename: testFile } as WorkerParam,
+            const worker = new Worker(new URL(import.meta.url), {
+                workerData: { path: fileURLToPath(new URL(testFile, dir)), filename: testFile } as WorkerParam,
             })
             worker.on('error', (e) => {
                 console.error(e)
@@ -43,9 +44,9 @@ if (isMainThread) {
     })
 }
 async function worker(script: WorkerParam = workerData) {
-    const ts = await import('typescript')
+    const ts = (await import('typescript')).default
     const transformer = await import('./node.js')
-    const sharedCompilerOptions = JSON.parse(readFileSync(join(__dirname, '../specs/tsconfig.json'), 'utf-8'))
+    const sharedCompilerOptions = JSON.parse(readFileSync(new URL('../specs/tsconfig.json', import.meta.url), 'utf-8'))
     if (statSync(script.path).isFile()) {
         let outputText = ''
         try {
@@ -60,9 +61,8 @@ async function worker(script: WorkerParam = workerData) {
             }
             const referencedFile = file.match(referenceFileRegExp)
             const additionalCompilerOptions = file.match(compilerOptionsRegExp) || ['', '{}']
-            const source = (referencedFile
-                ? readFileSync(script.path.replace(script.filename, referencedFile[1]), 'utf-8')
-                : file
+            const source = (
+                referencedFile ? readFileSync(script.path.replace(script.filename, referencedFile[1]), 'utf-8') : file
             )
                 .replace(compilerOptionsRegExp, '')
                 .replace(pluginConfigRegExp, '')
@@ -100,12 +100,12 @@ ${result.outputText}`
             if (e instanceof ConfigError) outputText = '// ' + e.message
             else throw e
         }
-        writeFileSync(join(snapshotDir, script.filename.replace(/tsx$/g, 'jsx').replace(/ts$/, 'js')), outputText)
+        writeFileSync(new URL(script.filename.replace(/tsx$/g, 'jsx').replace(/ts$/, 'js'), snapshotDir), outputText)
     } else {
-        const cmd = `yarn ttsc --target ESNext --module ESNext -p ${join(script.path, 'tsconfig.json')} --outDir ${join(
-            snapshotDir,
-            script.filename,
-        )}`
+        const cmd = `yarn ttsc --target ESNext --module ESNext -p ${join(
+            script.path,
+            'tsconfig.json',
+        )} --outDir ${fileURLToPath(new URL(script.filename, snapshotDir))}`
         try {
             execSync(cmd)
         } catch (e) {}

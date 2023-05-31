@@ -1,16 +1,20 @@
 /**
  * In this file there some host helper functions that must run in node
  */
-import * as ts from 'typescript'
-import { readFileSync, writeFileSync, existsSync } from 'fs'
-import { join, relative, posix } from 'path'
-import creatTransform from './core.js'
+import ts from 'typescript'
+import { readFileSync, writeFileSync, existsSync } from 'node:fs'
+import { join, relative, posix, isAbsolute } from 'node:path'
+import createTransform from './core.js'
 import * as ttsclib from './ttsclib.js'
 import * as configParser from './config-parser.js'
 import { queryWellknownUMD } from './well-known-umd.js'
+// @ts-ignore
+import __filename from '#filename'
+import type { ImportMapFunctionOpts, RewriteRulesUMD } from './plugin-config.js'
+import { createRequire } from 'node:module'
 
-import type { ImportMapFunctionOpts, RewriteRulesUMD } from './plugin-config'
-export default creatTransform({
+const __require = createRequire(__filename)
+export default createTransform({
     ts,
     queryWellknownUMD,
     ttsclib,
@@ -106,14 +110,17 @@ function treeshakeProvider(
     }
 }
 
-function queryPackageVersion(path: string) {
+function queryPackageVersion(path: string, parent: string | undefined | null) {
     const [a, b] = path.split('/')
     // ? this may not work for node 13 package exports
     const c = (a.startsWith('@') ? `${a}/${b}` : a) + '/package.json'
     try {
-        if (path === '@magic-works/ttypescript-browser-like-import-transformer')
-            return require('../package.json').version
-        return JSON.parse(readFileSync(require.resolve(c), 'utf-8')).version
+        if (path === '@magic-works/ttypescript-browser-like-import-transformer') {
+            return __require('../package.json').version
+        } else {
+            const this_require = parent && isAbsolute(parent) ? createRequire(parent) : __require
+            return JSON.parse(readFileSync(this_require.resolve(c), 'utf-8')).version
+        }
     } catch {}
     return null
 }
@@ -128,7 +135,7 @@ function importMapResolve(opt: ImportMapFunctionOpts): string | null {
     if (config.importMap.type === 'function') return config.importMap.function(opt)
     let lib: _jsenv_import_map
     try {
-        lib = require('@jsenv/import-map')
+        lib = __require('@jsenv/import-map')
     } catch (e) {
         throw new Error('You need to install @jsenv/import-map as dependencies to resolve import map')
     }

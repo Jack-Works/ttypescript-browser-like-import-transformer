@@ -5,9 +5,9 @@
  * and expected to run in any ES2020 compatible environment (with console.warn).
  */
 
-import type { RewriteRulesUMD, RewriteRulesURL } from './plugin-config'
-import type { CustomTransformationContext } from './core'
-import type { NormalizedPluginConfig, NormalizedRewriteRules } from './config-parser'
+import type { RewriteRulesUMD, RewriteRulesURL } from './plugin-config.js'
+import type { CustomTransformationContext } from './core.js'
+import type { NormalizedPluginConfig, NormalizedRewriteRules } from './config-parser.js'
 
 /**
  * This function is a helper for UMD transform.
@@ -331,7 +331,7 @@ export function moduleSpecifierTransform(
             }
             case 'url': {
                 const { noVersion, withVersion } = opt
-                const version = queryPackageVersion(path)
+                const version = queryPackageVersion(path, currentFile)
                 let string: string | undefined = undefined
                 if (version && withVersion) string = withVersion.replace(versionRegExp, version)
                 if ((version && !withVersion && noVersion) || (!version && noVersion)) string = noVersion
@@ -360,7 +360,7 @@ export function moduleSpecifierTransform(
                     if (!target) return ToError(Diag.TransformToUMDFailedCustom, path, rule)
 
                     const umdName = importPathToUMDName(path)
-                    const version = queryPackageVersion(path)
+                    const version = queryPackageVersion(path, currentFile)
                     const { globalObject = config.globalObject, umdImportPath } = ruleValue
                     if (!umdName && (target.match(umdNameRegExp) || umdImportPath?.match(umdNameRegExp)))
                         return ToError(Diag.TransformToUMDFailed, path, rule)

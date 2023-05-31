@@ -3,18 +3,25 @@
     "version": "3.0.2",
     "description": "A custom transformer that can be used with ttypescript to transform ts imports to browser style imports",
     "main": "cjs/node.js",
+    "type": "module",
     "repository": "https://github.com/Jack-Works/ttypescript-browser-like-import-transformer",
     "author": "Jack Works <jackworks@protonmail.com>",
     "license": "MIT",
+    "imports": {
+        "#filename": {
+            "require": "./cjs/node_self.js",
+            "import": "./es/node_self.mjs"
+        }
+    },
     "scripts": {
         "prepublishOnly": "npm run build:cjs && npm run build:es",
         "release": "standard-version",
-        "test": "node ./cjs/run-tests.js && npm run doc",
-        "start:cjs": "tsc -w -p src",
-        "start:es": "tsc -w -p src --module ESNext --outDir ./es",
-        "build:cjs": "tsc -p src",
-        "build:es": "tsc -p src --module ESNext --outDir ./es",
-        "doc": "node ./build-doc.js"
+        "test": "node ./es/run-tests.js && npm run doc",
+        "start:cjs": "tsc -w -p src/tsconfig.cjs.json",
+        "start:es": "tsc -w -p src",
+        "build:cjs": "tsc -p src/tsconfig.cjs.json",
+        "build:es": "tsc -p src",
+        "doc": "node ./build-doc.mjs"
     },
     "devDependencies": {
         "@microsoft/api-documenter": "^7.22.7",

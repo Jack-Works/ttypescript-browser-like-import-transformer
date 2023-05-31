@@ -1,0 +1,8 @@
+{
+    "type": "commonjs",
+    "imports": {
+        "#filename": {
+            "require": "./node_self.js"
+        }
+    }
+}

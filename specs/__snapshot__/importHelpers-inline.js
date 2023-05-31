@@ -29,7 +29,7 @@ function __dynamicImportTransform_1(_path, config, dynamicImport, UMDBindCheck, 
         case "rewrite": return dynamicImport(result.nextPath);
         case "umd": {
             const { globalObject } = config;
-            const _ = (v) => { var _a; return UMDBindCheck(v, [], path, `${(_a = result.globalObject) !== null && _a !== void 0 ? _a : "globalThis"}.${result.target}`, false); };
+            const _ = (v) => UMDBindCheck(v, [], path, `${result.globalObject ?? "globalThis"}.${result.target}`, false);
             if (globalObject === "globalThis" || globalObject === undefined)
                 return Promise.resolve(globalThis[result.target]).then(_);
             if (globalObject === "window")
@@ -84,8 +84,8 @@ function moduleSpecifierTransform_1(context, opt) {
     function self(...[context, opt = context.config.rules || { type: "simple", enum: "umd" }]) {
         const { path, config, parseRegExp, queryPackageVersion, currentFile, accessingImports, getCompilerOptions, resolveFolderImport, resolveJSONImport, runtime, treeshakeProvider, } = context;
         const { jsonImport, folderImport, extName, appendExtensionName, extNameRemote, appendExtensionNameForRemote, globalObject, } = config;
-        const conf = extName !== null && extName !== void 0 ? extName : appendExtensionName;
-        const expectedExtension = conf === true ? ".js" : conf !== null && conf !== void 0 ? conf : ".js";
+        const conf = extName ?? appendExtensionName;
+        const expectedExtension = conf === true ? ".js" : conf ?? ".js";
         if (opt.type === "noop")
             return noop;
         if (path === ".") {
@@ -97,7 +97,7 @@ function moduleSpecifierTransform_1(context, opt) {
         if (isBrowserCompatibleModuleSpecifier(path)) {
             if (conf === false)
                 return noop;
-            const remote = extNameRemote !== null && extNameRemote !== void 0 ? extNameRemote : appendExtensionNameForRemote;
+            const remote = extNameRemote ?? appendExtensionNameForRemote;
             if (jsonImport && path.endsWith(".json")) {
                 const nondeterministicJSONImport = ToJSON(null, path);
                 if (runtime)
@@ -191,7 +191,7 @@ function moduleSpecifierTransform_1(context, opt) {
             }
             case "url": {
                 const { noVersion, withVersion } = opt;
-                const version = queryPackageVersion(path);
+                const version = queryPackageVersion(path, currentFile);
                 let string = undefined;
                 if (version && withVersion)
                     string = withVersion.replace(versionRegExp, version);
@@ -220,11 +220,11 @@ function moduleSpecifierTransform_1(context, opt) {
                     if (!target)
                         return ToError(392860, path, rule);
                     const umdName = importPathToUMDName(path);
-                    const version = queryPackageVersion(path);
+                    const version = queryPackageVersion(path, currentFile);
                     const { globalObject = config.globalObject, umdImportPath } = ruleValue;
-                    if (!umdName && (target.match(umdNameRegExp) || (umdImportPath === null || umdImportPath === void 0 ? void 0 : umdImportPath.match(umdNameRegExp))))
+                    if (!umdName && (target.match(umdNameRegExp) || umdImportPath?.match(umdNameRegExp)))
                         return ToError(392859, path, rule);
-                    if (!version && (target.match(versionRegExp) || (umdImportPath === null || umdImportPath === void 0 ? void 0 : umdImportPath.match(versionRegExp))))
+                    if (!version && (target.match(versionRegExp) || umdImportPath?.match(versionRegExp)))
                         return ToError(392861, path, rule);
                     const [nextTarget, nextUMDImportPath] = [target, umdImportPath || ""].map((x) => x.replace(packageNameRegExp, path).replace(umdNameRegExp, umdName).replace(versionRegExp, version));
                     return ToUMD({ target: nextTarget, globalObject, umdImportPath: nextUMDImportPath });
@@ -293,7 +293,7 @@ function moduleSpecifierTransform_1(context, opt) {
             return predefined;
         const { pkg, sub } = resolveNS(path);
         const pkgVar = toCase(pkg);
-        const subVar = sub === null || sub === void 0 ? void 0 : sub.split("/").reduce((prev, curr) => {
+        const subVar = sub?.split("/").reduce((prev, curr) => {
             if (prev === null)
                 return null;
             const cased = toCase(curr);
@@ -303,7 +303,7 @@ function moduleSpecifierTransform_1(context, opt) {
         }, "");
         if (!pkgVar)
             return null;
-        if (sub === null || sub === void 0 ? void 0 : sub.length)
+        if (sub?.length)
             return subVar ? pkgVar + subVar : null;
         return pkgVar;
     }

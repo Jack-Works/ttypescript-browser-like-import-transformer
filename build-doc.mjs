@@ -1,8 +1,8 @@
-const { execSync } = require('child_process')
-const { readFileSync, writeFileSync } = require('fs')
+import { execSync } from 'node:child_process'
+import { readFileSync, writeFileSync } from 'node:fs'
 
 execSync('yarn api-extractor run')
-const file = require('./temp/config.api.json')
+const file = JSON.parse(readFileSync('./temp/config.api.json', 'utf-8'))
 function touch(o = file) {
     switch (typeof o) {
         case 'boolean':
@@ -28,20 +28,22 @@ function touch(o = file) {
  */
 function replace(str, regex, getFile) {
     const backquote = '```'
-    return str.replace(regex, (_, file) =>
-        `
+    return str.replace(regex, (_, file) => {
+        const src = getFile(file)
+        debugger
+        return `
 
 Filename: \`${file}\`
 ${backquote}${file.replace(/^.+\./, '')}
-${getFile(file)
+${src
     .replace(/[\s\r\n]+$/, '')
     .replace('../../../cjs/node.js', '@magic-works/ttypescript-browser-like-import-transformer')}
 ${backquote}
 `
             .split('\n')
             .map((x, i) => (i === 0 ? x : ' * ' + x))
-            .join('\n'),
-    )
+            .join('\n')
+    })
 }
 writeFileSync('./temp/config.api.json', JSON.stringify(touch(file)))
 execSync('yarn api-documenter markdown --input temp --output-folder docs')

@@ -1,17 +1,17 @@
 {
     "compilerOptions": {
-        "module": "CommonJS",
-        "target": "ES2018",
-        "outDir": "../cjs/",
+        "module": "NodeNext",
+        "target": "ES2022",
+        "outDir": "../es/",
         "sourceMap": true,
         "strict": true,
         "noImplicitReturns": true,
         "noFallthroughCasesInSwitch": true,
-        "moduleResolution": "node",
+        "moduleResolution": "nodenext",
         "rootDir": "./",
         "declaration": true,
         "declarationDir": "../dts",
         "declarationMap": true
     },
-    "files": ["./core.ts", "./node.ts", "./run-tests.ts", "./well-known-umd.ts", "./ttsclib.ts"]
+    "files": ["./core.ts", "./node.ts", "./run-tests.ts", "./well-known-umd.ts", "./ttsclib.ts", "node_self.mts"]
 }

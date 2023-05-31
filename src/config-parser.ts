@@ -4,7 +4,7 @@ import type {
     RewriteRulesUMD,
     RewriteRulesURL,
     RewriteRulesObject,
-} from './plugin-config'
+} from './plugin-config.js'
 import type { CompilerOptions } from 'typescript'
 
 /** All ConfigError should go though this class

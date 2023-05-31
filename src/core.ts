@@ -28,9 +28,9 @@ import type {
     CompilerOptions,
     NodeFactory,
 } from 'typescript'
-import type { PluginConfigs, ImportMapFunctionOpts, RewriteRulesUMD } from './plugin-config'
-import type { NormalizedPluginConfig } from './config-parser'
-import type { moduleSpecifierTransform } from './ttsclib'
+import type { PluginConfigs, ImportMapFunctionOpts, RewriteRulesUMD } from './plugin-config.js'
+import type { NormalizedPluginConfig } from './config-parser.js'
+import type { moduleSpecifierTransform } from './ttsclib.js'
 type ts = typeof import('typescript')
 export interface CustomTransformationContext<T extends Node> {
     ts: ts
@@ -45,7 +45,7 @@ export interface CustomTransformationContext<T extends Node> {
     /** Given a path, this function should return its UMD name */
     queryWellknownUMD: (path: string) => string | null
     importMapResolve: (opt: ImportMapFunctionOpts) => string | null
-    queryPackageVersion: (pkg: string) => string | null
+    queryPackageVersion: (pkg: string, parent: string | undefined | null) => string | null
     resolveJSONImport: (path: string, parent: string) => string | null
     resolveFolderImport: (path: string, parent: string) => string | null
     getCompilerOptions: () => CompilerOptions
@@ -55,8 +55,8 @@ export interface CustomTransformationContext<T extends Node> {
         cfg: NonNullable<RewriteRulesUMD['treeshake']>,
         compilerOptions: CompilerOptions,
     ) => void
-    configParser: typeof import('./config-parser')
-    ttsclib: typeof import('./ttsclib')
+    configParser: typeof import('./config-parser.js')
+    ttsclib: typeof import('./ttsclib.js')
 }
 type Context<T extends Node> = CustomTransformationContext<T>
 function _with<T extends Node>(ctx: Context<any>, node: T): Context<T> {
@@ -772,7 +772,8 @@ function createTopLevelScopedHelper<F extends string | ((...args: any[]) => any)
                 factory.createStringLiteral(
                     url.replace(
                         '$version$',
-                        queryPackageVersion('@magic-works/ttypescript-browser-like-import-transformer') || 'latest',
+                        queryPackageVersion('@magic-works/ttypescript-browser-like-import-transformer', null) ||
+                            'latest',
                     ),
                 ),
             ),

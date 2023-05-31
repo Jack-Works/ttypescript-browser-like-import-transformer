@@ -1,5 +1,6 @@
 temp/
-cjs/
+cjs/*
+!cjs/package.json
 es/
 dts/
 .vscode/
