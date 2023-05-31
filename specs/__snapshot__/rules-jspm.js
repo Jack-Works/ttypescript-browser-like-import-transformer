@@ -12,5 +12,5 @@ export { x };
 // Node style export
 export { c, d } from "https://jspm.dev/b";
 export * as e from "https://jspm.dev/c";
-import * as ts from "https://jspm.dev/typescript@4.5.4";
-import * as ts2 from "https://jspm.dev/typescript@4.5.4/lib/typescriptServices";
+import * as ts from "https://jspm.dev/typescript@5.0.4";
+import * as ts2 from "https://jspm.dev/typescript@5.0.4/lib/typescriptServices";

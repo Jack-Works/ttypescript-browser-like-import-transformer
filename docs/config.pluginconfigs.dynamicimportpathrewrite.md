@@ -6,7 +6,7 @@
 
 Config how to rewrite dynamic import.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 dynamicImportPathRewrite?: false | 'auto' | DynamicImportPathRewriteCustom

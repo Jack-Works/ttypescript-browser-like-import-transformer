@@ -6,7 +6,7 @@
 
 The ImportMap
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 mapObject?: object

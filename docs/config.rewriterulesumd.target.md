@@ -6,7 +6,7 @@
 
 Rewrite the matching import statement to specified global variable
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 target: string

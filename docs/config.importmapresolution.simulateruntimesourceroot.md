@@ -6,7 +6,7 @@
 
 The runtime path of your source root
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 simulateRuntimeSourceRoot?: string

@@ -6,7 +6,7 @@
 
 Config of this transformer
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface PluginConfigs 
@@ -14,20 +14,20 @@ export interface PluginConfigs
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [appendExtensionName?](./config.pluginconfigs.appendextensionname.md) | string \| boolean | <i>(Optional)</i> |
-|  [appendExtensionNameForRemote?](./config.pluginconfigs.appendextensionnameforremote.md) | boolean | <i>(Optional)</i> |
-|  [bareModuleRewrite?](./config.pluginconfigs.baremodulerewrite.md) | [PluginConfigs](./config.pluginconfigs.md)<!-- -->\['rules'\] | <i>(Optional)</i> The transformation rule. Specify how this transformer will handle your imports. |
-|  [dynamicImportPathRewrite?](./config.pluginconfigs.dynamicimportpathrewrite.md) | false \| 'auto' \| [DynamicImportPathRewriteCustom](./config.dynamicimportpathrewritecustom.md) | <i>(Optional)</i> Config how to rewrite dynamic import. |
-|  [extName?](./config.pluginconfigs.extname.md) | string \| boolean | <i>(Optional)</i> Add '.js' extension for local import path. |
-|  [extNameRemote?](./config.pluginconfigs.extnameremote.md) | boolean | <i>(Optional)</i> Also append extension '.js' to http:// or https:// URLs. |
-|  [folderImport?](./config.pluginconfigs.folderimport.md) | boolean | <i>(Optional)</i> Resolve NodeJS style path './x' to './x/index.js' |
-|  [globalObject?](./config.pluginconfigs.globalobject.md) | string | <i>(Optional)</i> When using UMD import, this option indicates what global object will be used to find the UMD variables. |
-|  [importHelpers?](./config.pluginconfigs.importhelpers.md) | 'inline' \| 'auto' \| 'cdn' \| 'node' \| string | <i>(Optional)</i> Import emit helpers (e.g. <code>\_import</code>, <code>\__dynamicImportTransform</code>, etc..) from ttsclib (a local file in this package). |
-|  [importMap?](./config.pluginconfigs.importmap.md) | [ImportMapResolution](./config.importmapresolution.md) \| [ImportMapCustomResolution](./config.importmapcustomresolution.md) | <i>(Optional)</i> Use import map as the transform rules. (This has the highest priority.) |
-|  [jsonImport?](./config.pluginconfigs.jsonimport.md) | 'data' \| 'inline' \| true | <i>(Optional)</i> JSON import |
-|  [rules?](./config.pluginconfigs.rules.md) | Exclude&lt;[RewriteRulesObject](./config.rewriterulesobject.md)<!-- -->, [RewriteRulesUMD](./config.rewriterulesumd.md)<!-- -->&gt; &amp; Record&lt;string, [RewriteRulesObject](./config.rewriterulesobject.md)<!-- -->&gt; | <i>(Optional)</i> The transformation rule. Specify how this transformer will handle your imports. |
-|  [safeAccess?](./config.pluginconfigs.safeaccess.md) | string | <i>(Optional)</i> Use property access syntax to access UMD variable |
-|  [umdCheckCompact](./config.pluginconfigs.umdcheckcompact.md) | boolean | Make \_import cleaner. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [appendExtensionName?](./config.pluginconfigs.appendextensionname.md) |  | string \| boolean | _(Optional)_ |
+|  [appendExtensionNameForRemote?](./config.pluginconfigs.appendextensionnameforremote.md) |  | boolean | _(Optional)_ |
+|  [bareModuleRewrite?](./config.pluginconfigs.baremodulerewrite.md) |  | [PluginConfigs](./config.pluginconfigs.md)<!-- -->\['rules'\] | _(Optional)_ The transformation rule. Specify how this transformer will handle your imports. |
+|  [dynamicImportPathRewrite?](./config.pluginconfigs.dynamicimportpathrewrite.md) |  | false \| 'auto' \| [DynamicImportPathRewriteCustom](./config.dynamicimportpathrewritecustom.md) | _(Optional)_ Config how to rewrite dynamic import. |
+|  [extName?](./config.pluginconfigs.extname.md) |  | string \| boolean | _(Optional)_ Add '.js' extension for local import path. |
+|  [extNameRemote?](./config.pluginconfigs.extnameremote.md) |  | boolean | _(Optional)_ Also append extension '.js' to http:// or https:// URLs. |
+|  [folderImport?](./config.pluginconfigs.folderimport.md) |  | boolean | _(Optional)_ Resolve NodeJS style path './x' to './x/index.js' |
+|  [globalObject?](./config.pluginconfigs.globalobject.md) |  | string | _(Optional)_ When using UMD import, this option indicates what global object will be used to find the UMD variables. |
+|  [importHelpers?](./config.pluginconfigs.importhelpers.md) |  | 'inline' \| 'auto' \| 'cdn' \| 'node' \| string | _(Optional)_ Import emit helpers (e.g. <code>\_import</code>, <code>\__dynamicImportTransform</code>, etc..) from ttsclib (a local file in this package). |
+|  [importMap?](./config.pluginconfigs.importmap.md) |  | [ImportMapResolution](./config.importmapresolution.md) \| [ImportMapCustomResolution](./config.importmapcustomresolution.md) | _(Optional)_ Use import map as the transform rules. (This has the highest priority.) |
+|  [jsonImport?](./config.pluginconfigs.jsonimport.md) |  | 'data' \| 'inline' \| true | _(Optional)_ JSON import |
+|  [rules?](./config.pluginconfigs.rules.md) |  | Exclude&lt;[RewriteRulesObject](./config.rewriterulesobject.md)<!-- -->, [RewriteRulesUMD](./config.rewriterulesumd.md)<!-- -->&gt; &amp; Record&lt;string, [RewriteRulesObject](./config.rewriterulesobject.md)<!-- -->&gt; | _(Optional)_ The transformation rule. Specify how this transformer will handle your imports. |
+|  [safeAccess?](./config.pluginconfigs.safeaccess.md) |  | string | _(Optional)_ Use property access syntax to access UMD variable |
+|  [umdCheckCompact](./config.pluginconfigs.umdcheckcompact.md) |  | boolean | Make \_import cleaner. |
 

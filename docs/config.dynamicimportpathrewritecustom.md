@@ -6,7 +6,7 @@
 
 Rewrite dynamic import with a custom function
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface DynamicImportPathRewriteCustom 
@@ -35,8 +35,8 @@ The function must be an ArrowFunctionExpression on the syntax level.
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [function](./config.dynamicimportpathrewritecustom.function.md) | string | The function string. It must be an ArrowFunctionExpression. |
-|  [type](./config.dynamicimportpathrewritecustom.type.md) | 'custom' |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [function](./config.dynamicimportpathrewritecustom.function.md) |  | string | The function string. It must be an ArrowFunctionExpression. |
+|  [type](./config.dynamicimportpathrewritecustom.type.md) |  | 'custom' |  |
 

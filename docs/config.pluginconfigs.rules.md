@@ -6,7 +6,7 @@
 
 The transformation rule. Specify how this transformer will handle your imports.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 rules?: Exclude<RewriteRulesObject, RewriteRulesUMD> & Record<string, RewriteRulesObject>

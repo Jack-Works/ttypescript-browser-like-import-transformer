@@ -17,19 +17,19 @@
         "doc": "node ./build-doc.js"
     },
     "devDependencies": {
-        "@microsoft/api-documenter": "^7.13.76",
-        "@microsoft/api-extractor": "^7.19.2",
-        "@types/node": "^16.11.12",
-        "standard-version": "^9.3.2",
-        "ts-node": "^10.4.0",
-        "ttypescript": "^1.5.13",
-        "typescript": "^4.5.4"
+        "@microsoft/api-documenter": "^7.22.7",
+        "@microsoft/api-extractor": "^7.35.1",
+        "@types/node": "^20.2.5",
+        "standard-version": "^9.5.0",
+        "ts-node": "^10.9.1",
+        "ttypescript": "^1.5.15",
+        "typescript": "^5.0.4"
     },
     "peerDependencies": {
-        "typescript": "^4.1.0"
+        "typescript": "^5.0.4"
     },
     "optionalDependencies": {
-        "@jsenv/import-map": "^6.9.0"
+        "@jsenv/import-map": "^6.13.3"
     },
     "files": [
         "src",

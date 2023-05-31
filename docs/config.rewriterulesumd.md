@@ -6,7 +6,7 @@
 
 Rewrite module to a UMD access
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface RewriteRulesUMD 
@@ -150,11 +150,11 @@ function createESModuleInterop(x) {
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [globalObject?](./config.rewriterulesumd.globalobject.md) | string | <i>(Optional)</i> When using UMD import, this option indicates what global object will be used to find the UMD variables. |
-|  [target](./config.rewriterulesumd.target.md) | string | Rewrite the matching import statement to specified global variable |
-|  [treeshake?](./config.rewriterulesumd.treeshake.md) | { out: string } | <i>(Optional)</i> |
-|  [type](./config.rewriterulesumd.type.md) | 'umd' |  |
-|  [umdImportPath?](./config.rewriterulesumd.umdimportpath.md) | string | <i>(Optional)</i> should be a URL. Will use a <code>import 'umdImportPath'</code> to load the UMD then deconstruct from it. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [globalObject?](./config.rewriterulesumd.globalobject.md) |  | string | _(Optional)_ When using UMD import, this option indicates what global object will be used to find the UMD variables. |
+|  [target](./config.rewriterulesumd.target.md) |  | string | Rewrite the matching import statement to specified global variable |
+|  [treeshake?](./config.rewriterulesumd.treeshake.md) |  | { out: string } | _(Optional)_ |
+|  [type](./config.rewriterulesumd.type.md) |  | 'umd' |  |
+|  [umdImportPath?](./config.rewriterulesumd.umdimportpath.md) |  | string | _(Optional)_ should be a URL. Will use a <code>import 'umdImportPath'</code> to load the UMD then deconstruct from it. |
 

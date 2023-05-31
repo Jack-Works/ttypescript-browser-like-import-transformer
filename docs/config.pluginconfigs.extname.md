@@ -6,7 +6,7 @@
 
 Add '.js' extension for local import path.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 extName?: string | boolean

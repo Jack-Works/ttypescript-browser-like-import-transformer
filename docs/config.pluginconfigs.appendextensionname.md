@@ -9,7 +9,7 @@
 > See "extName", will be removed in 3.0
 > 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 appendExtensionName?: string | boolean

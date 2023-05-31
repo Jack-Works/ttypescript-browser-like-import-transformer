@@ -6,7 +6,7 @@
 
 Predefined rewrite rules
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export type RewriteRulesSimple = 'umd' | 'unpkg' | 'skypack' | 'jspm' | 'jsdelivr' | 'esm.run'
@@ -87,8 +87,8 @@ export { x };
 // Node style export
 export { c, d } from "https://cdn.skypack.dev/b";
 export * as e from "https://cdn.skypack.dev/c";
-import * as ts from "https://cdn.skypack.dev/typescript@4.5.4";
-import * as ts2 from "https://cdn.skypack.dev/typescript@4.5.4/lib/typescriptServices";
+import * as ts from "https://cdn.skypack.dev/typescript@5.0.4";
+import * as ts2 from "https://cdn.skypack.dev/typescript@5.0.4/lib/typescriptServices";
 ```
 Filename: `rules-jspm.js`
 
@@ -107,8 +107,8 @@ export { x };
 // Node style export
 export { c, d } from "https://jspm.dev/b";
 export * as e from "https://jspm.dev/c";
-import * as ts from "https://jspm.dev/typescript@4.5.4";
-import * as ts2 from "https://jspm.dev/typescript@4.5.4/lib/typescriptServices";
+import * as ts from "https://jspm.dev/typescript@5.0.4";
+import * as ts2 from "https://jspm.dev/typescript@5.0.4/lib/typescriptServices";
 ```
 Filename: `rules-unpkg.js`
 
@@ -127,7 +127,7 @@ export { x };
 // Node style export
 export { c, d } from "https://unpkg.com/b?module";
 export * as e from "https://unpkg.com/c?module";
-import * as ts from "https://unpkg.com/typescript@4.5.4?module";
-import * as ts2 from "https://unpkg.com/typescript@4.5.4/lib/typescriptServices?module";
+import * as ts from "https://unpkg.com/typescript@5.0.4?module";
+import * as ts2 from "https://unpkg.com/typescript@5.0.4/lib/typescriptServices?module";
 ```
 

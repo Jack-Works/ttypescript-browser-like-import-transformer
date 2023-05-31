@@ -6,7 +6,7 @@
 
 Rewrite to this URL if the transformer can't read the version of the package
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 noVersion?: string

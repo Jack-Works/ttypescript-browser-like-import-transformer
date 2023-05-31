@@ -6,7 +6,7 @@
 
 JSON import
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 jsonImport?: 'data' | 'inline' | true

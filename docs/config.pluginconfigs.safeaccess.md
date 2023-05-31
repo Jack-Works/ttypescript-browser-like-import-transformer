@@ -6,7 +6,7 @@
 
 Use property access syntax to access UMD variable
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 safeAccess?: string

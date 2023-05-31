@@ -6,7 +6,7 @@
 
 Make \_import cleaner.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 umdCheckCompact: boolean

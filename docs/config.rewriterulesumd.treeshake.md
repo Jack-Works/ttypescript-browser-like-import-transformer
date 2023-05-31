@@ -4,7 +4,7 @@
 
 ## RewriteRulesUMD.treeshake property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 treeshake?: {

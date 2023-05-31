@@ -11,7 +11,7 @@
 
 The transformation rule. Specify how this transformer will handle your imports.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 bareModuleRewrite?: PluginConfigs['rules']

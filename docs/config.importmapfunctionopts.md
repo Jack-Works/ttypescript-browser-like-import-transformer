@@ -4,7 +4,7 @@
 
 ## ImportMapFunctionOpts type
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export type ImportMapFunctionOpts = {
@@ -15,7 +15,7 @@ export type ImportMapFunctionOpts = {
     tsconfigPath: string
 }
 ```
-<b>References:</b> [PluginConfigs](./config.pluginconfigs.md)
+**References:** [PluginConfigs](./config.pluginconfigs.md)
 
 ## Remarks
 

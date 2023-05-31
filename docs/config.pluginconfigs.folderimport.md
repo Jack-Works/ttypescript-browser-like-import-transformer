@@ -6,7 +6,7 @@
 
 Resolve NodeJS style path './x' to './x/index.js'
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 folderImport?: boolean

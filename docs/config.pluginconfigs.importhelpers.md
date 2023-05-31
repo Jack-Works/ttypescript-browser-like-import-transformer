@@ -6,7 +6,7 @@
 
 Import emit helpers (e.g. `\_import`<!-- -->, `\__dynamicImportTransform`<!-- -->, etc..) from ttsclib (a local file in this package).
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 importHelpers?: 'inline' | 'auto' | 'cdn' | 'node' | string

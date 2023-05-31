@@ -307,7 +307,6 @@ function updateImportExportDeclaration(
                 return [
                     factory.updateImportDeclaration(
                         node,
-                        node.decorators,
                         node.modifiers,
                         node.importClause,
                         nextPath,
@@ -318,7 +317,6 @@ function updateImportExportDeclaration(
                 return [
                     factory.updateExportDeclaration(
                         node,
-                        node.decorators,
                         node.modifiers,
                         node.isTypeOnly,
                         node.exportClause,
@@ -352,7 +350,7 @@ function updateImportExportDeclaration(
         const clause = ts.isImportDeclaration(node) ? node.importClause : node.exportClause
         const { umdImportPath } = rewriteStrategy
         const umdImport = umdImportPath
-            ? [factory.createImportDeclaration(void 0, void 0, void 0, factory.createStringLiteral(umdImportPath))]
+            ? [factory.createImportDeclaration(void 0, void 0, factory.createStringLiteral(umdImportPath))]
             : []
         // ? if it have no clause, it must be an ImportDeclaration
         if (!clause) {
@@ -416,7 +414,6 @@ function importOrExportClauseToUMD(
         const ghostBindings = new Map<ExportSpecifier, Identifier>()
         const ghostImportDeclaration = factory.createImportDeclaration(
             undefined,
-            undefined,
             factory.createImportClause(
                 false,
                 undefined,
@@ -438,7 +435,6 @@ function importOrExportClauseToUMD(
         const updatedGhost = updateImportExportDeclaration(_with(ctx, ghostImportDeclaration))
         const exportDeclaration = factory.createExportDeclaration(
             undefined,
-            void 0,
             false,
             factory.createNamedExports(
                 Array.from(ghostBindings).map(([key, value]) => {
@@ -457,13 +453,11 @@ function importOrExportClauseToUMD(
         const ghostBinding = factory.createTempVariable(() => {})
         const ghostImportDeclaration = factory.createImportDeclaration(
             undefined,
-            undefined,
             factory.createImportClause(false, undefined, factory.createNamespaceImport(ghostBinding)),
             factory.createStringLiteral(path),
         )
         const updatedGhost = updateImportExportDeclaration(_with(ctx, ghostImportDeclaration))
         const exportDeclaration = factory.createExportDeclaration(
-            void 0,
             void 0,
             false,
             factory.createNamedExports([
@@ -510,7 +504,7 @@ function importOrExportClauseToUMD(
     }
     function transformNamedImportExport(namedImport: NamedImportsOrExports, modifiers: Modifier[] = []) {
         const elements: Array<ImportSpecifier | ExportSpecifier> = []
-        namedImport.elements.forEach((y: typeof elements[0]) => elements.push(y))
+        namedImport.elements.forEach((y: (typeof elements)[0]) => elements.push(y))
         // ? const { a: b, c: d } = _import(value, name, path, mappedName)
         return factory.createVariableStatement(
             modifiers,
@@ -774,7 +768,6 @@ function createTopLevelScopedHelper<F extends string | ((...args: any[]) => any)
         let [importDec, idSet] = ttsclibImportMap.get(sourceFile) || [
             factory.createImportDeclaration(
                 void 0,
-                void 0,
                 factory.createImportClause(false, void 0, factory.createNamedImports([])),
                 factory.createStringLiteral(
                     url.replace(
@@ -788,8 +781,8 @@ function createTopLevelScopedHelper<F extends string | ((...args: any[]) => any)
         // ? import { __helperName as uniqueName } from 'url'
         const importBind =
             factory.createImportSpecifier.length === 2
-            // Before TS 4.5
-                ? (factory.createImportSpecifier as any)(factory.createIdentifier(fnName), uniqueName)
+                ? // Before TS 4.5
+                  (factory.createImportSpecifier as any)(factory.createIdentifier(fnName), uniqueName)
                 : factory.createImportSpecifier(false, factory.createIdentifier(fnName), uniqueName)
         const importClause = importDec.importClause!
         const importBindings = importClause.namedBindings! as NamedImports
@@ -799,7 +792,6 @@ function createTopLevelScopedHelper<F extends string | ((...args: any[]) => any)
         }
         importDec = factory.updateImportDeclaration(
             importDec,
-            void 0,
             void 0,
             factory.updateImportClause(
                 importClause,
@@ -816,13 +808,12 @@ function createTopLevelScopedHelper<F extends string | ((...args: any[]) => any)
     }
     const f = factory.updateFunctionDeclaration(
         parsedFunction,
-        void 0,
         parsedFunction.modifiers,
         parsedFunction.asteriskToken,
         uniqueName,
-        void 0,
+        parsedFunction.typeParameters,
         parsedFunction.parameters,
-        void 0,
+        parsedFunction.type,
         parsedFunction.body,
     )
     ts.setEmitFlags(f, ts.EmitFlags.NoComments)

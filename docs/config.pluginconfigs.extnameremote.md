@@ -6,7 +6,7 @@
 
 Also append extension '.js' to http:// or https:// URLs.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 extNameRemote?: boolean

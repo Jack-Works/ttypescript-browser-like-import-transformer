@@ -6,7 +6,7 @@
 
 should be a URL. Will use a `import 'umdImportPath'` to load the UMD then deconstruct from it.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 umdImportPath?: string

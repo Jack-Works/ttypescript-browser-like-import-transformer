@@ -4,7 +4,7 @@
 
 ## ImportMapCustomResolution interface
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface ImportMapCustomResolution 
@@ -16,8 +16,8 @@ See [ImportMapFunctionOpts](./config.importmapfunctionopts.md)
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [function](./config.importmapcustomresolution.function.md) | (opt: [ImportMapFunctionOpts](./config.importmapfunctionopts.md)<!-- -->) =&gt; string \| null | The function that will resolve a path to another path. |
-|  [type](./config.importmapcustomresolution.type.md) | 'function' |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [function](./config.importmapcustomresolution.function.md) |  | (opt: [ImportMapFunctionOpts](./config.importmapfunctionopts.md)<!-- -->) =&gt; string \| null | The function that will resolve a path to another path. |
+|  [type](./config.importmapcustomresolution.type.md) |  | 'function' |  |
 

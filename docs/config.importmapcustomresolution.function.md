@@ -6,7 +6,7 @@
 
 The function that will resolve a path to another path.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 function: (opt: ImportMapFunctionOpts) => string | null

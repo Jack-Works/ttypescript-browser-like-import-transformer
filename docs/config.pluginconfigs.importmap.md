@@ -6,7 +6,7 @@
 
 Use import map as the transform rules. (This has the highest priority.)
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 importMap?: ImportMapResolution | ImportMapCustomResolution

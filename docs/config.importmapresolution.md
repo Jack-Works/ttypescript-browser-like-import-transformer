@@ -5,7 +5,7 @@
 ## ImportMapResolution interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface ImportMapResolution 
@@ -13,11 +13,11 @@ export interface ImportMapResolution
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [mapObject?](./config.importmapresolution.mapobject.md) | object | <i>(Optional)</i> The ImportMap |
-|  [mapPath](./config.importmapresolution.mappath.md) | string | Path of the ImportMap |
-|  [simulateRuntimeImportMapPosition](./config.importmapresolution.simulateruntimeimportmapposition.md) | string | The runtime path of your ImportMap |
-|  [simulateRuntimeSourceRoot?](./config.importmapresolution.simulateruntimesourceroot.md) | string | <i>(Optional)</i> The runtime path of your source root |
-|  [type](./config.importmapresolution.type.md) | 'map' |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [mapObject?](./config.importmapresolution.mapobject.md) |  | object | _(Optional)_ The ImportMap |
+|  [mapPath](./config.importmapresolution.mappath.md) |  | string | Path of the ImportMap |
+|  [simulateRuntimeImportMapPosition](./config.importmapresolution.simulateruntimeimportmapposition.md) |  | string | The runtime path of your ImportMap |
+|  [simulateRuntimeSourceRoot?](./config.importmapresolution.simulateruntimesourceroot.md) |  | string | _(Optional)_ The runtime path of your source root |
+|  [type](./config.importmapresolution.type.md) |  | 'map' |  |
 

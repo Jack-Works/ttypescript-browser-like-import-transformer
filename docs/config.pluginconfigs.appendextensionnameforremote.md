@@ -9,7 +9,7 @@
 > use "extNameRemote", will be removed in 3.0
 > 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 appendExtensionNameForRemote?: boolean

@@ -6,7 +6,7 @@
 
 Rewrite module to another URL
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface RewriteRulesURL 
@@ -63,15 +63,15 @@ export { x };
 // Node style export
 export { c, d } from "std:b";
 export * as e from "std:c";
-import * as ts from "std:typescript@4.5.4";
-import * as ts2 from "std:typescript@4.5.4";
+import * as ts from "std:typescript@5.0.4";
+import * as ts2 from "std:typescript@5.0.4";
 ```
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [noVersion?](./config.rewriterulesurl.noversion.md) | string | <i>(Optional)</i> Rewrite to this URL if the transformer can't read the version of the package |
-|  [type](./config.rewriterulesurl.type.md) | 'url' |  |
-|  [withVersion?](./config.rewriterulesurl.withversion.md) | string | <i>(Optional)</i> Rewrite to this URL if the transformer can read the version of the package |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [noVersion?](./config.rewriterulesurl.noversion.md) |  | string | _(Optional)_ Rewrite to this URL if the transformer can't read the version of the package |
+|  [type](./config.rewriterulesurl.type.md) |  | 'url' |  |
+|  [withVersion?](./config.rewriterulesurl.withversion.md) |  | string | _(Optional)_ Rewrite to this URL if the transformer can read the version of the package |
 

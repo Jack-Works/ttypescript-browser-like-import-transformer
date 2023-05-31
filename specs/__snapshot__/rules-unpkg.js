@@ -12,5 +12,5 @@ export { x };
 // Node style export
 export { c, d } from "https://unpkg.com/b?module";
 export * as e from "https://unpkg.com/c?module";
-import * as ts from "https://unpkg.com/typescript@4.5.4?module";
-import * as ts2 from "https://unpkg.com/typescript@4.5.4/lib/typescriptServices?module";
+import * as ts from "https://unpkg.com/typescript@5.0.4?module";
+import * as ts2 from "https://unpkg.com/typescript@5.0.4/lib/typescriptServices?module";

@@ -4,7 +4,7 @@
 
 ## ImportMapResolution.type property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 type: 'map'

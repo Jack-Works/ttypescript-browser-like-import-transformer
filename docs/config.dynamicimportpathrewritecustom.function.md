@@ -6,7 +6,7 @@
 
 The function string. It must be an ArrowFunctionExpression.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 function: string

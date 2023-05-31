@@ -6,7 +6,7 @@
 
 Path of the ImportMap
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 mapPath: string

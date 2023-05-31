@@ -12,5 +12,5 @@ export { x };
 // Node style export
 export { c, d } from "https://cdn.jsdelivr.net/b";
 export * as e from "https://cdn.jsdelivr.net/c";
-import * as ts from "https://cdn.jsdelivr.net/typescript@4.5.4";
-import * as ts2 from "https://cdn.jsdelivr.net/typescript@4.5.4/lib/typescriptServices";
+import * as ts from "https://cdn.jsdelivr.net/typescript@5.0.4";
+import * as ts2 from "https://cdn.jsdelivr.net/typescript@5.0.4/lib/typescriptServices";
