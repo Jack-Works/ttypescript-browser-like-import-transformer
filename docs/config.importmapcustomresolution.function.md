@@ -14,5 +14,5 @@ function: (opt: ImportMapFunctionOpts) => string | null
 
 ## Remarks
 
-Since it is a function, it can't be specified in the tsconfig by ttscript.
+Since it is a function, it can't be specified in the tsconfig by tsconfig.
 

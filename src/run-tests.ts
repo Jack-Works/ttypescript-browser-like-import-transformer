@@ -102,7 +102,7 @@ ${result.outputText}`
         }
         writeFileSync(new URL(script.filename.replace(/tsx$/g, 'jsx').replace(/ts$/, 'js'), snapshotDir), outputText)
     } else {
-        const cmd = `yarn ttsc --target ESNext --module ESNext -p ${join(
+        const cmd = `yarn tspc --target ESNext --module ESNext -p ${join(
             script.path,
             'tsconfig.json',
         )} --outDir ${fileURLToPath(new URL(script.filename, snapshotDir))}`

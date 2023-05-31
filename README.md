@@ -64,10 +64,10 @@ import { _import as _import } from "https://cdn.jsdelivr.net/npm/@magic-works/tt
     ```typescript
     import React from 'react'
     ```
-1. Compile using `ttsc`
+1. Compile using `tspc`
 
     ```
-    ttsc --project tsconfig.json
+    tspc --project tsconfig.json
     ```
 
 ## Use cases
@@ -78,7 +78,7 @@ The default config of this transformer is "UMD" mode. All bare imports will be t
 
 ### Use with Webpack
 
-Here is [a template repo](https://github.com/Jack-Works/ttsc-browser-import-template) to help you use this transformer with Webpack. In this repo, all node style import is imported in [a single file](https://github.com/Jack-Works/ttsc-browser-import-template/blob/master/dependencies.js) and packed by Webpack. The rest of the source code never gets handled by Webpack but emitted by [ttypescript](https://github.com/cevek/ttypescript) (an enhanced typescript cli that allows you to specify transformer programmatically).
+Here is [a template repo](https://github.com/Jack-Works/ttsc-browser-import-template) to help you use this transformer with Webpack. In this repo, all node style import is imported in [a single file](https://github.com/Jack-Works/ttsc-browser-import-template/blob/master/dependencies.js) and packed by Webpack. The rest of the source code never gets handled by Webpack but emitted by [ts-patch](https://github.com/nonara/ts-patch/) (an enhanced typescript cli that allows you to specify transformer programmatically).
 
 ### Use with CDN
 

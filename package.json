@@ -29,7 +29,7 @@
         "@types/node": "^20.2.5",
         "standard-version": "^9.5.0",
         "ts-node": "^10.9.1",
-        "ttypescript": "^1.5.15",
+        "ts-patch": "3.0.0-beta3",
         "typescript": "^5.0.4"
     },
     "peerDependencies": {

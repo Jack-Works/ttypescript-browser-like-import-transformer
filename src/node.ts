@@ -1,7 +1,7 @@
 /**
  * In this file there some host helper functions that must run in node
  */
-import ts from 'typescript'
+import * as ts from 'typescript'
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { join, relative, posix, isAbsolute } from 'node:path'
 import createTransform from './core.js'
@@ -15,7 +15,7 @@ import { createRequire } from 'node:module'
 
 const __require = createRequire(__filename)
 export default createTransform({
-    ts,
+    ts: ts.default || ts,
     queryWellknownUMD,
     ttsclib,
     importMapResolve,

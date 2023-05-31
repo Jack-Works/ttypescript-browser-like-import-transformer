@@ -303,7 +303,7 @@ export interface ImportMapCustomResolution {
     /**
      * The function that will resolve a path to another path.
      * @remarks
-     * Since it is a function, it can't be specified in the tsconfig by ttscript.
+     * Since it is a function, it can't be specified in the tsconfig by tsconfig.
      */
     function: (opt: ImportMapFunctionOpts) => string | null
 }
