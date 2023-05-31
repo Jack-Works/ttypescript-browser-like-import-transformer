@@ -6,4 +6,4 @@ export function Comp() {
         "Hello, world ",
         s);
 }
-import { __esModuleInterop as __esModuleInterop_1, _import as _import_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@3.0.2/es/ttsclib.min.js";
+import { __esModuleInterop as __esModuleInterop_1, _import as _import_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@3.0.2/es/runtime.min.js";

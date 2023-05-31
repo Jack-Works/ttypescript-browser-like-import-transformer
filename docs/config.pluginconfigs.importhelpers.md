@@ -4,7 +4,7 @@
 
 ## PluginConfigs.importHelpers property
 
-Import emit helpers (e.g. `\_import`<!-- -->, `\__dynamicImportTransform`<!-- -->, etc..) from ttsclib (a local file in this package).
+Import emit helpers (e.g. `\_import`<!-- -->, `\__dynamicImportTransform`<!-- -->, etc..) from runtime (a local file in this package).
 
 **Signature:**
 
@@ -42,7 +42,7 @@ __dynamicImportTransform_1(x, JSON.parse("{\"after\":true,\"importHelpers\":\"au
 function __dynamicImportNative_1(path) {
     return import(path);
 }
-import { __dynamicImportTransform as __dynamicImportTransform_1, _import as _import_1, moduleSpecifierTransform as moduleSpecifierTransform_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@3.0.2/es/ttsclib.min.js";
+import { __dynamicImportTransform as __dynamicImportTransform_1, _import as _import_1, moduleSpecifierTransform as moduleSpecifierTransform_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@3.0.2/es/runtime.min.js";
 ```
 Filename: `importHelpers-string.js`
 
@@ -65,7 +65,7 @@ __dynamicImportTransform_1(x, JSON.parse("{\"after\":true,\"importHelpers\":\"cd
 function __dynamicImportNative_1(path) {
     return import(path);
 }
-import { __dynamicImportTransform as __dynamicImportTransform_1, _import as _import_1, moduleSpecifierTransform as moduleSpecifierTransform_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@3.0.2/es/ttsclib.min.js";
+import { __dynamicImportTransform as __dynamicImportTransform_1, _import as _import_1, moduleSpecifierTransform as moduleSpecifierTransform_1 } from "https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@3.0.2/es/runtime.min.js";
 ```
 Filename: `importHelpers-node.js`
 
@@ -76,7 +76,7 @@ __dynamicImportTransform_1(x, JSON.parse("{\"after\":true,\"importHelpers\":\"no
 function __dynamicImportNative_1(path) {
     return import(path);
 }
-import { __dynamicImportTransform as __dynamicImportTransform_1, _import as _import_1, moduleSpecifierTransform as moduleSpecifierTransform_1 } from "@magic-works/ttypescript-browser-like-import-transformer/cjs/ttsclib.js";
+import { __dynamicImportTransform as __dynamicImportTransform_1, _import as _import_1, moduleSpecifierTransform as moduleSpecifierTransform_1 } from "@magic-works/ttypescript-browser-like-import-transformer/cjs/runtime.js";
 ```
 Filename: `importHelpers-inline.js`
 

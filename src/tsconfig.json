@@ -13,5 +13,5 @@
         "declarationDir": "../dts",
         "declarationMap": true
     },
-    "files": ["./core.ts", "./node.ts", "./run-tests.ts", "./well-known-umd.ts", "./ttsclib.ts", "node_self.mts"]
+    "files": ["./core.ts", "./node.ts", "./run-tests.ts", "./well-known-umd.ts", "./runtime.ts", "node_self.mts"]
 }

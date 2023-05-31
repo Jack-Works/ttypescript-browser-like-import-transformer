@@ -5,7 +5,7 @@ import * as ts from 'typescript'
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { join, relative, posix, isAbsolute } from 'node:path'
 import createTransform from './core.js'
-import * as ttsclib from './ttsclib.js'
+import * as runtime from './runtime.js'
 import * as configParser from './config-parser.js'
 import { queryWellknownUMD } from './well-known-umd.js'
 // @ts-ignore
@@ -15,9 +15,9 @@ import { createRequire } from 'node:module'
 
 const __require = createRequire(__filename)
 export default createTransform({
-    ts: ts.default || ts,
+    ts: (ts as any).default || ts,
     queryWellknownUMD,
-    ttsclib,
+    runtime,
     importMapResolve,
     queryPackageVersion,
     configParser,

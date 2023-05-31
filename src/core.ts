@@ -30,7 +30,7 @@ import type {
 } from 'typescript'
 import type { PluginConfigs, ImportMapFunctionOpts, RewriteRulesUMD } from './plugin-config.js'
 import type { NormalizedPluginConfig } from './config-parser.js'
-import type { moduleSpecifierTransform } from './ttsclib.js'
+import type { moduleSpecifierTransform } from './runtime.js'
 type ts = typeof import('typescript')
 export interface CustomTransformationContext<T extends Node> {
     ts: ts
@@ -56,7 +56,7 @@ export interface CustomTransformationContext<T extends Node> {
         compilerOptions: CompilerOptions,
     ) => void
     configParser: typeof import('./config-parser.js')
-    ttsclib: typeof import('./ttsclib.js')
+    runtime: typeof import('./runtime.js')
 }
 type Context<T extends Node> = CustomTransformationContext<T>
 function _with<T extends Node>(ctx: Context<any>, node: T): Context<T> {
@@ -70,7 +70,7 @@ export default function createTransformer(
     io: Pick<
         Context<any>,
         | 'ts'
-        | 'ttsclib'
+        | 'runtime'
         | 'configParser'
         | 'queryWellknownUMD'
         | 'queryPackageVersion'
@@ -89,11 +89,11 @@ export default function createTransformer(
             const config = configParser.normalizePluginConfig(configRaw)
             return (sourceFile: SourceFile) => {
                 if (sourceFile.isDeclarationFile) return sourceFile
-                const ttsclib = {
-                    ...io.ttsclib,
-                    moduleSpecifierTransform: new Proxy(io.ttsclib.moduleSpecifierTransform, {
+                const runtime = {
+                    ...io.runtime,
+                    moduleSpecifierTransform: new Proxy(io.runtime.moduleSpecifierTransform, {
                         get(t, k) {
-                            if (k === 'toString') return () => io.ttsclib.moduleSpecifierTransform.toString()
+                            if (k === 'toString') return () => io.runtime.moduleSpecifierTransform.toString()
                             // @ts-ignore
                             return t[k]
                         },
@@ -126,7 +126,7 @@ export default function createTransformer(
                 const hoistedHelper = Array.from(topLevelScopedHelperMap.get(sourceFile)?.values() || []).map(
                     (x) => x[1],
                 )
-                const ttscHelper = ttsclibImportMap.get(sourceFile)
+                const ttscHelper = runtimeImportMap.get(sourceFile)
                 if (ttscHelper) hoistedHelper.push(ttscHelper[0])
                 function isLanguageHoistable(node: Statement): boolean {
                     if (ts.isFunctionDeclaration(node)) return true
@@ -161,7 +161,7 @@ export default function createTransformer(
                 // ? In incremental compiling, this Map might cause duplicated statements, WeakMap doesn't help
                 hoistUMDImportDeclaration.delete(sourceFile)
                 topLevelScopedHelperMap.delete(sourceFile)
-                ttsclibImportMap.delete(sourceFile)
+                runtimeImportMap.delete(sourceFile)
                 return visitedSourceFile
 
                 function visitor(node: Node): VisitResult<Node> {
@@ -173,7 +173,7 @@ export default function createTransformer(
                         node,
                         sourceFile,
                         ...io,
-                        ttsclib,
+                        runtime,
                         getCompilerOptions: () => context.getCompilerOptions(),
                     } as const
                     if (
@@ -284,9 +284,9 @@ function updateImportExportDeclaration(
     ctx: Context<ImportDeclaration | ExportDeclaration>,
     opt = ctx.config.rules,
 ): Statement[] {
-    const { node, sourceFile, ts, ttsclib, context } = ctx
+    const { node, sourceFile, ts, runtime, context } = ctx
     const { factory } = context
-    const rewriteStrategy = ttsclib.moduleSpecifierTransform(
+    const rewriteStrategy = runtime.moduleSpecifierTransform(
         {
             ...ctx,
             parseRegExp: parseRegExp.bind(ts),
@@ -383,7 +383,7 @@ function importOrExportClauseToUMD(
     globalObject = ctx.config.globalObject,
     noImportCheck = false,
 ): { variableNames: Identifier[]; statements: Statement[] } {
-    const { node, ts, path, context, ttsclib } = ctx
+    const { node, ts, path, context, runtime } = ctx
     const { factory } = context
     const {
         config: { umdCheckCompact },
@@ -484,7 +484,7 @@ function importOrExportClauseToUMD(
     function getDefaultImport(defaultImport: Identifier) {
         let umdAccess: Expression
         if (esModuleInterop) {
-            const [, createESModuleInteropCall] = createTopLevelScopedHelper(ctx, ttsclib.__esModuleInterop)
+            const [, createESModuleInteropCall] = createTopLevelScopedHelper(ctx, runtime.__esModuleInterop)
             umdAccess = createCheckedUMDAccess(createESModuleInteropCall, factory.createStringLiteral('default'))
         } else {
             umdAccess = createCheckedUMDAccess((x) => x, factory.createStringLiteral('default'))
@@ -530,7 +530,7 @@ function importOrExportClauseToUMD(
     }
     function createCheckedUMDAccess(wrapper: (x: Expression) => Expression, ...names: StringLiteral[]) {
         if (noImportCheck) return wrapper(umdExpression)
-        const [, createImportCheck] = createTopLevelScopedHelper(ctx, ttsclib._import)
+        const [, createImportCheck] = createTopLevelScopedHelper(ctx, runtime._import)
         return createImportCheck(
             wrapper(umdExpression),
             factory.createArrayLiteralExpression(names),
@@ -586,11 +586,11 @@ const moreThan1ArgumentDynamicImportErrorMessage =
     runtimeMessageHeader +
     "Transform rule for this dependencies found, but this dynamic import has more than 1 argument, transformer don't know how to transform that and keep it untouched."
 function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args: Expression[]): Expression {
-    const { ts, config, node, sourceFile, ttsclib, configParser } = ctx
+    const { ts, config, node, sourceFile, runtime, configParser } = ctx
     const { factory } = ctx.context
     const [first, ...rest] = args
     if (ts.isStringLiteralLike(first)) {
-        const rewriteStrategy = ttsclib.moduleSpecifierTransform({
+        const rewriteStrategy = runtime.moduleSpecifierTransform({
             ...ctx,
             path: first.text,
             parseRegExp: parseRegExp.bind(ts),
@@ -655,7 +655,7 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
     function createNondeterministicDynamicImport(): Expression {
         const opt = config.dynamicImportPathRewrite
         if (opt === false) return node
-        const source = ttsclib.moduleSpecifierTransform.toString()
+        const source = runtime.moduleSpecifierTransform.toString()
         const moduleSpecifierTransform_ = parseJS(ts, source, ParseHint.Statement, ts.isFunctionDeclaration)
         if (moduleSpecifierTransform_.type !== ParseResult.OK) {
             debugger
@@ -663,15 +663,15 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
         }
         const [dynamicImportTransformIdentifier, createDynamicImportTransform] = createTopLevelScopedHelper(
             ctx,
-            ttsclib.__dynamicImportTransform,
+            runtime.__dynamicImportTransform,
         )
         const stringifiedConfig = createJSONParse(factory, factory.createStringLiteral(JSON.stringify(config)))
         const [dynamicImportNative] = createTopLevelScopedHelper(
             ctx,
             config.jsonImport ? dynamicImportNativeWithJSONString : dynamicImportNativeString,
         )
-        const [importCheck] = createTopLevelScopedHelper(ctx, ttsclib._import)
-        const [moduleSpecifierTransform] = createTopLevelScopedHelper(ctx, ttsclib.moduleSpecifierTransform)
+        const [importCheck] = createTopLevelScopedHelper(ctx, runtime._import)
+        const [moduleSpecifierTransform] = createTopLevelScopedHelper(ctx, runtime.moduleSpecifierTransform)
         const helperArgs = [stringifiedConfig, dynamicImportNative, importCheck, moduleSpecifierTransform] as const
         if (opt === 'auto' || opt === undefined) {
             /**
@@ -704,7 +704,7 @@ function transformDynamicImport(ctx: Omit<Context<CallExpression>, 'path'>, args
                 },
             )
         }
-        const [, createCustomImportHelper] = createTopLevelScopedHelper(ctx, ttsclib.__customDynamicImportHelper)
+        const [, createCustomImportHelper] = createTopLevelScopedHelper(ctx, runtime.__customDynamicImportHelper)
         /**
          * __customImportHelper(
          *     path,
@@ -739,12 +739,12 @@ type CastArray<T> = T extends any[] ? T : never
 type CastFunction<T> = T extends (...a: any[]) => any ? T : (...a: never[]) => any
 
 const topLevelScopedHelperMap = new Map<SourceFile, Map<string | ((...args: any) => void), [Identifier, Statement]>>()
-const ttsclibImportMap = new Map<SourceFile, [ImportDeclaration, Set<Identifier>]>()
+const runtimeImportMap = new Map<SourceFile, [ImportDeclaration, Set<Identifier>]>()
 function createTopLevelScopedHelper<F extends string | ((...args: any[]) => any)>(
-    context: Pick<Context<any>, 'ts' | 'sourceFile' | 'config' | 'ttsclib' | 'queryPackageVersion' | 'context'>,
+    context: Pick<Context<any>, 'ts' | 'sourceFile' | 'config' | 'runtime' | 'queryPackageVersion' | 'context'>,
     helper: F | string,
 ): readonly [Identifier, (...args: CastArray<LevelUpArgs<Parameters<CastFunction<F>>>>) => Expression] {
-    const { config, ts, sourceFile, ttsclib, queryPackageVersion } = context
+    const { config, ts, sourceFile, runtime, queryPackageVersion } = context
     const { factory } = context.context
     const result = topLevelScopedHelperMap.get(sourceFile)?.get(helper)
     if (result) return [result[0], (...args: any) => factory.createCallExpression(result[0], void 0, args)] as const
@@ -755,17 +755,17 @@ function createTopLevelScopedHelper<F extends string | ((...args: any[]) => any)
     const fnName = parsedFunction.name!.text
     const uniqueName = factory.createUniqueName(fnName)
     const returnValue = [uniqueName, (...args: any) => factory.createCallExpression(uniqueName, void 0, args)] as const
-    // ? if the function name is in the ttsclib, return a import declaration
+    // ? if the function name is in the runtime, return a import declaration
     const { importHelpers = 'auto' } = config
-    if (fnName in ttsclib && importHelpers !== 'inline') {
+    if (fnName in runtime && importHelpers !== 'inline') {
         const cdn =
-            'https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@$version$/es/ttsclib.min.js'
-        const node = `@magic-works/ttypescript-browser-like-import-transformer/cjs/ttsclib.js`
+            'https://cdn.jsdelivr.net/npm/@magic-works/ttypescript-browser-like-import-transformer@$version$/es/runtime.min.js'
+        const node = `@magic-works/ttypescript-browser-like-import-transformer/cjs/runtime.js`
         let url
         if (importHelpers === 'auto' || importHelpers === 'cdn') url = cdn
         else if (importHelpers === 'node') url = node
         else url = importHelpers
-        let [importDec, idSet] = ttsclibImportMap.get(sourceFile) || [
+        let [importDec, idSet] = runtimeImportMap.get(sourceFile) || [
             factory.createImportDeclaration(
                 void 0,
                 factory.createImportClause(false, void 0, factory.createNamedImports([])),
@@ -804,7 +804,7 @@ function createTopLevelScopedHelper<F extends string | ((...args: any[]) => any)
             importDec.assertClause,
         )
         idSet.add(uniqueName)
-        ttsclibImportMap.set(sourceFile, [importDec, idSet])
+        runtimeImportMap.set(sourceFile, [importDec, idSet])
         return returnValue
     }
     const f = factory.updateFunctionDeclaration(
@@ -880,7 +880,7 @@ const dynamicImportFailedHelper = (args: Expression[]) => `function __dynamicImp
     return import(${args.map((_, i) => `args[${i}]`).join(', ')});
 };`
 /**
- * Don't move this to ttsclib because it is a ES2020 syntax.
+ * Don't move this to runtime because it is a ES2020 syntax.
  */
 const dynamicImportNativeString = `function __dynamicImportNative(path) {
     return import(path);

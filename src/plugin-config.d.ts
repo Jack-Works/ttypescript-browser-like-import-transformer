@@ -148,7 +148,7 @@ export interface PluginConfigs {
     importMap?: ImportMapResolution | ImportMapCustomResolution
     /**
      * Import emit helpers (e.g. `\_import`, `\__dynamicImportTransform`, etc..)
-     * from ttsclib (a local file in this package).
+     * from runtime (a local file in this package).
      *
      * @remarks
      *

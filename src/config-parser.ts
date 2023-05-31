@@ -40,7 +40,7 @@ export function validateConfig(config: PluginConfigs, options: CompilerOptions) 
     trueOnly('jsonImport')
 
     const _x = typeof config
-    function type(name: keyof PluginConfigs, _: typeof _x[], v: any = config[name], noUndefined = false) {
+    function type(name: keyof PluginConfigs, _: (typeof _x)[], v: any = config[name], noUndefined = false) {
         if (!noUndefined) _ = _.concat('undefined')
         if (!_.includes(typeof v)) throw new ConfigError(`type of ${name} in the tsconfig is not correct`)
         if (_.includes('object') && typeof v === null) throw new ConfigError(`${name} can't be null!`)

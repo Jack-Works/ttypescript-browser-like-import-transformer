@@ -4,5 +4,5 @@
         "module": "CommonJS",
         "outDir": "../cjs/"
     },
-    "files": ["./core.ts", "./node.ts", "./well-known-umd.ts", "./ttsclib.ts", "node_self.ts"]
+    "files": ["./core.ts", "./node.ts", "./well-known-umd.ts", "./runtime.ts", "node_self.ts"]
 }
