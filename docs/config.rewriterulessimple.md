@@ -9,7 +9,7 @@ Predefined rewrite rules
 <b>Signature:</b>
 
 ```typescript
-export type RewriteRulesSimple = 'umd' | 'unpkg' | 'pikacdn' | 'skypack' | 'jspm' | 'jsdelivr' | 'esm.run'
+export type RewriteRulesSimple = 'umd' | 'unpkg' | 'skypack' | 'jspm' | 'jsdelivr' | 'esm.run'
 ```
 
 ## Remarks

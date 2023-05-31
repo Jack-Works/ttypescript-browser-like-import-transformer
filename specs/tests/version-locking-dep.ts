@@ -1,4 +1,4 @@
-/// { rules: 'pikacdn' }
+/// { rules: 'skypack' }
 
 import * as typescript from 'typescript'
 console.log(typescript)

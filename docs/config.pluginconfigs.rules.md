@@ -45,7 +45,7 @@ A complex example:
 Filename: `demo-2.ts`
 
 ```ts
-/// { rules: { react: "umd", "lodash-es": "pikacdn", "async-call-rpc": "unpkg", "std:fs": false,"isarray": "unpkg", "/^@material-ui\\/(.+)/g": { type: "umd", target: "MaterialUI.$1", globalObject: "window" }, "/(.+)/g": "unpkg" } }
+/// { rules: { react: "umd", "lodash-es": "skypack", "async-call-rpc": "unpkg", "std:fs": false,"isarray": "unpkg", "/^@material-ui\\/(.+)/g": { type: "umd", target: "MaterialUI.$1", globalObject: "window" }, "/(.+)/g": "unpkg" } }
 //! { esModuleInterop: true }
 import React from 'react'
 import lodash from 'lodash-es'
@@ -64,7 +64,7 @@ Filename: `demo-2.js`
 
 ```js
 // CompilerOptions: {"module":"ESNext","esModuleInterop":true}
-// PluginConfig: {"rules":{"react":"umd","lodash-es":"pikacdn","async-call-rpc":"unpkg","std:fs":false,"isarray":"unpkg","/^@material-ui\\/(.+)/g":{"type":"umd","target":"MaterialUI.$1","globalObject":"window"},"/(.+)/g":"unpkg"}}
+// PluginConfig: {"rules":{"react":"umd","lodash-es":"skypack","async-call-rpc":"unpkg","std:fs":false,"isarray":"unpkg","/^@material-ui\\/(.+)/g":{"type":"umd","target":"MaterialUI.$1","globalObject":"window"},"/(.+)/g":"unpkg"}}
 const React = _import_1(__esModuleInterop_1(globalThis["React"]), ["default"], "react", "globalThis.React", true).default;
 const MUI = _import_1(window["MaterialUI.core"], [], "@material-ui/core", "window.MaterialUI.core", true);
 const MUILab = _import_1(window["MaterialUI.labs"], [], "@material-ui/labs", "window.MaterialUI.labs", true);

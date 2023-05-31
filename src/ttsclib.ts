@@ -280,7 +280,6 @@ export function moduleSpecifierTransform(
                 switch (e) {
                     case 'esm.run':
                     case 'jsdelivr':
-                    case 'pikacdn':
                     case 'skypack':
                     case 'jspm':
                     case 'unpkg': {
@@ -293,7 +292,6 @@ export function moduleSpecifierTransform(
                         const URLs: Record<typeof e, Omit<RewriteRulesURL, 'type'>> = {
                             jspm: getURL('jspm.dev'),
                             'esm.run': getURL('esm.run'),
-                            pikacdn: getURL('cdn.skypack.dev'),
                             skypack: getURL('cdn.skypack.dev'),
                             unpkg: getURL('unpkg.com'),
                             jsdelivr: getURL('cdn.jsdelivr.net'),

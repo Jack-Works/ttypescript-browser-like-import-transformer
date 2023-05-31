@@ -1,1 +1,1 @@
-// When rules is a string, it must be the enum umd,unpkg,pikacdn,skypack,jspm,jsdelivr,esm.run, but found unknown
+// When rules is a string, it must be the enum umd,unpkg,skypack,jspm,jsdelivr,esm.run, but found unknown

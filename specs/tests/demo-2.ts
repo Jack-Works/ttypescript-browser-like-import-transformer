@@ -1,4 +1,4 @@
-/// { rules: { react: "umd", "lodash-es": "pikacdn", "async-call-rpc": "unpkg", "std:fs": false,"isarray": "unpkg", "/^@material-ui\\/(.+)/g": { type: "umd", target: "MaterialUI.$1", globalObject: "window" }, "/(.+)/g": "unpkg" } }
+/// { rules: { react: "umd", "lodash-es": "skypack", "async-call-rpc": "unpkg", "std:fs": false,"isarray": "unpkg", "/^@material-ui\\/(.+)/g": { type: "umd", target: "MaterialUI.$1", globalObject: "window" }, "/(.+)/g": "unpkg" } }
 //! { esModuleInterop: true }
 import React from 'react'
 import lodash from 'lodash-es'

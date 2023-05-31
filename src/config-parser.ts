@@ -109,8 +109,6 @@ export function normalizePluginConfig(config: PluginConfigs): NormalizedPluginCo
 enum RewriteRulesSimpleEnumLocal {
     umd = 'umd',
     unpkg = 'unpkg',
-    /** @deprecated PikaCDN has renamed to Skypack */
-    pikacdn = 'pikacdn',
     /** @see https://skypack.dev/ */
     skypack = 'skypack',
     /** @see https://jspm.org/jspm-dev-release */

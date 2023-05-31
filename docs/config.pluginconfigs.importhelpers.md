@@ -220,7 +220,6 @@ function moduleSpecifierTransform_1(context, opt) {
                 switch (e) {
                     case "esm.run":
                     case "jsdelivr":
-                    case "pikacdn":
                     case "skypack":
                     case "jspm":
                     case "unpkg": {
@@ -233,7 +232,6 @@ function moduleSpecifierTransform_1(context, opt) {
                         const URLs = {
                             jspm: getURL("jspm.dev"),
                             "esm.run": getURL("esm.run"),
-                            pikacdn: getURL("cdn.skypack.dev"),
                             skypack: getURL("cdn.skypack.dev"),
                             unpkg: getURL("unpkg.com"),
                             jsdelivr: getURL("cdn.jsdelivr.net"),

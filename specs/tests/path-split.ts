@@ -1,4 +1,4 @@
-/// { rules: { "/@material-ui\\/(.+)/": {type: "umd", target: "MaterialUI.$1"}, "lodash": "umd", "jquery": "pikacdn", "/lodash-es/": "unpkg", "/.+/": "unpkg" } }
+/// { rules: { "/@material-ui\\/(.+)/": {type: "umd", target: "MaterialUI.$1"}, "lodash": "umd", "jquery": "skypack", "/lodash-es/": "unpkg", "/.+/": "unpkg" } }
 
 import a from '@material-ui/core'
 import x from '@material-ui/core/abc'

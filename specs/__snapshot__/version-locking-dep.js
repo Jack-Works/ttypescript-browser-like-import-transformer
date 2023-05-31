@@ -1,4 +1,4 @@
 // CompilerOptions: {"module":"ESNext"}
-// PluginConfig: {"rules":"pikacdn"}
+// PluginConfig: {"rules":"skypack"}
 import * as typescript from "https://cdn.skypack.dev/typescript@4.5.4";
 console.log(typescript);

@@ -1,5 +1,5 @@
 // CompilerOptions: {"module":"ESNext"}
-// PluginConfig: {"rules":{"/@material-ui\\/(.+)/":{"type":"umd","target":"MaterialUI.$1"},"lodash":"umd","jquery":"pikacdn","/lodash-es/":"unpkg","/.+/":"unpkg"}}
+// PluginConfig: {"rules":{"/@material-ui\\/(.+)/":{"type":"umd","target":"MaterialUI.$1"},"lodash":"umd","jquery":"skypack","/lodash-es/":"unpkg","/.+/":"unpkg"}}
 const a = _import_1(globalThis["MaterialUI.core"], ["default"], "@material-ui/core", "globalThis.MaterialUI.core", false).default;
 const x = _import_1(globalThis["MaterialUI.core/abc"], ["default"], "@material-ui/core/abc", "globalThis.MaterialUI.core/abc", false).default;
 import y from "https://unpkg.com/lodash/fp?module";
