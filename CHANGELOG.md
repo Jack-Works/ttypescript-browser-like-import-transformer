@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.0.0](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/compare/v3.0.2...v4.0.0) (2023-05-31)
+
+
+### ⚠ BREAKING CHANGES
+
+* rename ttsclib to runtime
+* convert to esm, support module resolution relative to the file
+* upgrade to minimal ts 5.0
+* drop pikacdn support
+* drop snowpack support
+
+### Features
+
+* drop pikacdn support ([d672226](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/commit/d67222652804c00123199473f615235b0ab595ae))
+* drop snowpack support ([3f4414a](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/commit/3f4414a22713d3c012bf6209fb96b51c585c349b))
+* upgrade to minimal ts 5.0 ([696a4f6](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/commit/696a4f6d89e9db48ff46feb874da4162e87e0c63))
+
+
+* convert to esm, support module resolution relative to the file ([fc793eb](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/commit/fc793ebfc1d001c7e9f95debd873f29b9c7e445b))
+* rename ttsclib to runtime ([ab512c4](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/commit/ab512c4bd16c36dbe85ee0cee4fe746bfa311c7b))
+
 ### [3.0.2](https://github.com/Jack-Works/ttypescript-browser-like-import-transformer/compare/v3.0.1...v3.0.2) (2021-12-14)
 
 
